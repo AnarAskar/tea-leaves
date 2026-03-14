@@ -1,5 +1,20 @@
-"use client";
 import { useState, useRef, useEffect, useCallback } from "react";
+
+/* ══════════════════════════════════════════════
+   🔧 TELEGRAM CONFIG — fill these in
+   ══════════════════════════════════════════════
+   BOT_TOKEN  → from @BotFather
+   CHAT_ID    → your personal / group chat ID
+   BASE_URL   → the URL where this app is hosted
+                e.g. "https://menu.tealeaves.iq"
+   NUM_TABLES → how many tables you have
+══════════════════════════════════════════════ */
+const BOT_TOKEN = import.meta.env.VITE_BOT_TOKEN;
+const CHAT_ID = import.meta.env.VITE_CHAT_ID;
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+const NUM_TABLES = import.meta.env.VITE_NUM_TABLES;
+
+console.log(BOT_TOKEN, CHAT_ID, BASE_URL, NUM_TABLES); // Check if values are correctly loaded
 
 /* ─── TRANSLATIONS ─── */
 const T = {
@@ -15,6 +30,7 @@ const T = {
     service: "Service (10%)",
     total: "Total",
     placeOrder: "Place Order",
+    sending: "Sending order…",
     orderPlaced: "Order Placed!",
     orderMsg: "Your order has been sent to our team.\nSit back and relax!",
     orderMore: "Order More Items",
@@ -25,6 +41,10 @@ const T = {
     new: "New",
     noItems: "No items found",
     results: "results for",
+    table: "Table",
+    errorTitle: "Order Failed",
+    errorMsg: "Could not send your order. Please ask a staff member for help.",
+    tryAgain: "Try Again",
   },
   ar: {
     appName: "تي ليفز",
@@ -38,6 +58,7 @@ const T = {
     service: "رسوم الخدمة (10%)",
     total: "الإجمالي",
     placeOrder: "تأكيد الطلب",
+    sending: "جاري الإرسال…",
     orderPlaced: "تم الطلب!",
     orderMsg: "تم إرسال طلبك إلى فريقنا.\nاسترخِ وانتظر!",
     orderMore: "طلب المزيد",
@@ -48,6 +69,10 @@ const T = {
     new: "جديد",
     noItems: "لا توجد عناصر",
     results: "نتائج لـ",
+    table: "طاولة",
+    errorTitle: "فشل الطلب",
+    errorMsg: "تعذّر إرسال طلبك. الرجاء طلب المساعدة من أحد الموظفين.",
+    tryAgain: "حاول مجدداً",
   },
   ku: {
     appName: "تی لیڤز",
@@ -61,6 +86,7 @@ const T = {
     service: "خزمەتگوزاری (10%)",
     total: "کۆی گشتی",
     placeOrder: "پشتڕاستکردنەوەی داواکاری",
+    sending: "ناردن…",
     orderPlaced: "داواکاری تۆمارکرا!",
     orderMsg: "داواکارییەکەت نێردرا بۆ تیمەکەمان.\nئارام بە!",
     orderMore: "داواکاری زیاتر",
@@ -71,6 +97,10 @@ const T = {
     new: "نوێ",
     noItems: "هیچ بابەتێک نەدۆزرایەوە",
     results: "ئەنجام بۆ",
+    table: "مێز",
+    errorTitle: "داواکاری سەرنەکەوت",
+    errorMsg: "نەتوانرا داواکارییەکەت بنێردرێت. تکایە کارمەندێک بانگ بکە.",
+    tryAgain: "دووبارە هەوڵبدەرەوە",
   },
 };
 
@@ -80,7 +110,6 @@ const LANG_OPTS = [
   { code: "ku", label: "کوردی", flag: "🏔️" },
 ];
 
-/* ─── CATEGORIES ─── */
 const CATS = [
   {
     id: "blacktea",
@@ -129,7 +158,6 @@ const CATS = [
   },
 ];
 
-/* ─── MENU ITEMS ─── */
 const ITEMS = {
   blacktea: [
     {
@@ -688,6 +716,56 @@ const ITEMS = {
 const ALL_ITEMS = Object.values(ITEMS).flat();
 const fmt = (n) => n.toLocaleString();
 
+/* ── Send order to Telegram ── */
+async function sendTelegramOrder({
+  tableNum,
+  cartItems,
+  cart,
+  note,
+  grand,
+  tax,
+  totalIQD,
+  lang,
+}) {
+  const time = new Date().toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const lines = cartItems
+    .map(
+      (item) =>
+        `• ${item.name.en} × ${cart[item.id]} — ${fmt(item.price * cart[item.id])} IQD`,
+    )
+    .join("\n");
+
+  const noteLine = note.trim() ? `\n📝 Note: ${note.trim()}` : "";
+  const message = `🍵 *New Order — Table ${tableNum}*
+ 
+${lines}${noteLine}
+ 
+💰 Subtotal: ${fmt(totalIQD)} IQD
+🧾 Service: ${fmt(tax)} IQD
+✅ *Total: ${fmt(grand)} IQD*
+🕐 ${time}`;
+
+  const res = await fetch(
+    `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: CHAT_ID,
+        text: message,
+        parse_mode: "Markdown",
+      }),
+    },
+  );
+  if (!res.ok) throw new Error("Telegram error");
+}
+
+/* ══════════════════════════
+   MAIN APP
+══════════════════════════ */
 export default function TeaLeaves() {
   const [lang, setLang] = useState("en");
   const [langOpen, setLangOpen] = useState(false);
@@ -697,17 +775,26 @@ export default function TeaLeaves() {
   const [note, setNote] = useState("");
   const [query, setQuery] = useState("");
   const [toast, setToast] = useState("");
-  const [done, setDone] = useState(false);
   const [orderNum] = useState(() => Math.floor(Math.random() * 9000) + 1000);
+  const [screen, setScreen] = useState("menu"); // "menu" | "success" | "error"
+  const [sending, setSending] = useState(false);
+  const [tableNum, setTableNum] = useState(null);
 
   const toastRef = useRef(null);
-  const catBarRef = useRef(null); // the horizontal cat strip
-  const sectionRefs = useRef({}); // { catId: DOM element }
-  const scrollRef = useRef(null); // the main scrollable area
-  const ignoreScrollRef = useRef(false); // prevent scroll-spy fighting click
+  const catBarRef = useRef(null);
+  const sectionRefs = useRef({});
+  const scrollRef = useRef(null);
+  const ignoreScrollRef = useRef(false);
 
   const t = T[lang];
   const isRTL = lang === "ar" || lang === "ku";
+
+  /* read ?table= silently from QR URL */
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const n = parseInt(params.get("table"), 10);
+    if (n >= 1 && n <= NUM_TABLES) setTableNum(n);
+  }, []);
 
   const totalQty = Object.values(cart).reduce((s, q) => s + q, 0);
   const totalIQD = Object.entries(cart).reduce((s, [id, q]) => {
@@ -734,40 +821,56 @@ export default function TeaLeaves() {
       return n;
     });
   };
-  const placeOrder = () => {
-    setDrawerOpen(false);
-    setTimeout(() => setDone(true), 350);
-  };
-  const reset = () => {
-    setCart({});
-    setNote("");
-    setDone(false);
+
+  const cartItems = ALL_ITEMS.filter((i) => cart[i.id]);
+
+  const placeOrder = async () => {
+    setSending(true);
+    try {
+      await sendTelegramOrder({
+        tableNum,
+        cartItems,
+        cart,
+        note,
+        grand,
+        tax,
+        totalIQD,
+        lang,
+      });
+      setDrawerOpen(false);
+      setSending(false);
+      setCart({});
+      setNote("");
+      setScreen("success");
+    } catch {
+      setSending(false);
+      setDrawerOpen(false);
+      setScreen("error");
+    }
   };
 
-  /* ── CLICK CATEGORY → smooth scroll to section ── */
+  const reset = () => setScreen("menu");
+
+  /* ── scroll to category ── */
   const handleCatClick = (catId) => {
     setActiveCat(catId);
     const el = sectionRefs.current[catId];
     const container = scrollRef.current;
     if (el && container) {
       ignoreScrollRef.current = true;
-      // offset for sticky header (~170px)
-      const top = el.offsetTop - 170;
-      container.scrollTo({ top, behavior: "smooth" });
+      container.scrollTo({ top: el.offsetTop - 170, behavior: "smooth" });
       setTimeout(() => {
         ignoreScrollRef.current = false;
       }, 800);
     }
-    // also scroll the cat pill into view
-    const catEl = catBarRef.current?.querySelector(`[data-cat="${catId}"]`);
-    catEl?.scrollIntoView({
+    catBarRef.current?.querySelector(`[data-cat="${catId}"]`)?.scrollIntoView({
       behavior: "smooth",
       block: "nearest",
       inline: "center",
     });
   };
 
-  /* ── SCROLL SPY: highlight cat as you scroll ── */
+  /* ── scroll spy ── */
   const handleScroll = useCallback(() => {
     if (ignoreScrollRef.current || query.trim()) return;
     const container = scrollRef.current;
@@ -788,7 +891,7 @@ export default function TeaLeaves() {
     return () => el.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
-  /* ── DRAG SCROLL for cat bar ── */
+  /* ── drag cat bar ── */
   useEffect(() => {
     const el = catBarRef.current;
     if (!el) return;
@@ -830,7 +933,59 @@ export default function TeaLeaves() {
       )
     : null;
 
-  const cartItems = ALL_ITEMS.filter((i) => cart[i.id]);
+  const itemCard = (item) => {
+    const qty = cart[item.id] || 0;
+    return (
+      <div key={item.id} className={`g-card${qty > 0 ? " incart" : ""}`}>
+        <img
+          className="g-img"
+          src={item.photo}
+          alt={item.name[lang]}
+          loading="lazy"
+        />
+        {qty > 0 && <div className="img-badge">{qty}</div>}
+        <div className="g-body">
+          <div className="g-name">{item.name[lang]}</div>
+          <div className="g-price">{fmt(item.price)}</div>
+          <div className="g-foot">
+            <div className="g-tags">
+              {item.tags.includes("hot") && (
+                <span className="tag t-hot">{t.hot}</span>
+              )}
+              {item.tags.includes("cold") && (
+                <span className="tag t-cold">{t.cold}</span>
+              )}
+              {item.tags.includes("vegan") && (
+                <span className="tag t-vegan">{t.vegan}</span>
+              )}
+              {item.tags.includes("new") && (
+                <span className="tag t-new">{t.new}</span>
+              )}
+            </div>
+            <div className="qty-r">
+              {!tableNum ? (
+                <div className="no-order-badge">🔒</div>
+              ) : qty === 0 ? (
+                <button className="qb solid" onClick={() => add(item)}>
+                  +
+                </button>
+              ) : (
+                <>
+                  <button className="qb" onClick={() => remove(item)}>
+                    −
+                  </button>
+                  <span className="qnum">{qty}</span>
+                  <button className="qb" onClick={() => add(item)}>
+                    +
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -838,64 +993,26 @@ export default function TeaLeaves() {
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
         body{background:#1b3a2d;font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;}
-
-        /* ── APP FRAME ── */
-        .phone-frame{
-          width:100%;
-          max-width:430px;
-          min-height:100vh;
-          height:100vh;
-          background:#1b3a2d;
-          color:#fff;
-          direction:${isRTL ? "rtl" : "ltr"};
-          display:flex;
-          flex-direction:column;
-          position:relative;
-          overflow:hidden;
-          margin:0 auto;
-        }
-
-        /* ── HEADER (fixed inside frame) ── */
-        .hdr{
-          background:#1b3a2d;
-          padding:14px 16px 0;
-          flex-shrink:0;
-          border-bottom:1px solid #2d5a42;
-          z-index:10;
-        }
+        .app{width:100%;max-width:430px;min-height:100vh;height:100vh;background:#1b3a2d;color:#fff;direction:${isRTL ? "rtl" : "ltr"};display:flex;flex-direction:column;position:relative;overflow:hidden;margin:0 auto;}
+        .hdr{background:#1b3a2d;padding:14px 16px 0;flex-shrink:0;border-bottom:1px solid #2d5a42;z-index:10;}
         .hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
         .hdr-title{font-size:18px;font-weight:700;color:#fff;text-align:center;flex:1;}
-
-        /* language */
+        .hdr-right{display:flex;align-items:center;gap:8px;}
         .lang-wrap{position:relative;}
-        .lang-btn{
-          display:flex;align-items:center;gap:5px;
-          background:#1e3d2f;border:1px solid #2d5a42;border-radius:20px;
-          padding:6px 10px;cursor:pointer;font-size:13px;font-weight:600;
-          color:#52b788;font-family:'Plus Jakarta Sans',sans-serif;transition:border-color .2s;
-        }
+        .lang-btn{display:flex;align-items:center;gap:5px;background:#1e3d2f;border:1px solid #2d5a42;border-radius:20px;padding:6px 10px;cursor:pointer;font-size:13px;font-weight:600;color:#52b788;font-family:'Plus Jakarta Sans',sans-serif;transition:border-color .2s;}
         .lang-btn:hover{border-color:#52b788;}
         .chev{transition:transform .2s;}
         .chev.open{transform:rotate(180deg);}
-        .lang-drop{
-          position:absolute;top:calc(100% + 8px);${isRTL ? "right" : "left"}:0;
-          background:#1e3d2f;border:1px solid #2d5a42;border-radius:12px;
-          overflow:hidden;z-index:300;min-width:145px;
-          box-shadow:0 8px 24px rgba(0,0,0,.55);
-        }
+        .lang-drop{position:absolute;top:calc(100% + 8px);${isRTL ? "right" : "left"}:0;background:#1e3d2f;border:1px solid #2d5a42;border-radius:12px;overflow:hidden;z-index:300;min-width:145px;box-shadow:0 8px 24px rgba(0,0,0,.55);}
         .lang-opt{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:14px;font-weight:500;cursor:pointer;color:#fff;transition:background .15s;}
         .lang-opt:hover{background:#2d6a4f;}
         .lang-opt.sel{color:#52b788;}
-
         .icon-btn{background:none;border:none;color:#8ab8a0;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;position:relative;}
-
-        /* search */
+        .table-chip{background:#1e3d2f;border:1px solid #2d5a42;border-radius:20px;padding:5px 10px;font-size:12px;font-weight:700;color:#52b788;}
         .search-row{display:flex;align-items:center;gap:8px;background:#1e3d2f;border:1px solid #2d5a42;border-radius:20px;padding:9px 14px;margin-bottom:12px;}
         .search-row input{flex:1;background:none;border:none;outline:none;color:#fff;font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;}
         .search-row input::placeholder{color:#5a8c6e;}
         .clr-btn{background:none;border:none;color:#5a8c6e;cursor:pointer;font-size:13px;padding:0;}
-
-        /* cats */
         .cats{display:flex;gap:0;padding:14px 16px 0;overflow-x:auto;scrollbar-width:none;cursor:grab;user-select:none;-webkit-overflow-scrolling:touch;}
         .cats::-webkit-scrollbar{display:none;}
         .cats.drag{cursor:grabbing;}
@@ -905,27 +1022,12 @@ export default function TeaLeaves() {
         .cat-item.active .cat-icon{background:#2d6a4f;border-color:#52b788;}
         .cat-lbl{font-size:10px;font-weight:500;color:#6ba882;text-align:center;line-height:1.3;transition:color .2s;white-space:nowrap;}
         .cat-item.active .cat-lbl{color:#52b788;}
-
-        /* ── SCROLLABLE BODY ── */
         .scroll-body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
         .scroll-body::-webkit-scrollbar{width:3px;}
         .scroll-body::-webkit-scrollbar-thumb{background:#2d5a42;border-radius:2px;}
-
         .menu-body{padding:16px 12px 140px;}
-
-        /* section header */
-        .sec-head{
-          display:flex;align-items:center;gap:10px;
-          padding:6px 4px 12px;
-          font-size:15px;font-weight:700;color:#fff;
-          border-bottom:1px solid #2d5a42;
-          margin-bottom:12px;margin-top:8px;
-        }
+        .sec-head{display:flex;align-items:center;gap:10px;padding:6px 4px 12px;font-size:15px;font-weight:700;color:#fff;border-bottom:1px solid #2d5a42;margin-bottom:12px;margin-top:8px;}
         .sec-head:first-child{margin-top:0;}
-        .sec-emoji{font-size:20px;}
-        .sec-spacer{flex:1;height:1px;background:transparent;}
-
-        /* grid */
         .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
         .g-card{background:#1e3d2f;border-radius:14px;overflow:hidden;border:1px solid #2d5a42;transition:border-color .2s,transform .15s;position:relative;}
         .g-card:hover{transform:translateY(-2px);}
@@ -937,39 +1039,32 @@ export default function TeaLeaves() {
         .g-foot{display:flex;justify-content:space-between;align-items:center;gap:4px;}
         .g-tags{display:flex;gap:3px;flex-wrap:wrap;flex:1;}
         .tag{font-size:9px;font-weight:700;padding:2px 5px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
-        .t-hot  {background:#3d1a0d;color:#f4845f;}
-        .t-cold {background:#0d1f2e;color:#74c0fc;}
+        .t-hot{background:#3d1a0d;color:#f4845f;}
+        .t-cold{background:#0d1f2e;color:#74c0fc;}
         .t-vegan{background:#0a2010;color:#69db7c;}
-        .t-new  {background:#1e0e2e;color:#cc5de8;}
-
-        /* qty */
+        .t-new{background:#1e0e2e;color:#cc5de8;}
         .qty-r{display:flex;align-items:center;gap:4px;}
         .qb{width:26px;height:26px;border-radius:50%;border:1.5px solid #52b788;background:none;color:#52b788;font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;line-height:1;font-family:'Plus Jakarta Sans',sans-serif;}
         .qb:hover,.qb.solid{background:#52b788;color:#1b3a2d;border-color:#52b788;}
         .qnum{font-size:13px;font-weight:800;min-width:14px;text-align:center;}
+        .no-order-badge{width:26px;height:26px;border-radius:50%;background:#243f30;border:1.5px solid #2d5a42;display:flex;align-items:center;justify-content:center;font-size:12px;opacity:0.6;}
         .img-badge{position:absolute;top:8px;${isRTL ? "left" : "right"}:8px;background:#40916c;color:#fff;font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
-
-        /* search results */
         .search-results{padding:14px 12px 140px;}
         .sec-lbl{font-size:13px;font-weight:600;color:#6ba882;margin-bottom:12px;padding:0 2px;}
-
-        /* bottom bar */
         .btm-bar{position:absolute;bottom:0;left:0;right:0;padding:10px 12px 24px;background:linear-gradient(to top,#1b3a2d 65%,transparent);pointer-events:none;z-index:20;}
         .vob{width:100%;background:#40916c;color:#fff;border:none;border-radius:14px;padding:14px 18px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:flex;justify-content:space-between;align-items:center;pointer-events:all;box-shadow:0 6px 20px rgba(64,145,108,.45);transition:opacity .2s,transform .15s;}
         .vob:hover{opacity:.93;transform:translateY(-2px);}
         .vob-l{display:flex;align-items:center;gap:10px;}
         .vob-n{background:rgba(255,255,255,.25);width:24px;height:24px;border-radius:50%;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;}
-
-        /* overlay */
+        .browse-banner{width:100%;background:#1e3d2f;border:1px solid #2d5a42;border-radius:14px;padding:13px 16px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;color:#6ba882;pointer-events:none;}
         .overlay{position:absolute;inset:0;background:rgba(0,0,0,.6);z-index:30;opacity:0;pointer-events:none;transition:opacity .3s;}
         .overlay.open{opacity:1;pointer-events:all;}
-
-        /* drawer */
         .drawer{position:absolute;bottom:0;left:0;right:0;background:#1e3d2f;border-top-left-radius:22px;border-top-right-radius:22px;z-index:40;max-height:88%;display:flex;flex-direction:column;transition:transform .35s cubic-bezier(.4,0,.2,1);transform:translateY(100%);direction:${isRTL ? "rtl" : "ltr"};}
         .drawer.open{transform:translateY(0);}
         .d-handle{width:34px;height:4px;background:#2d5a42;border-radius:2px;margin:11px auto 0;flex-shrink:0;}
         .d-head{padding:13px 18px;border-bottom:1px solid #2d5a42;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
         .d-title{font-size:18px;font-weight:700;}
+        .d-table{font-size:12px;color:#52b788;font-weight:600;}
         .d-close{width:28px;height:28px;background:#2d6a4f;border:1px solid #2d5a42;border-radius:50%;color:#6ba882;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;}
         .d-close:hover{color:#fff;}
         .d-list{flex:1;overflow-y:auto;padding:12px 18px;}
@@ -992,34 +1087,35 @@ export default function TeaLeaves() {
         .s-row{display:flex;justify-content:space-between;font-size:13px;color:#6ba882;margin-bottom:5px;}
         .t-row{display:flex;justify-content:space-between;font-size:16px;font-weight:700;margin:10px 0 14px;padding-top:10px;border-top:1px solid #2d5a42;}
         .t-row span:last-child{color:#52b788;}
-        .place-btn{width:100%;background:#40916c;color:#fff;border:none;border-radius:13px;padding:14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .15s;}
-        .place-btn:hover{opacity:.9;transform:translateY(-1px);}
+        .place-btn{width:100%;background:#40916c;color:#fff;border:none;border-radius:13px;padding:14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+        .place-btn:hover:not(:disabled){opacity:.9;transform:translateY(-1px);}
+        .place-btn:disabled{opacity:.6;cursor:not-allowed;}
         .empty-c{text-align:center;padding:44px 20px;color:#4a7a5a;}
         .empty-c .e-ico{font-size:50px;margin-bottom:14px;}
         .empty-c p{font-size:14px;line-height:1.7;white-space:pre-line;}
-
-        /* toast */
         .toast{position:absolute;bottom:110px;left:50%;transform:translateX(-50%) translateY(8px);background:#1e3d2f;border:1px solid #52b788;color:#52b788;padding:8px 18px;border-radius:30px;font-size:13px;font-weight:600;z-index:50;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;}
         .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-        /* success */
-        .success{position:absolute;inset:0;background:#1b3a2d;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 32px;transform:translateY(100%);transition:transform .4s cubic-bezier(.4,0,.2,1);direction:${isRTL ? "rtl" : "ltr"};}
-        .success.show{transform:translateY(0);}
+        .fullscreen{position:absolute;inset:0;background:#1b3a2d;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 32px;transform:translateY(100%);transition:transform .4s cubic-bezier(.4,0,.2,1);direction:${isRTL ? "rtl" : "ltr"};}
+        .fullscreen.show{transform:translateY(0);}
         .s-icon{font-size:68px;margin-bottom:18px;}
         .s-title{font-size:26px;font-weight:800;color:#52b788;margin-bottom:10px;}
         .s-msg{font-size:14px;color:#6ba882;line-height:1.7;margin-bottom:24px;white-space:pre-line;}
         .s-num{font-size:17px;font-weight:700;color:#fff;padding:12px 24px;border:1px solid #2d5a42;border-radius:12px;background:#1e3d2f;margin-bottom:32px;}
         .s-back{background:#40916c;color:#fff;border:none;padding:13px 28px;border-radius:13px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s;}
         .s-back:hover{opacity:.9;}
-
-
+        .err-icon{font-size:60px;margin-bottom:18px;}
+        .err-title{font-size:22px;font-weight:800;color:#e63946;margin-bottom:10px;}
+        .err-msg{font-size:14px;color:#6ba882;line-height:1.7;margin-bottom:28px;}
+        .err-btn{background:#e63946;color:#fff;border:none;padding:13px 28px;border-radius:13px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s;}
+        .err-btn:hover{opacity:.9;}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
       `}</style>
 
-      <div className="phone-frame">
+      <div className="app">
         {/* HEADER */}
         <div className="hdr">
           <div className="hdr-top">
-            {/* Language */}
             <div className="lang-wrap">
               <button
                 className="lang-btn"
@@ -1070,42 +1166,55 @@ export default function TeaLeaves() {
 
             <div className="hdr-title">{t.appName}</div>
 
-            {/* Cart */}
-            <button className="icon-btn" onClick={() => setDrawerOpen(true)}>
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-              >
-                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <path d="M16 10a4 4 0 01-8 0" />
-              </svg>
-              {totalQty > 0 && (
-                <span
-                  style={{
-                    position: "absolute",
-                    top: -4,
-                    right: -5,
-                    background: "#e63946",
-                    color: "#fff",
-                    fontSize: 10,
-                    fontWeight: 800,
-                    width: 16,
-                    height: 16,
-                    borderRadius: "50%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {totalQty}
-                </span>
+            <div className="hdr-right">
+              {/* Table chip — read-only, set by QR code URL */}
+              {tableNum && (
+                <div className="table-chip">
+                  🪑 {t.table} {tableNum}
+                </div>
               )}
-            </button>
+              {/* Cart — only shown when arrived via QR */}
+              {tableNum && (
+                <button
+                  className="icon-btn"
+                  onClick={() => setDrawerOpen(true)}
+                >
+                  <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                  >
+                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <path d="M16 10a4 4 0 01-8 0" />
+                  </svg>
+                  {totalQty > 0 && (
+                    <span
+                      style={{
+                        position: "absolute",
+                        top: -4,
+                        right: -5,
+                        background: "#e63946",
+                        color: "#fff",
+                        fontSize: 10,
+                        fontWeight: 800,
+                        width: 16,
+                        height: 16,
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {totalQty}
+                    </span>
+                  )}
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Search */}
@@ -1133,7 +1242,7 @@ export default function TeaLeaves() {
             )}
           </div>
 
-          {/* Category strip */}
+          {/* Categories */}
           {!query && (
             <div className="cats" ref={catBarRef}>
               {CATS.map((c) => (
@@ -1151,10 +1260,9 @@ export default function TeaLeaves() {
           )}
         </div>
 
-        {/* SCROLLABLE CONTENT */}
+        {/* SCROLL BODY */}
         <div className="scroll-body" ref={scrollRef}>
           {filtered ? (
-            /* Search results */
             <div className="search-results">
               <div className="sec-lbl">
                 {filtered.length} {t.results} "{query}"
@@ -1171,75 +1279,10 @@ export default function TeaLeaves() {
                   <div style={{ fontSize: 14 }}>{t.noItems}</div>
                 </div>
               ) : (
-                <div className="grid">
-                  {filtered.map((item) => {
-                    const qty = cart[item.id] || 0;
-                    return (
-                      <div
-                        key={item.id}
-                        className={`g-card${qty > 0 ? " incart" : ""}`}
-                      >
-                        <img
-                          className="g-img"
-                          src={item.photo}
-                          alt={item.name[lang]}
-                          loading="lazy"
-                        />
-                        {qty > 0 && <div className="img-badge">{qty}</div>}
-                        <div className="g-body">
-                          <div className="g-name">{item.name[lang]}</div>
-                          <div className="g-price">{fmt(item.price)}</div>
-                          <div className="g-foot">
-                            <div className="g-tags">
-                              {item.tags.includes("hot") && (
-                                <span className="tag t-hot">{t.hot}</span>
-                              )}
-                              {item.tags.includes("cold") && (
-                                <span className="tag t-cold">{t.cold}</span>
-                              )}
-                              {item.tags.includes("vegan") && (
-                                <span className="tag t-vegan">{t.vegan}</span>
-                              )}
-                              {item.tags.includes("new") && (
-                                <span className="tag t-new">{t.new}</span>
-                              )}
-                            </div>
-                            <div className="qty-r">
-                              {qty === 0 ? (
-                                <button
-                                  className="qb solid"
-                                  onClick={() => add(item)}
-                                >
-                                  +
-                                </button>
-                              ) : (
-                                <>
-                                  <button
-                                    className="qb"
-                                    onClick={() => remove(item)}
-                                  >
-                                    −
-                                  </button>
-                                  <span className="qnum">{qty}</span>
-                                  <button
-                                    className="qb"
-                                    onClick={() => add(item)}
-                                  >
-                                    +
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                <div className="grid">{filtered.map(itemCard)}</div>
               )}
             </div>
           ) : (
-            /* Full menu — all sections */
             <div className="menu-body">
               {CATS.map((cat) => (
                 <div
@@ -1247,73 +1290,11 @@ export default function TeaLeaves() {
                   ref={(el) => (sectionRefs.current[cat.id] = el)}
                 >
                   <div className="sec-head">
-                    <span className="sec-emoji">{cat.emoji}</span>
+                    <span>{cat.emoji}</span>
                     <span>{cat.label[lang]}</span>
                   </div>
                   <div className="grid">
-                    {(ITEMS[cat.id] || []).map((item) => {
-                      const qty = cart[item.id] || 0;
-                      return (
-                        <div
-                          key={item.id}
-                          className={`g-card${qty > 0 ? " incart" : ""}`}
-                        >
-                          <img
-                            className="g-img"
-                            src={item.photo}
-                            alt={item.name[lang]}
-                            loading="lazy"
-                          />
-                          {qty > 0 && <div className="img-badge">{qty}</div>}
-                          <div className="g-body">
-                            <div className="g-name">{item.name[lang]}</div>
-                            <div className="g-price">{fmt(item.price)}</div>
-                            <div className="g-foot">
-                              <div className="g-tags">
-                                {item.tags.includes("hot") && (
-                                  <span className="tag t-hot">{t.hot}</span>
-                                )}
-                                {item.tags.includes("cold") && (
-                                  <span className="tag t-cold">{t.cold}</span>
-                                )}
-                                {item.tags.includes("vegan") && (
-                                  <span className="tag t-vegan">{t.vegan}</span>
-                                )}
-                                {item.tags.includes("new") && (
-                                  <span className="tag t-new">{t.new}</span>
-                                )}
-                              </div>
-                              <div className="qty-r">
-                                {qty === 0 ? (
-                                  <button
-                                    className="qb solid"
-                                    onClick={() => add(item)}
-                                  >
-                                    +
-                                  </button>
-                                ) : (
-                                  <>
-                                    <button
-                                      className="qb"
-                                      onClick={() => remove(item)}
-                                    >
-                                      −
-                                    </button>
-                                    <span className="qnum">{qty}</span>
-                                    <button
-                                      className="qb"
-                                      onClick={() => add(item)}
-                                    >
-                                      +
-                                    </button>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                    {(ITEMS[cat.id] || []).map(itemCard)}
                   </div>
                 </div>
               ))}
@@ -1321,16 +1302,32 @@ export default function TeaLeaves() {
           )}
         </div>
 
-        {/* BOTTOM BAR */}
-        {totalQty > 0 && !drawerOpen && (
+        {/* BOTTOM BAR — ordering only available when scanned from table QR */}
+        {tableNum ? (
+          totalQty > 0 &&
+          !drawerOpen && (
+            <div className="btm-bar">
+              <button className="vob" onClick={() => setDrawerOpen(true)}>
+                <div className="vob-l">
+                  <span className="vob-n">{totalQty}</span>
+                  <span>{t.viewOrder}</span>
+                </div>
+                <span>{fmt(totalIQD)} IQD</span>
+              </button>
+            </div>
+          )
+        ) : (
           <div className="btm-bar">
-            <button className="vob" onClick={() => setDrawerOpen(true)}>
-              <div className="vob-l">
-                <span className="vob-n">{totalQty}</span>
-                <span>{t.viewOrder}</span>
-              </div>
-              <span>{fmt(totalIQD)} IQD</span>
-            </button>
+            <div className="browse-banner">
+              <span>📋</span>
+              <span>
+                {lang === "ar"
+                  ? "عرض القائمة فقط — امسح رمز QR على طاولتك للطلب"
+                  : lang === "ku"
+                    ? "تەنها بینینی مێنیو — QR ی مێزەکەت بسکێنە بۆ داواکاری"
+                    : "Browsing only — scan the QR at your table to order"}
+              </span>
+            </div>
           </div>
         )}
 
@@ -1344,7 +1341,14 @@ export default function TeaLeaves() {
         <div className={`drawer${drawerOpen ? " open" : ""}`}>
           <div className="d-handle" />
           <div className="d-head">
-            <div className="d-title">🍵 {t.yourOrder}</div>
+            <div>
+              <div className="d-title">🍵 {t.yourOrder}</div>
+              {tableNum && (
+                <div className="d-table">
+                  🪑 {t.table} {tableNum}
+                </div>
+              )}
+            </div>
             <button className="d-close" onClick={() => setDrawerOpen(false)}>
               ✕
             </button>
@@ -1422,8 +1426,19 @@ export default function TeaLeaves() {
                   <span>{t.total}</span>
                   <span>{fmt(grand)} IQD</span>
                 </div>
-                <button className="place-btn" onClick={placeOrder}>
-                  {t.placeOrder} · {fmt(grand)} IQD
+                <button
+                  className="place-btn"
+                  onClick={placeOrder}
+                  disabled={sending}
+                >
+                  {sending ? (
+                    <>
+                      <div className="spinner" />
+                      {t.sending}
+                    </>
+                  ) : (
+                    `${t.placeOrder} · ${fmt(grand)} IQD`
+                  )}
                 </button>
               </div>
             </>
@@ -1434,17 +1449,34 @@ export default function TeaLeaves() {
         <div className={`toast${toast ? " show" : ""}`}>{toast}</div>
 
         {/* SUCCESS */}
-        <div className={`success${done ? " show" : ""}`}>
+        <div className={`fullscreen${screen === "success" ? " show" : ""}`}>
           <div className="s-icon">☕</div>
           <div className="s-title">{t.orderPlaced}</div>
           <div className="s-msg">{t.orderMsg}</div>
-          <div className="s-num">Order #TL-{orderNum}</div>
+          <div className="s-num">
+            Order #TL-{orderNum} · {t.table} {tableNum}
+          </div>
           <button className="s-back" onClick={reset}>
             {t.orderMore}
           </button>
         </div>
+
+        {/* ERROR */}
+        <div className={`fullscreen${screen === "error" ? " show" : ""}`}>
+          <div className="err-icon">⚠️</div>
+          <div className="err-title">{t.errorTitle}</div>
+          <div className="err-msg">{t.errorMsg}</div>
+          <button
+            className="err-btn"
+            onClick={() => {
+              setScreen("menu");
+              setDrawerOpen(true);
+            }}
+          >
+            {t.tryAgain}
+          </button>
+        </div>
       </div>
-      {/* /phone-frame */}
     </>
   );
 }
