@@ -14,8 +14,6 @@ const CHAT_ID = import.meta.env.VITE_CHAT_ID;
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const NUM_TABLES = import.meta.env.VITE_NUM_TABLES;
 
-console.log(BOT_TOKEN, CHAT_ID, BASE_URL, NUM_TABLES); // Check if values are correctly loaded
-
 /* ─── TRANSLATIONS ─── */
 const T = {
   en: {
