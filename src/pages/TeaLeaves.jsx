@@ -14,6 +14,12 @@ const CHAT_ID = import.meta.env.VITE_CHAT_ID;
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const NUM_TABLES = import.meta.env.VITE_NUM_TABLES;
 
+const SLIDER_IMAGES = [
+  "https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=800&q=85",
+  "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&q=85",
+  "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&q=85",
+];
+
 /* ─── TRANSLATIONS ─── */
 const T = {
   en: {
@@ -212,12 +218,12 @@ const ITEMS = {
     {
       id: 1,
       photo:
-        "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&q=80",
+        "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&q=80",
       name: { en: "Kurdish Chai", ar: "الشاي الكردي", ku: "چای کوردی" },
-      desc: {
-        en: "Traditional black tea with cardamom & sugar cubes",
-        ar: "شاي أسود تقليدي مع هيل وسكر",
-        ku: "چای ڕەشی کلاسیک لەگەڵ هێل و شەکر",
+      ingredients: {
+        en: "Black tea, cardamom, sugar cubes, hot water",
+        ar: "شاي أسود، هيل، قطع سكر، ماء ساخن",
+        ku: "چای ڕەش، هێل، شەکر، ئاوی گەرم",
       },
       price: 2500,
       tags: ["hot", "vegan"],
@@ -225,12 +231,12 @@ const ITEMS = {
     {
       id: 2,
       photo:
-        "https://images.unsplash.com/photo-1563911892437-1feda0179e1b?w=400&q=80",
+        "https://images.unsplash.com/photo-1563911892437-1feda0179e1b?w=600&q=80",
       name: { en: "Earl Grey", ar: "إيرل غراي", ku: "ئیرل گری" },
-      desc: {
-        en: "Bergamot-scented Ceylon tea in a glass teapot",
-        ar: "شاي أسود بنكهة البرغموت",
-        ku: "چای ڕەشی سیلۆن بەبۆنی بێرگامۆت",
+      ingredients: {
+        en: "Ceylon black tea, bergamot oil, lemon slice",
+        ar: "شاي سيلاني، زيت البرغموت، شريحة ليمون",
+        ku: "چای سیلۆن، رۆنی بێرگامۆت، لیمۆن",
       },
       price: 4000,
       tags: ["hot", "vegan"],
@@ -238,12 +244,12 @@ const ITEMS = {
     {
       id: 3,
       photo:
-        "https://images.unsplash.com/photo-1597318181409-cf64d0b5d8a2?w=400&q=80",
+        "https://images.unsplash.com/photo-1597318181409-cf64d0b5d8a2?w=600&q=80",
       name: { en: "Saffron Tea", ar: "شاي الزعفران", ku: "چای زەعفەران" },
-      desc: {
-        en: "White tea with Herat saffron, honey & rose petals",
-        ar: "شاي أبيض مع زعفران هراة والعسل",
-        ku: "چای سپی لەگەڵ زەعفەران و گوڵ",
+      ingredients: {
+        en: "White tea, Herat saffron, wildflower honey, rose petals",
+        ar: "شاي أبيض، زعفران هراة، عسل أزهار، بتلات ورد",
+        ku: "چای سپی، زەعفەران، عەسڵی گوڵ، گوڵی گوڵاو",
       },
       price: 5500,
       tags: ["hot", "vegan"],
@@ -251,12 +257,12 @@ const ITEMS = {
     {
       id: 4,
       photo:
-        "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&q=80",
+        "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=600&q=80",
       name: { en: "Cardamom Latte", ar: "لاتيه بالهيل", ku: "لاتێی هێل" },
-      desc: {
-        en: "Strong black tea with steamed milk & fresh cardamom",
-        ar: "شاي قوي مع حليب مبخر وهيل طازج",
-        ku: "چای قووڵ لەگەڵ شیر و هێلی تازە",
+      ingredients: {
+        en: "Strong black tea, steamed full-cream milk, fresh cardamom",
+        ar: "شاي أسود قوي، حليب مبخر كامل الدسم، هيل طازج",
+        ku: "چای ڕەشی قووڵ، شیری بخارکراو، هێلی تازە",
       },
       price: 4500,
       tags: ["hot"],
@@ -266,12 +272,12 @@ const ITEMS = {
     {
       id: 5,
       photo:
-        "https://images.unsplash.com/photo-1587796697483-2b6d98d35f16?w=400&q=80",
+        "https://images.unsplash.com/photo-1587796697483-2b6d98d35f16?w=600&q=80",
       name: { en: "Rose Hibiscus", ar: "الورد والكركديه", ku: "گوڵ و ڕووکەند" },
-      desc: {
-        en: "Dried rose buds & hibiscus flowers with honey",
-        ar: "براعم الورد والكركديه مع عسل",
-        ku: "گوڵی وشک و ڕووکەند لەگەڵ عەسڵ",
+      ingredients: {
+        en: "Dried rose buds, hibiscus flowers, wildflower honey, hot water",
+        ar: "براعم ورد مجففة، كركديه، عسل أزهار برية، ماء ساخن",
+        ku: "گوڵی وشک، گوڵی ڕووکەند، عەسڵ، ئاوی گەرم",
       },
       price: 5000,
       tags: ["hot", "vegan"],
@@ -279,12 +285,12 @@ const ITEMS = {
     {
       id: 6,
       photo:
-        "https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=400&q=80",
+        "https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=600&q=80",
       name: { en: "Fresh Mint Tea", ar: "شاي النعناع", ku: "چای نەعنا" },
-      desc: {
-        en: "Fresh garden mint steeped to perfection",
-        ar: "نعناع طازج منقوع بالماء الساخن",
-        ku: "نەعنای تازەی باخچە لە ئاوی گەرم",
+      ingredients: {
+        en: "Fresh garden mint leaves, hot water, honey (optional)",
+        ar: "أوراق نعناع طازجة، ماء ساخن، عسل (اختياري)",
+        ku: "گەڵای نەعنای تازە، ئاوی گەرم، عەسڵ (ئارەزووی)",
       },
       price: 3500,
       tags: ["hot", "vegan"],
@@ -292,16 +298,16 @@ const ITEMS = {
     {
       id: 7,
       photo:
-        "https://images.unsplash.com/photo-1571934811356-5cc061b6d7c3?w=400&q=80",
+        "https://images.unsplash.com/photo-1571934811356-5cc061b6d7c3?w=600&q=80",
       name: {
         en: "Chamomile Honey",
         ar: "البابونج بالعسل",
         ku: "کامیۆمیل و عەسڵ",
       },
-      desc: {
-        en: "Delicate chamomile with wildflower honey & lemon",
-        ar: "بابونج لطيف مع عسل الأزهار البرية",
-        ku: "کامیۆمیل نازک لەگەڵ عەسڵ و لیمۆن",
+      ingredients: {
+        en: "Chamomile flowers, wildflower honey, lemon juice, hot water",
+        ar: "زهور بابونج، عسل أزهار برية، عصير ليمون، ماء ساخن",
+        ku: "گوڵی کامیۆمیل، عەسڵ، ئاوی لیمۆن، ئاوی گەرم",
       },
       price: 4500,
       tags: ["hot", "vegan"],
@@ -309,16 +315,16 @@ const ITEMS = {
     {
       id: 8,
       photo:
-        "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&q=80",
+        "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&q=80",
       name: {
         en: "Ginger Lemon",
         ar: "الزنجبيل والليمون",
         ku: "زەنجەفیل و لیمۆن",
       },
-      desc: {
-        en: "Fresh ginger root, lemon & raw honey infusion",
-        ar: "جذر زنجبيل طازج وعصير الليمون والعسل",
-        ku: "زەنجەفیلی تازە، لیمۆن و عەسڵی خام",
+      ingredients: {
+        en: "Fresh ginger root, lemon juice, raw honey, hot water",
+        ar: "جذر زنجبيل طازج، عصير ليمون، عسل خام، ماء ساخن",
+        ku: "ڕەگی زەنجەفیلی تازە، ئاوی لیمۆن، عەسڵی خام",
       },
       price: 4000,
       tags: ["hot", "vegan", "new"],
@@ -328,16 +334,16 @@ const ITEMS = {
     {
       id: 9,
       photo:
-        "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=400&q=80",
+        "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=600&q=80",
       name: {
         en: "Masala Chai Latte",
         ar: "ماسالا تشاي",
         ku: "ماسالا چای لاتێ",
       },
-      desc: {
-        en: "Spiced black tea with ginger, cinnamon & steamed milk",
-        ar: "شاي مبهر مع حليب مبخر",
-        ku: "چای بەرزەواتی لەگەڵ شیر",
+      ingredients: {
+        en: "Black tea, ginger, cinnamon, cloves, cardamom, steamed milk",
+        ar: "شاي أسود، زنجبيل، قرفة، قرنفل، هيل، حليب مبخر",
+        ku: "چای ڕەش، زەنجەفیل، دارچین، قرنفل، هێل، شیر",
       },
       price: 5500,
       tags: ["hot"],
@@ -345,12 +351,12 @@ const ITEMS = {
     {
       id: 10,
       photo:
-        "https://images.unsplash.com/photo-1572119865084-43c285814d63?w=400&q=80",
+        "https://images.unsplash.com/photo-1572119865084-43c285814d63?w=600&q=80",
       name: { en: "London Fog", ar: "ضباب لندن", ku: "لۆندن فۆگ" },
-      desc: {
-        en: "Earl Grey with vanilla & lavender steamed milk",
-        ar: "إيرل غراي مع حليب الفانيليا واللافندر",
-        ku: "ئیرل گری لەگەڵ وانیلا و لافەندر",
+      ingredients: {
+        en: "Earl Grey tea, vanilla syrup, lavender, steamed milk, foam",
+        ar: "شاي إيرل غراي، شراب فانيليا، لافندر، حليب مبخر، رغوة",
+        ku: "چای ئیرل گری، شەربەتی وانیلا، لافەندر، شیر، فۆم",
       },
       price: 6000,
       tags: ["hot"],
@@ -358,16 +364,16 @@ const ITEMS = {
     {
       id: 11,
       photo:
-        "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&q=80",
+        "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=600&q=80",
       name: {
         en: "Hot Chocolate Tea",
         ar: "شوكولاتة ساخنة",
         ku: "چۆکلاتی گەرم",
       },
-      desc: {
-        en: "Dark chocolate blended with rooibos tea & oat milk",
-        ar: "شوكولاتة داكنة مع شاي الرويبوس",
-        ku: "چۆکلاتی تاریک لەگەڵ چای رووییبۆس",
+      ingredients: {
+        en: "Valrhona dark chocolate, rooibos tea, oat milk, cinnamon",
+        ar: "شوكولاتة داكنة فالرونا، شاي رويبوس، حليب شوفان، قرفة",
+        ku: "چۆکلاتی تاریک، چای رووییبۆس، شیری جۆ، دارچین",
       },
       price: 6500,
       tags: ["hot"],
@@ -377,16 +383,16 @@ const ITEMS = {
     {
       id: 12,
       photo:
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",
       name: {
         en: "Brown Sugar Milk Tea",
         ar: "شاي الحليب بسكر بني",
         ku: "چای شیری شەکری قاوەیی",
       },
-      desc: {
-        en: "Tiger-stripe caramel, full-cream milk & black tea",
-        ar: "كراميل وحليب كامل الدسم وشاي أسود",
-        ku: "کارامێل لەگەڵ شیر و چای ڕەش",
+      ingredients: {
+        en: "Loose-leaf black tea, tiger-stripe brown sugar caramel, full-cream milk",
+        ar: "شاي أسود، كراميل سكر بني، حليب كامل الدسم",
+        ku: "چای ڕەش، کارامێلی شەکری قاوەیی، شیری تەواو",
       },
       price: 6000,
       tags: ["hot", "cold"],
@@ -394,16 +400,16 @@ const ITEMS = {
     {
       id: 13,
       photo:
-        "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&q=80",
+        "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=600&q=80",
       name: {
         en: "Taro Milk Tea",
         ar: "شاي الحليب بالتارو",
         ku: "چای شیری تارۆ",
       },
-      desc: {
-        en: "Velvety taro with oolong tea & oat milk",
-        ar: "تارو كريمي مع شاي الأولونج",
-        ku: "تارۆی نەرم لەگەڵ چای ئوولۆنگ",
+      ingredients: {
+        en: "Oolong tea, taro powder, oat milk, honey, ice (optional)",
+        ar: "شاي أولونج، مسحوق التارو، حليب الشوفان، عسل، ثلج (اختياري)",
+        ku: "چای ئوولۆنگ، پووری تارۆ، شیری جۆ، عەسڵ، یەخ",
       },
       price: 6500,
       tags: ["hot", "cold", "new"],
@@ -411,16 +417,16 @@ const ITEMS = {
     {
       id: 14,
       photo:
-        "https://images.unsplash.com/photo-1571934811356-5cc061b6d7c3?w=400&q=80",
+        "https://images.unsplash.com/photo-1571934811356-5cc061b6d7c3?w=600&q=80",
       name: {
         en: "Rose Milk Tea",
         ar: "شاي الورد بالحليب",
         ku: "چای گوڵ و شیر",
       },
-      desc: {
-        en: "Assam black tea, rose water & steamed full-cream milk",
-        ar: "شاي أسام مع ماء الورد والحليب",
-        ku: "چای ئاسام لەگەڵ ئاوی گوڵ و شیر",
+      ingredients: {
+        en: "Assam black tea, rose water, rose syrup, steamed full-cream milk",
+        ar: "شاي أسام، ماء ورد، شراب ورد، حليب كامل الدسم مبخر",
+        ku: "چای ئاسام، ئاوی گوڵ، شەربەتی گوڵ، شیر",
       },
       price: 5500,
       tags: ["hot"],
@@ -428,16 +434,16 @@ const ITEMS = {
     {
       id: 15,
       photo:
-        "https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=400&q=80",
+        "https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=600&q=80",
       name: {
         en: "Chestnut Milk Tea",
         ar: "شاي الحليب بالكستناء",
         ku: "چای شیری بالحاء",
       },
-      desc: {
-        en: "Roasted chestnut syrup with houji-cha & silky milk",
-        ar: "شراب الكستناء المحمص مع الهايجيشا",
-        ku: "شەربەتی بالحاء کەپووتوو لەگەڵ شیر",
+      ingredients: {
+        en: "Houji-cha green tea, roasted chestnut syrup, silky steamed milk",
+        ar: "شاي هايجيشا الأخضر، شراب كستناء محمص، حليب مبخر",
+        ku: "چای هووجیچا، شەربەتی بالحاء، شیری نوشتک",
       },
       price: 6000,
       tags: ["hot"],
@@ -447,16 +453,16 @@ const ITEMS = {
     {
       id: 16,
       photo:
-        "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=400&q=80",
+        "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=600&q=80",
       name: {
         en: "Ceremonial Matcha",
         ar: "ماتشا احتفالية",
         ku: "ماتچای رەسمی",
       },
-      desc: {
-        en: "100% Japanese ceremonial grade matcha, whisked fresh",
-        ar: "ماتشا يابانية احتفالية 100%",
-        ku: "ماتچای ژاپۆنی %100",
+      ingredients: {
+        en: "100% Japanese ceremonial grade matcha powder, hot water (70°C)",
+        ar: "مسحوق ماتشا ياباني احتفالي 100%، ماء ساخن (70 درجة)",
+        ku: "پووری ماتچای ژاپۆنی %100، ئاوی گەرم (70°C)",
       },
       price: 7000,
       tags: ["hot", "vegan"],
@@ -464,12 +470,12 @@ const ITEMS = {
     {
       id: 17,
       photo:
-        "https://images.unsplash.com/photo-1515823662972-da6a2e4d3002?w=400&q=80",
+        "https://images.unsplash.com/photo-1515823662972-da6a2e4d3002?w=600&q=80",
       name: { en: "Matcha Latte", ar: "لاتيه الماتشا", ku: "ماتچا لاتێ" },
-      desc: {
-        en: "Ceremonial matcha, honey & full-cream steamed milk",
-        ar: "ماتشا احتفالية مع عسل وحليب مبخر",
-        ku: "ماتچا لەگەڵ عەسڵ و شیر",
+      ingredients: {
+        en: "Ceremonial matcha, wildflower honey, steamed full-cream milk, soft foam",
+        ar: "ماتشا احتفالية، عسل أزهار برية، حليب مبخر كامل الدسم، رغوة",
+        ku: "ماتچای رەسمی، عەسڵ، شیری بخارکراو، فۆم",
       },
       price: 6500,
       tags: ["hot"],
@@ -477,16 +483,16 @@ const ITEMS = {
     {
       id: 18,
       photo:
-        "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&q=80",
+        "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&q=80",
       name: {
         en: "Iced Matcha Latte",
         ar: "لاتيه الماتشا البارد",
         ku: "ماتچا لاتێی سارد",
       },
-      desc: {
-        en: "Double-shot matcha over ice with oat milk & vanilla",
-        ar: "ماتشا مزدوجة مع الثلج وحليب الشوفان",
-        ku: "ماتچای دووتا سەر یەخ لەگەڵ شیری جۆ",
+      ingredients: {
+        en: "Double-shot matcha, oat milk, vanilla syrup, ice cubes",
+        ar: "ماتشا مزدوجة، حليب الشوفان، شراب فانيليا، مكعبات ثلج",
+        ku: "ماتچای دووتا، شیری جۆ، شەربەتی وانیلا، یەخ",
       },
       price: 7000,
       tags: ["cold", "vegan"],
@@ -494,16 +500,16 @@ const ITEMS = {
     {
       id: 19,
       photo:
-        "https://images.unsplash.com/photo-1572119865084-43c285814d63?w=400&q=80",
+        "https://images.unsplash.com/photo-1572119865084-43c285814d63?w=600&q=80",
       name: {
         en: "Matcha Yuzu Fizz",
         ar: "ماتشا اليوزو الفوار",
         ku: "ماتچا یووزو فیز",
       },
-      desc: {
-        en: "Sparkling matcha soda with yuzu citrus & lychee foam",
-        ar: "مشروب ماتشا فوار بنكهة اليوزو",
-        ku: "سۆدای ماتچای فوارە لەگەڵ یووزو",
+      ingredients: {
+        en: "Sparkling water, matcha, yuzu citrus juice, lychee foam, ice",
+        ar: "ماء فوار، ماتشا، عصير يوزو، رغوة ليتشي، ثلج",
+        ku: "ئاوی فوارە، ماتچا، ئاوی یووزو، فۆمی لیچی، یەخ",
       },
       price: 7500,
       tags: ["cold", "vegan", "new"],
@@ -513,16 +519,16 @@ const ITEMS = {
     {
       id: 20,
       photo:
-        "https://images.unsplash.com/photo-1563911892437-1feda0179e1b?w=400&q=80",
+        "https://images.unsplash.com/photo-1563911892437-1feda0179e1b?w=600&q=80",
       name: {
         en: "Strawberry Hibiscus",
         ar: "الفراولة والكركديه",
         ku: "تۆوی فریز و ڕووکەند",
       },
-      desc: {
-        en: "Hibiscus flowers, fresh strawberries & wild berry blend",
-        ar: "أزهار الكركديه مع الفراولة الطازجة",
-        ku: "گوڵی ڕووکەند لەگەڵ تۆوی فریز",
+      ingredients: {
+        en: "Hibiscus flowers, fresh strawberries, wild berry mix, honey, ice",
+        ar: "أزهار الكركديه، فراولة طازجة، مزيج توت بري، عسل، ثلج",
+        ku: "گوڵی ڕووکەند، تۆوی فریزی تازە، تۆوی کێوی، عەسڵ، یەخ",
       },
       price: 5500,
       tags: ["cold", "vegan"],
@@ -530,16 +536,16 @@ const ITEMS = {
     {
       id: 21,
       photo:
-        "https://images.unsplash.com/photo-1587796697483-2b6d98d35f16?w=400&q=80",
+        "https://images.unsplash.com/photo-1587796697483-2b6d98d35f16?w=600&q=80",
       name: {
         en: "Mango Passion Tea",
         ar: "شاي المانغو والباشن",
         ku: "چای مانگا و پاشن",
       },
-      desc: {
-        en: "Tropical mango & passion fruit with green tea",
-        ar: "مانغو وباشن فروت مع شاي أخضر",
-        ku: "مانگا و پاشن فرووت لەگەڵ چای سەوز",
+      ingredients: {
+        en: "Green tea, mango puree, passion fruit, honey, ice cubes",
+        ar: "شاي أخضر، هريس مانغو، باشن فروت، عسل، ثلج",
+        ku: "چای سەوز، پووری مانگا، پاشن فرووت، عەسڵ، یەخ",
       },
       price: 5500,
       tags: ["cold", "vegan"],
@@ -547,12 +553,12 @@ const ITEMS = {
     {
       id: 22,
       photo:
-        "https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=400&q=80",
+        "https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=600&q=80",
       name: { en: "Peach Oolong", ar: "الخوخ والأولونج", ku: "خۆخ و ئوولۆنگ" },
-      desc: {
-        en: "Premium oolong steeped with sun-ripened peaches & honey",
-        ar: "أولونج فاخر مع خوخ ناضج وعسل",
-        ku: "ئوولۆنگ لەگەڵ خۆخ و عەسڵ",
+      ingredients: {
+        en: "Premium oolong tea, sun-ripened peach slices, wildflower honey, ice",
+        ar: "أولونج فاخر، شرائح خوخ ناضج، عسل أزهار برية، ثلج",
+        ku: "ئوولۆنگی باشتر، بڕچکەی خۆخ، عەسڵ، یەخ",
       },
       price: 6000,
       tags: ["cold", "vegan"],
@@ -560,16 +566,16 @@ const ITEMS = {
     {
       id: 23,
       photo:
-        "https://images.unsplash.com/photo-1597318181409-cf64d0b5d8a2?w=400&q=80",
+        "https://images.unsplash.com/photo-1597318181409-cf64d0b5d8a2?w=600&q=80",
       name: {
         en: "Blueberry Lemonade",
         ar: "ليمونادة التوت الأزرق",
         ku: "لیمۆناتی بلووبێری",
       },
-      desc: {
-        en: "Iced white tea, blueberry compote & house lemonade",
-        ar: "شاي أبيض بارد مع كومبوت التوت",
-        ku: "چای سپی سارد لەگەڵ بلووبێری",
+      ingredients: {
+        en: "Iced white tea, blueberry compote, fresh lemon juice, mint, ice",
+        ar: "شاي أبيض بارد، كومبوت توت أزرق، عصير ليمون طازج، نعناع، ثلج",
+        ku: "چای سپی سارد، کۆمپۆتی بلووبێری، ئاوی لیمۆن، نەعنا",
       },
       price: 6000,
       tags: ["cold", "vegan", "new"],
@@ -579,16 +585,16 @@ const ITEMS = {
     {
       id: 24,
       photo:
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80",
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",
       name: {
         en: "Thai Iced Tea",
         ar: "الشاي التايلاندي",
         ku: "چای تایلاندی سارد",
       },
-      desc: {
-        en: "Ceylon brew with condensed milk over crushed ice",
-        ar: "شاي سيلاني مع حليب مكثف وثلج",
-        ku: "چای سیلۆن لەگەڵ شیری کۆنداسد سەر یەخ",
+      ingredients: {
+        en: "Ceylon black tea, sweetened condensed milk, star anise, crushed ice",
+        ar: "شاي سيلاني، حليب مكثف محلى، يانسون نجمي، ثلج مجروش",
+        ku: "چای سیلۆن، شیری کۆنداسدی شیرین، ئانیسی ئەستێرە، یەخ",
       },
       price: 5000,
       tags: ["cold"],
@@ -596,16 +602,16 @@ const ITEMS = {
     {
       id: 25,
       photo:
-        "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=400&q=80",
+        "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=600&q=80",
       name: {
         en: "Cold Brew Jasmine",
         ar: "الياسمين البارد",
         ku: "چای یاسمین سارد",
       },
-      desc: {
-        en: "12-hour cold-brewed jasmine green tea",
-        ar: "شاي الياسمين الأخضر المخمر 12 ساعة",
-        ku: "١٢ کاتژمێر چای سەوزی یاسمین سارد",
+      ingredients: {
+        en: "Jasmine green tea, cold-filtered water (12hr steep), light honey",
+        ar: "شاي الياسمين الأخضر، ماء مفلتر بارد (نقيع 12 ساعة)، عسل خفيف",
+        ku: "چای سەوزی یاسمین، ئاوی سارد (12 کاتژمێر), عەسڵی سووک",
       },
       price: 5500,
       tags: ["cold", "vegan"],
@@ -613,16 +619,16 @@ const ITEMS = {
     {
       id: 26,
       photo:
-        "https://images.unsplash.com/photo-1571934811356-5cc061b6d7c3?w=400&q=80",
+        "https://images.unsplash.com/photo-1571934811356-5cc061b6d7c3?w=600&q=80",
       name: {
         en: "Honey Lemon Iced Tea",
         ar: "شاي الليمون والعسل",
         ku: "چای لیمۆن و عەسڵ",
       },
-      desc: {
-        en: "Chilled black tea, wildflower honey & fresh lemon",
-        ar: "شاي أسود بارد مع عسل وشرائح الليمون",
-        ku: "چای ڕەشی سارد لەگەڵ عەسڵ و لیمۆن",
+      ingredients: {
+        en: "Black tea, wildflower honey, fresh lemon slices, mint leaves, ice",
+        ar: "شاي أسود، عسل أزهار برية، شرائح ليمون طازجة، نعناع، ثلج",
+        ku: "چای ڕەش، عەسڵ، لیمۆنی تازە، گەڵای نەعنا، یەخ",
       },
       price: 4500,
       tags: ["cold", "vegan"],
@@ -632,16 +638,16 @@ const ITEMS = {
     {
       id: 27,
       photo:
-        "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80",
+        "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=80",
       name: {
         en: "Golden Chicken Salad",
         ar: "سلطة الدجاج الذهبية",
         ku: "سەلاتەی مریشکی زێرین",
       },
-      desc: {
-        en: "Grilled chicken, mixed greens, tomatoes & lemon dressing",
-        ar: "دجاج مشوي مع خضار مشكلة وطماطم كرز",
-        ku: "مریشکی کەپووتوو لەگەڵ سەوزەی تێکەڵ",
+      ingredients: {
+        en: "Lollo rosso, iceberg, sweet corn, red beans, grilled chicken, lemon dressing",
+        ar: "لولو روسو، خس جبل الثلج، ذرة حلوة، فاصولياء حمراء، دجاج مشوي، صلصة ليمون",
+        ku: "لۆلۆ ڕۆسۆ، خاس، گەنمی شیرین، لوبیای سوور، مریشک، سۆسی لیمۆن",
       },
       price: 12500,
       tags: [],
@@ -649,16 +655,16 @@ const ITEMS = {
     {
       id: 28,
       photo:
-        "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&q=80",
+        "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&q=80",
       name: {
         en: "Tomato Pomegranate",
         ar: "سلطة الطماطم والرمان",
         ku: "سەلاتەی تاماتی ئەنار",
       },
-      desc: {
-        en: "Heirloom tomatoes, pomegranate, feta & mint dressing",
-        ar: "طماطم مع بذور الرمان وجبن الفيتا",
-        ku: "تاماتی ئەصیل لەگەڵ تۆی ئەنار و پەنیر",
+      ingredients: {
+        en: "Fresh tomatoes, hot green peppers, crunchy walnuts, pomegranate seeds, olive oil",
+        ar: "طماطم طازجة، فلفل أخضر حار، جوز مقرمش، بذور رمان، زيت زيتون",
+        ku: "تاماتی تازە، مریچی سەوزی تیژ، گوێزی ئینگلیزی، تۆی ئەنار، رۆنی زەیتوون",
       },
       price: 7000,
       tags: ["vegan"],
@@ -666,16 +672,16 @@ const ITEMS = {
     {
       id: 29,
       photo:
-        "https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400&q=80",
+        "https://images.unsplash.com/photo-1546793665-c74683f339c1?w=600&q=80",
       name: {
         en: "Chicken Caesar",
         ar: "سلطة سيزر بالدجاج",
         ku: "سەلاتەی سیزەری مریشک",
       },
-      desc: {
-        en: "Romaine, grilled chicken, parmesan & Caesar dressing",
-        ar: "خس روماني مع دجاج مشوي وجبن بارميزان",
-        ku: "خاسی رۆمانی لەگەڵ مریشک و پەنیر",
+      ingredients: {
+        en: "Romaine lettuce, grilled chicken, parmesan, croutons, Caesar dressing, anchovies",
+        ar: "خس روماني، دجاج مشوي، جبن بارميزان، خبز محمص، صلصة سيزر، أنشوفة",
+        ku: "خاسی رۆمانی، مریشک، پەنیری پارمیزان، کرووتۆن، سۆسی سیزار",
       },
       price: 13000,
       tags: [],
@@ -683,16 +689,16 @@ const ITEMS = {
     {
       id: 30,
       photo:
-        "https://images.unsplash.com/photo-1551248429-40975aa4de74?w=400&q=80",
+        "https://images.unsplash.com/photo-1551248429-40975aa4de74?w=600&q=80",
       name: {
         en: "Avocado Citrus",
         ar: "سلطة الأفوكادو",
         ku: "سەلاتەی ئاڤۆکادۆ",
       },
-      desc: {
-        en: "Fresh avocado, grapefruit, cucumber & citrus dressing",
-        ar: "أفوكادو طازج مع جريب فروت وخيار وجرجير",
-        ku: "ئاڤۆکادۆی تازە لەگەڵ تاێفا و خیار",
+      ingredients: {
+        en: "Fresh avocado, grapefruit segments, cucumber, arugula, citrus vinaigrette",
+        ar: "أفوكادو طازج، قطع جريب فروت، خيار، جرجير، خل الحمضيات",
+        ku: "ئاڤۆکادۆی تازە، تاێفا، خیار، ئارووگولا، سۆسی سیتروس",
       },
       price: 11000,
       tags: ["vegan", "new"],
@@ -702,16 +708,16 @@ const ITEMS = {
     {
       id: 31,
       photo:
-        "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&q=80",
+        "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&q=80",
       name: {
         en: "Butter Croissant",
         ar: "كرواسان بالزبدة",
         ku: "کرواسانی کەرە",
       },
-      desc: {
-        en: "Freshly baked flaky croissant with French butter",
-        ar: "كرواسان طازج بالزبدة الفرنسية",
-        ku: "کرواسانی تازەی کەپووتوو",
+      ingredients: {
+        en: "French butter, T45 flour, fresh yeast, milk, sea salt, egg wash",
+        ar: "زبدة فرنسية، دقيق T45، خميرة طازجة، حليب، ملح بحري، طلاء بيض",
+        ku: "کەرەی فەرەنسی، ئارد، خەمیرەی تازە، شیر، خوێی بەحری",
       },
       price: 5000,
       tags: [],
@@ -719,12 +725,12 @@ const ITEMS = {
     {
       id: 32,
       photo:
-        "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=400&q=80",
+        "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=600&q=80",
       name: { en: "Cheesecake Slice", ar: "تشيز كيك", ku: "چیزکێک" },
-      desc: {
-        en: "Creamy New York-style cheesecake on a biscuit base",
-        ar: "تشيز كيك كريمي على قاعدة البسكويت",
-        ku: "چیزکێکی نیویۆرکی بە قاعدەی بیسکووت",
+      ingredients: {
+        en: "Cream cheese, digestive biscuit base, eggs, vanilla, sour cream, sugar",
+        ar: "جبن كريمي، قاعدة بسكويت، بيض، فانيليا، كريمة حامضة، سكر",
+        ku: "پەنیری کریمی، قاعدەی بیسکووت، هێلکە، وانیلا، شیری ترش",
       },
       price: 7000,
       tags: [],
@@ -732,16 +738,16 @@ const ITEMS = {
     {
       id: 33,
       photo:
-        "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=400&q=80",
+        "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&q=80",
       name: {
         en: "Chocolate Brownie",
         ar: "براوني الشوكولاتة",
         ku: "براونی چۆکلاتی",
       },
-      desc: {
-        en: "Dense dark chocolate brownie with walnuts",
-        ar: "براوني شوكولاتة داكنة مع جوز",
-        ku: "براونی چۆکلاتی تاریک لەگەڵ گوێزی ئینگلیزی",
+      ingredients: {
+        en: "Valrhona dark chocolate, unsalted butter, eggs, sugar, flour, walnuts",
+        ar: "شوكولاتة داكنة فالرونا، زبدة غير مملحة، بيض، سكر، دقيق، جوز",
+        ku: "چۆکلاتی تاریک، کەرە، هێلکە، شەکر، ئارد، گوێزی ئینگلیزی",
       },
       price: 5500,
       tags: [],
@@ -749,12 +755,12 @@ const ITEMS = {
     {
       id: 34,
       photo:
-        "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=400&q=80",
+        "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&q=80",
       name: { en: "Pistachio Cookie", ar: "كوكيز الفستق", ku: "کووکیز پیستە" },
-      desc: {
-        en: "Crisp-edged chewy pistachio & white chocolate cookie",
-        ar: "كوكيز فستق وشوكولاتة بيضاء",
-        ku: "کووکیزی نەرم لەگەڵ پیستە",
+      ingredients: {
+        en: "Pistachio paste, white chocolate chips, butter, flour, brown sugar, sea salt",
+        ar: "معجون فستق، قطع شوكولاتة بيضاء، زبدة، دقيق، سكر بني، ملح بحري",
+        ku: "پەیستی پیستە، چۆکلاتی سپی، کەرە، ئارد، شەکری قاوەیی، خوێ",
       },
       price: 3500,
       tags: ["vegan", "new"],
@@ -912,6 +918,9 @@ export default function TeaLeaves() {
   const [sending, setSending] = useState(false);
   const [tableNum, setTableNum] = useState(null);
   const [modal, setModal] = useState(null); // null | "bill" | "note" | "feedback"
+  const [viewMode, setViewMode] = useState("grid"); // "grid" | "list"
+  const [selectedItem, setSelectedItem] = useState(null); // item detail modal
+  const [sliderIdx, setSliderIdx] = useState(0);
   const [noteText, setNoteText] = useState("");
   const [modalSending, setModalSending] = useState(false);
   const [modalDone, setModalDone] = useState(false);
@@ -989,6 +998,15 @@ export default function TeaLeaves() {
   };
 
   const reset = () => setScreen("menu");
+
+  /* ── slider auto-advance ── */
+  useEffect(() => {
+    const id = setInterval(
+      () => setSliderIdx((i) => (i + 1) % SLIDER_IMAGES.length),
+      4000,
+    );
+    return () => clearInterval(id);
+  }, []);
 
   /* ── scroll to category ── */
   const handleCatClick = (catId) => {
@@ -1076,8 +1094,36 @@ export default function TeaLeaves() {
 
   const itemCard = (item) => {
     const qty = cart[item.id] || 0;
+    if (viewMode === "list") {
+      return (
+        <div
+          key={item.id}
+          className={`l-card${qty > 0 ? " incart" : ""}`}
+          onClick={() => setSelectedItem(item)}
+        >
+          <div className="l-body">
+            <div className="l-name">{item.name[lang]}</div>
+            <div className="l-price">IQD {fmt(item.price)}</div>
+            <div className="l-ing">{item.ingredients[lang]}</div>
+          </div>
+          <div className="l-img-wrap">
+            <img
+              className="l-img"
+              src={item.photo}
+              alt={item.name[lang]}
+              loading="lazy"
+            />
+            {qty > 0 && <div className="img-badge">{qty}</div>}
+          </div>
+        </div>
+      );
+    }
     return (
-      <div key={item.id} className={`g-card${qty > 0 ? " incart" : ""}`}>
+      <div
+        key={item.id}
+        className={`g-card${qty > 0 ? " incart" : ""}`}
+        onClick={() => setSelectedItem(item)}
+      >
         <img
           className="g-img"
           src={item.photo}
@@ -1103,7 +1149,7 @@ export default function TeaLeaves() {
                 <span className="tag t-new">{t.new}</span>
               )}
             </div>
-            <div className="qty-r">
+            <div className="qty-r" onClick={(e) => e.stopPropagation()}>
               {!tableNum ? (
                 <div className="no-order-badge">🔒</div>
               ) : qty === 0 ? (
@@ -1248,6 +1294,49 @@ export default function TeaLeaves() {
         .err-btn:hover{opacity:.9;}
         @keyframes spin{to{transform:rotate(360deg)}}
         .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+
+        /* ── SLIDER ── */
+        .slider-wrap{position:relative;width:100%;height:180px;overflow:hidden;flex-shrink:0;}
+        .slide-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .7s ease;}
+        .slide-img.active{opacity:1;}
+        .slider-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:2;}
+        .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.45);cursor:pointer;transition:background .2s,transform .2s;}
+        .dot.active{background:#fff;transform:scale(1.3);}
+
+        /* ── SECTION HEAD with toggle ── */
+        .list-toggle{background:#1e3d2f;border:1px solid #2d5a42;border-radius:8px;color:#8ab8a0;cursor:pointer;width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;padding:0;}
+        .list-toggle:hover{border-color:#52b788;color:#52b788;}
+
+        /* ── LIST VIEW CARDS (matching screenshot) ── */
+        .list-view{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+        .l-card{background:#1e3d2f;border-radius:14px;border:1px solid #2d5a42;display:flex;justify-content:space-between;align-items:stretch;overflow:hidden;cursor:pointer;transition:border-color .2s;}
+        .l-card:hover{border-color:#3a6a4a;}
+        .l-card.incart{border-color:#52b788;}
+        .l-body{padding:16px 14px;flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:4px;}
+        .l-name{font-size:15px;font-weight:700;color:#fff;line-height:1.3;}
+        .l-price{font-size:13px;font-weight:700;color:#fff;}
+        .l-ing{font-size:12px;color:#6ba882;line-height:1.5;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+        .l-img-wrap{position:relative;width:120px;flex-shrink:0;}
+        .l-img{width:100%;height:100%;object-fit:cover;display:block;}
+
+        /* ── ITEM DETAIL MODAL ── */
+        .det-overlay{position:absolute;inset:0;background:rgba(0,0,0,.7);z-index:70;display:flex;align-items:flex-end;}
+        .det-sheet{background:#1e3d2f;border-top-left-radius:24px;border-top-right-radius:24px;width:100%;max-height:90%;display:flex;flex-direction:column;overflow:hidden;}
+        .det-handle{width:34px;height:4px;background:#2d5a42;border-radius:2px;margin:12px auto 0;flex-shrink:0;}
+        .det-img-wrap{position:relative;width:100%;height:220px;flex-shrink:0;}
+        .det-img{width:100%;height:100%;object-fit:cover;display:block;}
+        .det-close{position:absolute;top:12px;right:12px;width:32px;height:32px;background:rgba(0,0,0,.5);border:none;border-radius:50%;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+        .det-tags{position:absolute;bottom:10px;left:12px;display:flex;gap:4px;}
+        .det-body{padding:18px 20px 32px;overflow-y:auto;flex:1;}
+        .det-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px;}
+        .det-name{font-size:20px;font-weight:800;color:#fff;line-height:1.25;flex:1;}
+        .det-price{font-size:18px;font-weight:800;color:#52b788;white-space:nowrap;flex-shrink:0;}
+        .det-ing-label{font-size:11px;font-weight:700;color:#6ba882;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+        .det-ing{font-size:14px;color:#a8c9b4;line-height:1.7;font-weight:300;}
+        .det-actions{margin-top:22px;}
+        .det-add{width:100%;background:#40916c;color:#fff;border:none;border-radius:13px;padding:15px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s;}
+        .det-add:hover{opacity:.9;}
+        .det-qty-row{display:flex;align-items:center;gap:12px;background:#243f30;border-radius:13px;padding:10px 16px;}
         .act-btn{background:#1e3d2f;border:1px solid #2d5a42;border-radius:10px;color:#8ab8a0;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0;flex-shrink:0;}
         .act-btn:hover{border-color:#52b788;color:#52b788;background:#243f30;}
         .m-overlay{position:absolute;inset:0;background:rgba(0,0,0,.65);z-index:80;display:flex;align-items:flex-end;justify-content:center;}
@@ -1480,6 +1569,29 @@ export default function TeaLeaves() {
             )}
           </div>
 
+          {/* ── SLIDER ── */}
+          {!query && (
+            <div className="slider-wrap">
+              {SLIDER_IMAGES.map((img, i) => (
+                <img
+                  key={i}
+                  src={img}
+                  alt="Tea Leaves Cafe"
+                  className={`slide-img${i === sliderIdx ? " active" : ""}`}
+                />
+              ))}
+              <div className="slider-dots">
+                {SLIDER_IMAGES.map((_, i) => (
+                  <div
+                    key={i}
+                    className={`dot${i === sliderIdx ? " active" : ""}`}
+                    onClick={() => setSliderIdx(i)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Categories */}
           {!query && (
             <div className="cats" ref={catBarRef}>
@@ -1528,10 +1640,46 @@ export default function TeaLeaves() {
                   ref={(el) => (sectionRefs.current[cat.id] = el)}
                 >
                   <div className="sec-head">
-                    <span>{cat.emoji}</span>
+                    <button
+                      type="button"
+                      className="list-toggle"
+                      onClick={() =>
+                        setViewMode((v) => (v === "grid" ? "list" : "grid"))
+                      }
+                      title="Toggle view"
+                    >
+                      {viewMode === "grid" ? (
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.2"
+                        >
+                          <line x1="3" y1="6" x2="21" y2="6" />
+                          <line x1="3" y1="12" x2="21" y2="12" />
+                          <line x1="3" y1="18" x2="21" y2="18" />
+                        </svg>
+                      ) : (
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <rect x="3" y="3" width="7" height="7" />
+                          <rect x="14" y="3" width="7" height="7" />
+                          <rect x="3" y="14" width="7" height="7" />
+                          <rect x="14" y="14" width="7" height="7" />
+                        </svg>
+                      )}
+                    </button>
                     <span>{cat.label[lang]}</span>
                   </div>
-                  <div className="grid">
+                  <div className={viewMode === "list" ? "list-view" : "grid"}>
                     {(ITEMS[cat.id] || []).map(itemCard)}
                   </div>
                 </div>
@@ -1839,6 +1987,123 @@ export default function TeaLeaves() {
             </div>
           </div>
         )}
+
+        {/* ── ITEM DETAIL MODAL ── */}
+        {selectedItem &&
+          (() => {
+            const item = selectedItem;
+            const qty = cart[item.id] || 0;
+            return (
+              <div
+                className="det-overlay"
+                onClick={() => setSelectedItem(null)}
+              >
+                <div className="det-sheet" onClick={(e) => e.stopPropagation()}>
+                  <div className="det-handle" />
+                  <div className="det-img-wrap">
+                    <img
+                      className="det-img"
+                      src={item.photo}
+                      alt={item.name[lang]}
+                    />
+                    <button
+                      className="det-close"
+                      onClick={() => setSelectedItem(null)}
+                    >
+                      ✕
+                    </button>
+                    {item.tags.length > 0 && (
+                      <div className="det-tags">
+                        {item.tags.includes("hot") && (
+                          <span className="tag t-hot">{t.hot}</span>
+                        )}
+                        {item.tags.includes("cold") && (
+                          <span className="tag t-cold">{t.cold}</span>
+                        )}
+                        {item.tags.includes("vegan") && (
+                          <span className="tag t-vegan">{t.vegan}</span>
+                        )}
+                        {item.tags.includes("new") && (
+                          <span className="tag t-new">{t.new}</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="det-body">
+                    <div className="det-row">
+                      <div className="det-name">{item.name[lang]}</div>
+                      <div className="det-price">IQD {fmt(item.price)}</div>
+                    </div>
+                    <div className="det-ing-label">
+                      {isRTL
+                        ? "المكونات"
+                        : lang === "ku"
+                          ? "پێکهاتەکان"
+                          : "Ingredients"}
+                    </div>
+                    <div className="det-ing">{item.ingredients[lang]}</div>
+                    {tableNum && (
+                      <div className="det-actions">
+                        {qty === 0 ? (
+                          <button
+                            className="det-add"
+                            onClick={() => {
+                              add(item);
+                              setSelectedItem(null);
+                            }}
+                          >
+                            +{" "}
+                            {lang === "ar"
+                              ? "أضف للطلب"
+                              : lang === "ku"
+                                ? "زیادبکە"
+                                : "Add to Order"}
+                          </button>
+                        ) : (
+                          <div className="det-qty-row">
+                            <button
+                              className="qb"
+                              style={{ width: 36, height: 36, fontSize: 20 }}
+                              onClick={() => remove(item)}
+                            >
+                              −
+                            </button>
+                            <span
+                              style={{
+                                fontSize: 18,
+                                fontWeight: 800,
+                                minWidth: 28,
+                                textAlign: "center",
+                              }}
+                            >
+                              {qty}
+                            </span>
+                            <button
+                              className="qb solid"
+                              style={{ width: 36, height: 36, fontSize: 20 }}
+                              onClick={() => add(item)}
+                            >
+                              +
+                            </button>
+                            <div style={{ flex: 1 }} />
+                            <div
+                              style={{
+                                fontSize: 14,
+                                fontWeight: 700,
+                                color: "#52b788",
+                              }}
+                            >
+                              IQD {fmt(item.price * qty)}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
         {/* TOAST */}
         <div className={`toast${toast ? " show" : ""}`}>{toast}</div>
