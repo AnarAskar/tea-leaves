@@ -39,10 +39,27 @@ const T = {
     new: "New",
     noItems: "No items found",
     results: "results for",
-    table: "Table",
     errorTitle: "Order Failed",
     errorMsg: "Could not send your order. Please ask a staff member for help.",
     tryAgain: "Try Again",
+    billTitle: "Request the Bill?",
+    billYes: "Yes, bring the bill",
+    billNo: "Cancel",
+    billSent: "Bill requested! We'll be right with you.",
+    noteTitle: "Leave a Note",
+    noteSend: "Send Note",
+    noteSendingNote: "Sending…",
+    noteSent: "Note sent to our team!",
+    noteMsgPlaceholder: "Write your note here…",
+    feedbackTitle: "Share Your Feedback",
+    feedbackStaff: "Staff",
+    feedbackService: "Service",
+    feedbackHygiene: "Hygiene",
+    feedbackContact: "Your phone number (optional)",
+    feedbackComments: "Additional comments",
+    feedbackSend: "Send Feedback",
+    feedbackSent: "Thank you for your feedback! 🙏",
+    feedbackSending: "Sending…",
   },
   ar: {
     appName: "تي ليفز",
@@ -67,10 +84,27 @@ const T = {
     new: "جديد",
     noItems: "لا توجد عناصر",
     results: "نتائج لـ",
-    table: "طاولة",
     errorTitle: "فشل الطلب",
     errorMsg: "تعذّر إرسال طلبك. الرجاء طلب المساعدة من أحد الموظفين.",
     tryAgain: "حاول مجدداً",
+    billTitle: "طلب الفاتورة؟",
+    billYes: "نعم، أحضر الفاتورة",
+    billNo: "إلغاء",
+    billSent: "تم طلب الفاتورة! سنأتي إليك الآن.",
+    noteTitle: "اترك ملاحظة",
+    noteSend: "إرسال",
+    noteSendingNote: "جاري الإرسال…",
+    noteSent: "تم إرسال ملاحظتك!",
+    noteMsgPlaceholder: "اكتب ملاحظتك هنا…",
+    feedbackTitle: "شاركنا رأيك",
+    feedbackStaff: "الموظفون",
+    feedbackService: "الخدمة",
+    feedbackHygiene: "النظافة",
+    feedbackContact: "رقم هاتفك (اختياري)",
+    feedbackComments: "تعليقات إضافية",
+    feedbackSend: "إرسال التقييم",
+    feedbackSent: "شكراً على تقييمك! 🙏",
+    feedbackSending: "جاري الإرسال…",
   },
   ku: {
     appName: "تی لیڤز",
@@ -95,10 +129,27 @@ const T = {
     new: "نوێ",
     noItems: "هیچ بابەتێک نەدۆزرایەوە",
     results: "ئەنجام بۆ",
-    table: "مێز",
     errorTitle: "داواکاری سەرنەکەوت",
     errorMsg: "نەتوانرا داواکارییەکەت بنێردرێت. تکایە کارمەندێک بانگ بکە.",
     tryAgain: "دووبارە هەوڵبدەرەوە",
+    billTitle: "داواکردنی پسووڵە؟",
+    billYes: "بەڵێ، پسووڵەکەم بێنە",
+    billNo: "پاشگەزبوونەوە",
+    billSent: "پسووڵە داواکرا! ئێمە دێینە بۆلات.",
+    noteTitle: "تێبینی بنێرە",
+    noteSend: "ناردن",
+    noteSendingNote: "دەنێردرێت…",
+    noteSent: "تێبینییەکەت نێردرا!",
+    noteMsgPlaceholder: "تێبینییەکەت لێرە بنووسە…",
+    feedbackTitle: "ڕازیبوون و نارەزایی",
+    feedbackStaff: "ستاف",
+    feedbackService: "خزمەتگوزاری",
+    feedbackHygiene: "پاکیزەیی",
+    feedbackContact: "ژمارەی تەلەفۆنت (ئارەزووی)",
+    feedbackComments: "تێبینیی زیادە",
+    feedbackSend: "ناردنی هەڵسەنگاندن",
+    feedbackSent: "سپاس بۆ هەڵسەنگاندنەکەت! 🙏",
+    feedbackSending: "دەنێردرێت…",
   },
 };
 
@@ -738,9 +789,9 @@ async function sendTelegramOrder({
 
   const noteLine = note.trim() ? `\n📝 Note: ${note.trim()}` : "";
   const message = `🍵 *New Order — Table ${tableNum}*
- 
+
 ${lines}${noteLine}
- 
+
 💰 Subtotal: ${fmt(totalIQD)} IQD
 🧾 Service: ${fmt(tax)} IQD
 ✅ *Total: ${fmt(grand)} IQD*
@@ -755,6 +806,89 @@ ${lines}${noteLine}
         chat_id: CHAT_ID,
         text: message,
         parse_mode: "Markdown",
+      }),
+    },
+  );
+  if (!res.ok) throw new Error("Telegram error");
+}
+
+/* ── Send bill request ── */
+async function sendTelegramBill(tableNum) {
+  const time = new Date().toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const res = await fetch(
+    `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: CHAT_ID,
+        parse_mode: "Markdown",
+        text: `💳 *Bill Requested — Table ${tableNum}*
+🕐 ${time}`,
+      }),
+    },
+  );
+  if (!res.ok) throw new Error("Telegram error");
+}
+
+/* ── Send note ── */
+async function sendTelegramNote(tableNum, note) {
+  const time = new Date().toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const res = await fetch(
+    `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: CHAT_ID,
+        parse_mode: "Markdown",
+        text: `📝 *Note — Table ${tableNum}*
+
+${note}
+
+🕐 ${time}`,
+      }),
+    },
+  );
+  if (!res.ok) throw new Error("Telegram error");
+}
+
+/* ── Send feedback ── */
+async function sendTelegramFeedback(tableNum, stars, contact, comments) {
+  const star = (n) => "⭐".repeat(n) + "☆".repeat(5 - n);
+  const time = new Date().toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const contactLine = contact
+    ? `
+📞 Contact: ${contact}`
+    : "";
+  const commentsLine = comments
+    ? `
+💬 Comments: ${comments}`
+    : "";
+  const res = await fetch(
+    `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: CHAT_ID,
+        parse_mode: "Markdown",
+        text: `⭐ *Feedback — Table ${tableNum}*
+
+Staff: ${star(stars.staff)}
+Service: ${star(stars.service)}
+Hygiene: ${star(stars.hygiene)}${contactLine}${commentsLine}
+
+🕐 ${time}`,
       }),
     },
   );
@@ -777,6 +911,13 @@ export default function TeaLeaves() {
   const [screen, setScreen] = useState("menu"); // "menu" | "success" | "error"
   const [sending, setSending] = useState(false);
   const [tableNum, setTableNum] = useState(null);
+  const [modal, setModal] = useState(null); // null | "bill" | "note" | "feedback"
+  const [noteText, setNoteText] = useState("");
+  const [modalSending, setModalSending] = useState(false);
+  const [modalDone, setModalDone] = useState(false);
+  const [fbStars, setFbStars] = useState({ staff: 0, service: 0, hygiene: 0 });
+  const [fbContact, setFbContact] = useState("");
+  const [fbComments, setFbComments] = useState("");
 
   const toastRef = useRef(null);
   const catBarRef = useRef(null);
@@ -861,11 +1002,13 @@ export default function TeaLeaves() {
         ignoreScrollRef.current = false;
       }, 800);
     }
-    catBarRef.current?.querySelector(`[data-cat="${catId}"]`)?.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-      inline: "center",
-    });
+    catBarRef.current
+      ?.querySelector(`[data-cat="${catId}"]`)
+      ?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
   };
 
   /* ── scroll spy ── */
@@ -1006,7 +1149,6 @@ export default function TeaLeaves() {
         .lang-opt:hover{background:#2d6a4f;}
         .lang-opt.sel{color:#52b788;}
         .icon-btn{background:none;border:none;color:#8ab8a0;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;position:relative;}
-        .table-chip{background:#1e3d2f;border:1px solid #2d5a42;border-radius:20px;padding:5px 10px;font-size:12px;font-weight:700;color:#52b788;}
         .search-row{display:flex;align-items:center;gap:8px;background:#1e3d2f;border:1px solid #2d5a42;border-radius:20px;padding:9px 14px;margin-bottom:12px;}
         .search-row input{flex:1;background:none;border:none;outline:none;color:#fff;font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;}
         .search-row input::placeholder{color:#5a8c6e;}
@@ -1054,7 +1196,6 @@ export default function TeaLeaves() {
         .vob:hover{opacity:.93;transform:translateY(-2px);}
         .vob-l{display:flex;align-items:center;gap:10px;}
         .vob-n{background:rgba(255,255,255,.25);width:24px;height:24px;border-radius:50%;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;}
-        .browse-banner{width:100%;background:#1e3d2f;border:1px solid #2d5a42;border-radius:14px;padding:13px 16px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;color:#6ba882;pointer-events:none;}
         .overlay{position:absolute;inset:0;background:rgba(0,0,0,.6);z-index:30;opacity:0;pointer-events:none;transition:opacity .3s;}
         .overlay.open{opacity:1;pointer-events:all;}
         .drawer{position:absolute;bottom:0;left:0;right:0;background:#1e3d2f;border-top-left-radius:22px;border-top-right-radius:22px;z-index:40;max-height:88%;display:flex;flex-direction:column;transition:transform .35s cubic-bezier(.4,0,.2,1);transform:translateY(100%);direction:${isRTL ? "rtl" : "ltr"};}
@@ -1062,7 +1203,6 @@ export default function TeaLeaves() {
         .d-handle{width:34px;height:4px;background:#2d5a42;border-radius:2px;margin:11px auto 0;flex-shrink:0;}
         .d-head{padding:13px 18px;border-bottom:1px solid #2d5a42;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
         .d-title{font-size:18px;font-weight:700;}
-        .d-table{font-size:12px;color:#52b788;font-weight:600;}
         .d-close{width:28px;height:28px;background:#2d6a4f;border:1px solid #2d5a42;border-radius:50%;color:#6ba882;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;}
         .d-close:hover{color:#fff;}
         .d-list{flex:1;overflow-y:auto;padding:12px 18px;}
@@ -1108,6 +1248,41 @@ export default function TeaLeaves() {
         .err-btn:hover{opacity:.9;}
         @keyframes spin{to{transform:rotate(360deg)}}
         .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+        .act-btn{background:#1e3d2f;border:1px solid #2d5a42;border-radius:10px;color:#8ab8a0;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0;flex-shrink:0;}
+        .act-btn:hover{border-color:#52b788;color:#52b788;background:#243f30;}
+        .m-overlay{position:absolute;inset:0;background:rgba(0,0,0,.65);z-index:80;display:flex;align-items:flex-end;justify-content:center;}
+        .m-sheet{background:#1e3d2f;border-top-left-radius:22px;border-top-right-radius:22px;width:100%;padding:0 20px 32px;max-height:80vh;display:flex;flex-direction:column;border-top:1px solid #2d5a42;}
+        .m-handle{width:34px;height:4px;background:#2d5a42;border-radius:2px;margin:12px auto 18px;flex-shrink:0;}
+        .m-title{font-size:18px;font-weight:700;color:#fff;margin-bottom:18px;flex-shrink:0;}
+        .m-textarea{width:100%;background:#243f30;border:1px solid #2d5a42;border-radius:12px;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;padding:12px 14px;outline:none;resize:none;transition:border-color .2s;margin-bottom:14px;}
+        .m-textarea:focus{border-color:#52b788;}
+        .m-textarea::placeholder{color:#4a7a5a;}
+        .m-input{width:100%;background:#243f30;border:1px solid #2d5a42;border-radius:12px;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;padding:12px 14px;outline:none;transition:border-color .2s;margin-bottom:14px;}
+        .m-input:focus{border-color:#52b788;}
+        .m-input::placeholder{color:#4a7a5a;}
+        .m-send-btn{width:100%;background:#40916c;color:#fff;border:none;border-radius:13px;padding:14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s;flex-shrink:0;}
+        .m-send-btn:hover:not(:disabled){opacity:.9;}
+        .m-send-btn:disabled{opacity:.45;cursor:not-allowed;}
+        .m-btn-yes{flex:1;background:#40916c;color:#fff;border:none;border-radius:13px;padding:14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s;}
+        .m-btn-yes:hover{opacity:.9;}
+        .m-btn-no{flex:1;background:#243f30;color:#8ab8a0;border:1px solid #2d5a42;border-radius:13px;padding:14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all .15s;}
+        .m-btn-no:hover{border-color:#52b788;color:#fff;}
+        .m-done{display:flex;flex-direction:column;align-items:center;padding:12px 0 4px;text-align:center;}
+        .m-done-icon{font-size:52px;margin-bottom:14px;}
+        .m-done-text{font-size:16px;font-weight:600;color:#52b788;line-height:1.5;}
+        .m-scroll{flex:1;overflow-y:auto;margin-bottom:14px;}
+        .m-scroll::-webkit-scrollbar{width:3px;}
+        .m-scroll::-webkit-scrollbar-thumb{background:#2d5a42;border-radius:2px;}
+        .fb-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #2d5a42;}
+        .fb-row:last-of-type{border-bottom:none;}
+        .fb-label{font-size:15px;font-weight:600;color:#fff;}
+        .fb-stars{display:flex;gap:6px;}
+        .star-btn{background:none;border:none;font-size:26px;color:#2d5a42;cursor:pointer;padding:2px;line-height:1;transition:color .1s,transform .1s;outline:none;-webkit-tap-highlight-color:transparent;user-select:none;}
+        .star-btn span{display:block;line-height:1;pointer-events:none;}
+        .star-btn.lit{color:#f4b942;}
+        .star-btn:hover{transform:scale(1.15);}
+        .star-btn:focus{outline:none;}
+        .fb-field-label{font-size:12px;font-weight:600;color:#6ba882;margin-bottom:6px;margin-top:14px;}
       `}</style>
 
       <div className="app">
@@ -1165,52 +1340,117 @@ export default function TeaLeaves() {
             <div className="hdr-title">{t.appName}</div>
 
             <div className="hdr-right">
-              {/* Table chip — read-only, set by QR code URL */}
+              {/* Action buttons — only shown when arrived via QR */}
               {tableNum && (
-                <div className="table-chip">
-                  🪑 {t.table} {tableNum}
-                </div>
-              )}
-              {/* Cart — only shown when arrived via QR */}
-              {tableNum && (
-                <button
-                  className="icon-btn"
-                  onClick={() => setDrawerOpen(true)}
-                >
-                  <svg
-                    width="22"
-                    height="22"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
+                <>
+                  {/* Bill */}
+                  <button
+                    className="act-btn"
+                    title="Request Bill"
+                    onClick={() => {
+                      setModal("bill");
+                      setModalDone(false);
+                    }}
                   >
-                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-                    <line x1="3" y1="6" x2="21" y2="6" />
-                    <path d="M16 10a4 4 0 01-8 0" />
-                  </svg>
-                  {totalQty > 0 && (
-                    <span
-                      style={{
-                        position: "absolute",
-                        top: -4,
-                        right: -5,
-                        background: "#e63946",
-                        color: "#fff",
-                        fontSize: 10,
-                        fontWeight: 800,
-                        width: 16,
-                        height: 16,
-                        borderRadius: "50%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
                     >
-                      {totalQty}
-                    </span>
-                  )}
-                </button>
+                      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <line x1="16" y1="13" x2="8" y2="13" />
+                      <line x1="16" y1="17" x2="8" y2="17" />
+                      <polyline points="10 9 9 9 8 9" />
+                    </svg>
+                  </button>
+                  {/* Note */}
+                  <button
+                    className="act-btn"
+                    title="Leave a Note"
+                    onClick={() => {
+                      setModal("note");
+                      setModalDone(false);
+                      setNoteText("");
+                    }}
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                    </svg>
+                  </button>
+                  {/* Feedback */}
+                  <button
+                    className="act-btn"
+                    title="Give Feedback"
+                    onClick={() => {
+                      setModal("feedback");
+                      setModalDone(false);
+                      setFbStars({ staff: 0, service: 0, hygiene: 0 });
+                      setFbContact("");
+                      setFbComments("");
+                    }}
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
+                  </button>
+                  {/* Cart */}
+                  <button
+                    className="icon-btn"
+                    onClick={() => setDrawerOpen(true)}
+                  >
+                    <svg
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                    >
+                      <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                      <line x1="3" y1="6" x2="21" y2="6" />
+                      <path d="M16 10a4 4 0 01-8 0" />
+                    </svg>
+                    {totalQty > 0 && (
+                      <span
+                        style={{
+                          position: "absolute",
+                          top: -4,
+                          right: -5,
+                          background: "#e63946",
+                          color: "#fff",
+                          fontSize: 10,
+                          fontWeight: 800,
+                          width: 16,
+                          height: 16,
+                          borderRadius: "50%",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {totalQty}
+                      </span>
+                    )}
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -1300,32 +1540,16 @@ export default function TeaLeaves() {
           )}
         </div>
 
-        {/* BOTTOM BAR — ordering only available when scanned from table QR */}
-        {tableNum ? (
-          totalQty > 0 &&
-          !drawerOpen && (
-            <div className="btm-bar">
-              <button className="vob" onClick={() => setDrawerOpen(true)}>
-                <div className="vob-l">
-                  <span className="vob-n">{totalQty}</span>
-                  <span>{t.viewOrder}</span>
-                </div>
-                <span>{fmt(totalIQD)} IQD</span>
-              </button>
-            </div>
-          )
-        ) : (
+        {/* BOTTOM BAR — only when arrived via QR and has items */}
+        {tableNum && totalQty > 0 && !drawerOpen && (
           <div className="btm-bar">
-            <div className="browse-banner">
-              <span>📋</span>
-              <span>
-                {lang === "ar"
-                  ? "عرض القائمة فقط — امسح رمز QR على طاولتك للطلب"
-                  : lang === "ku"
-                    ? "تەنها بینینی مێنیو — QR ی مێزەکەت بسکێنە بۆ داواکاری"
-                    : "Browsing only — scan the QR at your table to order"}
-              </span>
-            </div>
+            <button className="vob" onClick={() => setDrawerOpen(true)}>
+              <div className="vob-l">
+                <span className="vob-n">{totalQty}</span>
+                <span>{t.viewOrder}</span>
+              </div>
+              <span>{fmt(totalIQD)} IQD</span>
+            </button>
           </div>
         )}
 
@@ -1339,14 +1563,7 @@ export default function TeaLeaves() {
         <div className={`drawer${drawerOpen ? " open" : ""}`}>
           <div className="d-handle" />
           <div className="d-head">
-            <div>
-              <div className="d-title">🍵 {t.yourOrder}</div>
-              {tableNum && (
-                <div className="d-table">
-                  🪑 {t.table} {tableNum}
-                </div>
-              )}
-            </div>
+            <div className="d-title">🍵 {t.yourOrder}</div>
             <button className="d-close" onClick={() => setDrawerOpen(false)}>
               ✕
             </button>
@@ -1443,6 +1660,186 @@ export default function TeaLeaves() {
           )}
         </div>
 
+        {/* ── MODAL OVERLAY ── */}
+        {modal && (
+          <div
+            className="m-overlay"
+            onClick={() => !modalSending && setModal(null)}
+          >
+            <div className="m-sheet" onClick={(e) => e.stopPropagation()}>
+              <div className="m-handle" />
+
+              {/* ── BILL MODAL ── */}
+              {modal === "bill" &&
+                (modalDone ? (
+                  <div className="m-done">
+                    <div className="m-done-icon">💳</div>
+                    <div className="m-done-text">{t.billSent}</div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="m-title">{t.billTitle}</div>
+                    <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+                      <button
+                        className="m-btn-no"
+                        onClick={() => setModal(null)}
+                      >
+                        {t.billNo}
+                      </button>
+                      <button
+                        className="m-btn-yes"
+                        onClick={async () => {
+                          setModalSending(true);
+                          try {
+                            await sendTelegramBill(tableNum);
+                          } catch {}
+                          setModalSending(false);
+                          setModalDone(true);
+                          setTimeout(() => setModal(null), 2200);
+                        }}
+                      >
+                        {modalSending ? (
+                          <>
+                            <div className="spinner" />
+                          </>
+                        ) : (
+                          t.billYes
+                        )}
+                      </button>
+                    </div>
+                  </>
+                ))}
+
+              {/* ── NOTE MODAL ── */}
+              {modal === "note" &&
+                (modalDone ? (
+                  <div className="m-done">
+                    <div className="m-done-icon">📝</div>
+                    <div className="m-done-text">{t.noteSent}</div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="m-title">{t.noteTitle}</div>
+                    <textarea
+                      className="m-textarea"
+                      rows={4}
+                      value={noteText}
+                      onChange={(e) => setNoteText(e.target.value)}
+                      placeholder={t.noteMsgPlaceholder}
+                      autoFocus
+                    />
+                    <button
+                      className="m-send-btn"
+                      disabled={!noteText.trim() || modalSending}
+                      onClick={async () => {
+                        setModalSending(true);
+                        try {
+                          await sendTelegramNote(tableNum, noteText);
+                        } catch {}
+                        setModalSending(false);
+                        setModalDone(true);
+                        setTimeout(() => setModal(null), 2200);
+                      }}
+                    >
+                      {modalSending ? (
+                        <>
+                          <div className="spinner" />
+                          {t.noteSendingNote}
+                        </>
+                      ) : (
+                        t.noteSend
+                      )}
+                    </button>
+                  </>
+                ))}
+
+              {/* ── FEEDBACK MODAL ── */}
+              {modal === "feedback" &&
+                (modalDone ? (
+                  <div className="m-done">
+                    <div className="m-done-icon">⭐</div>
+                    <div className="m-done-text">{t.feedbackSent}</div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="m-title">{t.feedbackTitle}</div>
+                    <div className="m-scroll">
+                      {[
+                        { key: "staff", label: t.feedbackStaff },
+                        { key: "service", label: t.feedbackService },
+                        { key: "hygiene", label: t.feedbackHygiene },
+                      ].map(({ key, label }) => (
+                        <div key={key} className="fb-row">
+                          <div className="fb-label">{label}</div>
+                          <div className="fb-stars">
+                            {[1, 2, 3, 4, 5].map((n) => (
+                              <button
+                                key={n}
+                                type="button"
+                                className={`star-btn${fbStars[key] >= n ? " lit" : ""}`}
+                                onClick={() =>
+                                  setFbStars((s) => ({ ...s, [key]: n }))
+                                }
+                              >
+                                <span aria-hidden="true">★</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                      <div className="fb-field-label">{t.feedbackContact}</div>
+                      <input
+                        className="m-input"
+                        type="tel"
+                        value={fbContact}
+                        onChange={(e) => setFbContact(e.target.value)}
+                        placeholder="+964 7XX XXX XXXX"
+                      />
+                      <div className="fb-field-label">{t.feedbackComments}</div>
+                      <textarea
+                        className="m-textarea"
+                        rows={3}
+                        value={fbComments}
+                        onChange={(e) => setFbComments(e.target.value)}
+                        placeholder="…"
+                      />
+                    </div>
+                    <button
+                      className="m-send-btn"
+                      disabled={
+                        modalSending ||
+                        (!fbStars.staff && !fbStars.service && !fbStars.hygiene)
+                      }
+                      onClick={async () => {
+                        setModalSending(true);
+                        try {
+                          await sendTelegramFeedback(
+                            tableNum,
+                            fbStars,
+                            fbContact,
+                            fbComments,
+                          );
+                        } catch {}
+                        setModalSending(false);
+                        setModalDone(true);
+                        setTimeout(() => setModal(null), 2500);
+                      }}
+                    >
+                      {modalSending ? (
+                        <>
+                          <div className="spinner" />
+                          {t.feedbackSending}
+                        </>
+                      ) : (
+                        t.feedbackSend
+                      )}
+                    </button>
+                  </>
+                ))}
+            </div>
+          </div>
+        )}
+
         {/* TOAST */}
         <div className={`toast${toast ? " show" : ""}`}>{toast}</div>
 
@@ -1451,9 +1848,7 @@ export default function TeaLeaves() {
           <div className="s-icon">☕</div>
           <div className="s-title">{t.orderPlaced}</div>
           <div className="s-msg">{t.orderMsg}</div>
-          <div className="s-num">
-            Order #TL-{orderNum} · {t.table} {tableNum}
-          </div>
+          <div className="s-num">Order #TL-{orderNum}</div>
           <button className="s-back" onClick={reset}>
             {t.orderMore}
           </button>
