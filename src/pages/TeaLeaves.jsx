@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect, useCallback } from "react";
 
 /* ══════════════════════════════════════════════
@@ -23,748 +24,149 @@ const SLIDER_IMAGES = [
 /* ─── TRANSLATIONS ─── */
 const T = {
   en: {
-    appName: "Tea Leaves",
-    search: "Search menu…",
-    viewOrder: "View Order",
-    yourOrder: "Your Order",
-    empty: "Your order is empty.\nAdd some items from the menu!",
-    specialNote: "Special instructions",
-    notePlaceholder: "e.g. no sugar, extra hot…",
-    subtotal: "Subtotal",
-    service: "Service (10%)",
-    total: "Total",
-    placeOrder: "Place Order",
-    sending: "Sending order…",
-    orderPlaced: "Order Placed!",
-    orderMsg: "Your order has been sent to our team.\nSit back and relax!",
-    orderMore: "Order More Items",
-    each: "each",
-    hot: "Hot",
-    cold: "Cold",
-    vegan: "Vegan",
-    new: "New",
-    noItems: "No items found",
-    results: "results for",
-    errorTitle: "Order Failed",
-    errorMsg: "Could not send your order. Please ask a staff member for help.",
-    tryAgain: "Try Again",
-    billTitle: "Request the Bill?",
-    billYes: "Yes, bring the bill",
-    billNo: "Cancel",
-    billSent: "Bill requested! We'll be right with you.",
-    noteTitle: "Leave a Note",
-    noteSend: "Send Note",
-    noteSendingNote: "Sending…",
-    noteSent: "Note sent to our team!",
-    noteMsgPlaceholder: "Write your note here…",
-    feedbackTitle: "Share Your Feedback",
-    feedbackStaff: "Staff",
-    feedbackService: "Service",
-    feedbackHygiene: "Hygiene",
-    feedbackContact: "Your phone number (optional)",
-    feedbackComments: "Additional comments",
-    feedbackSend: "Send Feedback",
-    feedbackSent: "Thank you for your feedback! 🙏",
-    feedbackSending: "Sending…",
+    appName:"Tea Leaves", search:"Search menu…", viewOrder:"View Order",
+    yourOrder:"Your Order", empty:"Your order is empty.\nAdd some items from the menu!",
+    specialNote:"Special instructions", notePlaceholder:"e.g. no sugar, extra hot…",
+    subtotal:"Subtotal", service:"Service (10%)", total:"Total",
+    placeOrder:"Place Order", sending:"Sending order…",
+    orderPlaced:"Order Placed!", orderMsg:"Your order has been sent to our team.\nSit back and relax!",
+    orderMore:"Order More Items", each:"each",
+    hot:"Hot", cold:"Cold", vegan:"Vegan", new:"New",
+    noItems:"No items found", results:"results for",
+    errorTitle:"Order Failed",
+    errorMsg:"Could not send your order. Please ask a staff member for help.",
+    tryAgain:"Try Again",
+    billTitle:"Request the Bill?", billYes:"Yes, bring the bill", billNo:"Cancel",
+    billSent:"Bill requested! We'll be right with you.",
+    noteTitle:"Leave a Note", noteSend:"Send Note", noteSendingNote:"Sending…",
+    noteSent:"Note sent to our team!",
+    noteMsgPlaceholder:"Write your note here…",
+    feedbackTitle:"Share Your Feedback", feedbackStaff:"Staff", feedbackService:"Service",
+    feedbackHygiene:"Hygiene", feedbackContact:"Your phone number (optional)",
+    feedbackComments:"Additional comments", feedbackSend:"Send Feedback",
+    feedbackSent:"Thank you for your feedback! 🙏",
+    feedbackSending:"Sending…",
   },
   ar: {
-    appName: "تي ليفز",
-    search: "ابحث في القائمة…",
-    viewOrder: "عرض الطلب",
-    yourOrder: "طلبك",
-    empty: "طلبك فارغ.\nأضف بعض العناصر من القائمة!",
-    specialNote: "ملاحظات خاصة",
-    notePlaceholder: "مثال: بدون سكر، ساخن جداً…",
-    subtotal: "المجموع الجزئي",
-    service: "رسوم الخدمة (10%)",
-    total: "الإجمالي",
-    placeOrder: "تأكيد الطلب",
-    sending: "جاري الإرسال…",
-    orderPlaced: "تم الطلب!",
-    orderMsg: "تم إرسال طلبك إلى فريقنا.\nاسترخِ وانتظر!",
-    orderMore: "طلب المزيد",
-    each: "للواحدة",
-    hot: "ساخن",
-    cold: "بارد",
-    vegan: "نباتي",
-    new: "جديد",
-    noItems: "لا توجد عناصر",
-    results: "نتائج لـ",
-    errorTitle: "فشل الطلب",
-    errorMsg: "تعذّر إرسال طلبك. الرجاء طلب المساعدة من أحد الموظفين.",
-    tryAgain: "حاول مجدداً",
-    billTitle: "طلب الفاتورة؟",
-    billYes: "نعم، أحضر الفاتورة",
-    billNo: "إلغاء",
-    billSent: "تم طلب الفاتورة! سنأتي إليك الآن.",
-    noteTitle: "اترك ملاحظة",
-    noteSend: "إرسال",
-    noteSendingNote: "جاري الإرسال…",
-    noteSent: "تم إرسال ملاحظتك!",
-    noteMsgPlaceholder: "اكتب ملاحظتك هنا…",
-    feedbackTitle: "شاركنا رأيك",
-    feedbackStaff: "الموظفون",
-    feedbackService: "الخدمة",
-    feedbackHygiene: "النظافة",
-    feedbackContact: "رقم هاتفك (اختياري)",
-    feedbackComments: "تعليقات إضافية",
-    feedbackSend: "إرسال التقييم",
-    feedbackSent: "شكراً على تقييمك! 🙏",
-    feedbackSending: "جاري الإرسال…",
+    appName:"تي ليفز", search:"ابحث في القائمة…", viewOrder:"عرض الطلب",
+    yourOrder:"طلبك", empty:"طلبك فارغ.\nأضف بعض العناصر من القائمة!",
+    specialNote:"ملاحظات خاصة", notePlaceholder:"مثال: بدون سكر، ساخن جداً…",
+    subtotal:"المجموع الجزئي", service:"رسوم الخدمة (10%)", total:"الإجمالي",
+    placeOrder:"تأكيد الطلب", sending:"جاري الإرسال…",
+    orderPlaced:"تم الطلب!", orderMsg:"تم إرسال طلبك إلى فريقنا.\nاسترخِ وانتظر!",
+    orderMore:"طلب المزيد", each:"للواحدة",
+    hot:"ساخن", cold:"بارد", vegan:"نباتي", new:"جديد",
+    noItems:"لا توجد عناصر", results:"نتائج لـ",
+    errorTitle:"فشل الطلب",
+    errorMsg:"تعذّر إرسال طلبك. الرجاء طلب المساعدة من أحد الموظفين.",
+    tryAgain:"حاول مجدداً",
+    billTitle:"طلب الفاتورة؟", billYes:"نعم، أحضر الفاتورة", billNo:"إلغاء",
+    billSent:"تم طلب الفاتورة! سنأتي إليك الآن.",
+    noteTitle:"اترك ملاحظة", noteSend:"إرسال", noteSendingNote:"جاري الإرسال…",
+    noteSent:"تم إرسال ملاحظتك!",
+    noteMsgPlaceholder:"اكتب ملاحظتك هنا…",
+    feedbackTitle:"شاركنا رأيك", feedbackStaff:"الموظفون", feedbackService:"الخدمة",
+    feedbackHygiene:"النظافة", feedbackContact:"رقم هاتفك (اختياري)",
+    feedbackComments:"تعليقات إضافية", feedbackSend:"إرسال التقييم",
+    feedbackSent:"شكراً على تقييمك! 🙏",
+    feedbackSending:"جاري الإرسال…",
   },
   ku: {
-    appName: "تی لیڤز",
-    search: "گەڕان لە مێنیوو…",
-    viewOrder: "بینینی داواکاری",
-    yourOrder: "داواکارییەکەت",
-    empty: "داواکارییەکەت بەتاڵە.\nشتێک لە مێنیوی زیاد بکە!",
-    specialNote: "تێبینی تایبەت",
-    notePlaceholder: "مەسەلەن: بێ شەکر، زۆر گەرم…",
-    subtotal: "کۆی بەشەکان",
-    service: "خزمەتگوزاری (10%)",
-    total: "کۆی گشتی",
-    placeOrder: "پشتڕاستکردنەوەی داواکاری",
-    sending: "ناردن…",
-    orderPlaced: "داواکاری تۆمارکرا!",
-    orderMsg: "داواکارییەکەت نێردرا بۆ تیمەکەمان.\nئارام بە!",
-    orderMore: "داواکاری زیاتر",
-    each: "بۆ هەریەک",
-    hot: "گەرم",
-    cold: "سارد",
-    vegan: "ڤێگان",
-    new: "نوێ",
-    noItems: "هیچ بابەتێک نەدۆزرایەوە",
-    results: "ئەنجام بۆ",
-    errorTitle: "داواکاری سەرنەکەوت",
-    errorMsg: "نەتوانرا داواکارییەکەت بنێردرێت. تکایە کارمەندێک بانگ بکە.",
-    tryAgain: "دووبارە هەوڵبدەرەوە",
-    billTitle: "داواکردنی پسووڵە؟",
-    billYes: "بەڵێ، پسووڵەکەم بێنە",
-    billNo: "پاشگەزبوونەوە",
-    billSent: "پسووڵە داواکرا! ئێمە دێینە بۆلات.",
-    noteTitle: "تێبینی بنێرە",
-    noteSend: "ناردن",
-    noteSendingNote: "دەنێردرێت…",
-    noteSent: "تێبینییەکەت نێردرا!",
-    noteMsgPlaceholder: "تێبینییەکەت لێرە بنووسە…",
-    feedbackTitle: "ڕازیبوون و نارەزایی",
-    feedbackStaff: "ستاف",
-    feedbackService: "خزمەتگوزاری",
-    feedbackHygiene: "پاکیزەیی",
-    feedbackContact: "ژمارەی تەلەفۆنت (ئارەزووی)",
-    feedbackComments: "تێبینیی زیادە",
-    feedbackSend: "ناردنی هەڵسەنگاندن",
-    feedbackSent: "سپاس بۆ هەڵسەنگاندنەکەت! 🙏",
-    feedbackSending: "دەنێردرێت…",
+    appName:"تی لیڤز", search:"گەڕان لە مێنیوو…", viewOrder:"بینینی داواکاری",
+    yourOrder:"داواکارییەکەت", empty:"داواکارییەکەت بەتاڵە.\nشتێک لە مێنیوی زیاد بکە!",
+    specialNote:"تێبینی تایبەت", notePlaceholder:"مەسەلەن: بێ شەکر، زۆر گەرم…",
+    subtotal:"کۆی بەشەکان", service:"خزمەتگوزاری (10%)", total:"کۆی گشتی",
+    placeOrder:"پشتڕاستکردنەوەی داواکاری", sending:"ناردن…",
+    orderPlaced:"داواکاری تۆمارکرا!", orderMsg:"داواکارییەکەت نێردرا بۆ تیمەکەمان.\nئارام بە!",
+    orderMore:"داواکاری زیاتر", each:"بۆ هەریەک",
+    hot:"گەرم", cold:"سارد", vegan:"ڤێگان", new:"نوێ",
+    noItems:"هیچ بابەتێک نەدۆزرایەوە", results:"ئەنجام بۆ",
+    errorTitle:"داواکاری سەرنەکەوت",
+    errorMsg:"نەتوانرا داواکارییەکەت بنێردرێت. تکایە کارمەندێک بانگ بکە.",
+    tryAgain:"دووبارە هەوڵبدەرەوە",
+    billTitle:"داواکردنی پسووڵە؟", billYes:"بەڵێ، پسووڵەکەم بێنە", billNo:"پاشگەزبوونەوە",
+    billSent:"پسووڵە داواکرا! ئێمە دێینە بۆلات.",
+    noteTitle:"تێبینی بنێرە", noteSend:"ناردن", noteSendingNote:"دەنێردرێت…",
+    noteSent:"تێبینییەکەت نێردرا!",
+    noteMsgPlaceholder:"تێبینییەکەت لێرە بنووسە…",
+    feedbackTitle:"ڕازیبوون و نارەزایی", feedbackStaff:"ستاف", feedbackService:"خزمەتگوزاری",
+    feedbackHygiene:"پاکیزەیی", feedbackContact:"ژمارەی تەلەفۆنت (ئارەزووی)",
+    feedbackComments:"تێبینیی زیادە", feedbackSend:"ناردنی هەڵسەنگاندن",
+    feedbackSent:"سپاس بۆ هەڵسەنگاندنەکەت! 🙏",
+    feedbackSending:"دەنێردرێت…",
   },
 };
 
 const LANG_OPTS = [
-  { code: "en", label: "English", flag: "🇬🇧" },
-  { code: "ar", label: "العربية", flag: "🇮🇶" },
-  { code: "ku", label: "کوردی", flag: "🏔️" },
+  { code:"en", label:"English", flag:"🇬🇧" },
+  { code:"ar", label:"العربية", flag:"🇮🇶" },
+  { code:"ku", label:"کوردی",   flag:"🏔️"  },
 ];
 
 const CATS = [
-  {
-    id: "blacktea",
-    emoji: "🍵",
-    label: { en: "Black Tea", ar: "الشاي الأسود", ku: "چای ڕەش" },
-  },
-  {
-    id: "herbal",
-    emoji: "🌿",
-    label: { en: "Herbal Teas", ar: "الأعشاب", ku: "چای گیایی" },
-  },
-  {
-    id: "hotdrinks",
-    emoji: "☕",
-    label: { en: "Hot Drinks", ar: "مشروبات ساخنة", ku: "خواردنەوەی گەرم" },
-  },
-  {
-    id: "milktea",
-    emoji: "🥛",
-    label: { en: "Milk Teas", ar: "شاي الحليب", ku: "چای شیر" },
-  },
-  {
-    id: "matcha",
-    emoji: "🍃",
-    label: { en: "Matcha", ar: "ماتشا", ku: "ماتچا" },
-  },
-  {
-    id: "fruittea",
-    emoji: "🍓",
-    label: { en: "Fruit Teas", ar: "شاي الفاكهة", ku: "چای میوە" },
-  },
-  {
-    id: "iced",
-    emoji: "🧊",
-    label: { en: "Iced Drinks", ar: "مشروبات باردة", ku: "خواردنەوەی سارد" },
-  },
-  {
-    id: "salads",
-    emoji: "🥗",
-    label: { en: "Salads", ar: "سلطات", ku: "سەلاتە" },
-  },
-  {
-    id: "bites",
-    emoji: "🥐",
-    label: { en: "Light Bites", ar: "وجبات خفيفة", ku: "خواردنی سووک" },
-  },
+  { id:"blacktea",  emoji:"🍵", label:{ en:"Black Tea",   ar:"الشاي الأسود",    ku:"چای ڕەش"         }},
+  { id:"herbal",    emoji:"🌿", label:{ en:"Herbal Teas", ar:"الأعشاب",          ku:"چای گیایی"       }},
+  { id:"hotdrinks", emoji:"☕", label:{ en:"Hot Drinks",  ar:"مشروبات ساخنة",   ku:"خواردنەوەی گەرم" }},
+  { id:"milktea",   emoji:"🥛", label:{ en:"Milk Teas",   ar:"شاي الحليب",       ku:"چای شیر"         }},
+  { id:"matcha",    emoji:"🍃", label:{ en:"Matcha",       ar:"ماتشا",             ku:"ماتچا"           }},
+  { id:"fruittea",  emoji:"🍓", label:{ en:"Fruit Teas",  ar:"شاي الفاكهة",      ku:"چای میوە"        }},
+  { id:"iced",      emoji:"🧊", label:{ en:"Iced Drinks", ar:"مشروبات باردة",    ku:"خواردنەوەی سارد" }},
+  { id:"salads",    emoji:"🥗", label:{ en:"Salads",       ar:"سلطات",             ku:"سەلاتە"          }},
+  { id:"bites",     emoji:"🥐", label:{ en:"Light Bites", ar:"وجبات خفيفة",      ku:"خواردنی سووک"    }},
 ];
 
 const ITEMS = {
-  blacktea: [
-    {
-      id: 1,
-      photo:
-        "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&q=80",
-      name: { en: "Kurdish Chai", ar: "الشاي الكردي", ku: "چای کوردی" },
-      ingredients: {
-        en: "Black tea, cardamom, sugar cubes, hot water",
-        ar: "شاي أسود، هيل، قطع سكر، ماء ساخن",
-        ku: "چای ڕەش، هێل، شەکر، ئاوی گەرم",
-      },
-      price: 2500,
-      tags: ["hot", "vegan"],
-    },
-    {
-      id: 2,
-      photo:
-        "https://images.unsplash.com/photo-1563911892437-1feda0179e1b?w=600&q=80",
-      name: { en: "Earl Grey", ar: "إيرل غراي", ku: "ئیرل گری" },
-      ingredients: {
-        en: "Ceylon black tea, bergamot oil, lemon slice",
-        ar: "شاي سيلاني، زيت البرغموت، شريحة ليمون",
-        ku: "چای سیلۆن، رۆنی بێرگامۆت، لیمۆن",
-      },
-      price: 4000,
-      tags: ["hot", "vegan"],
-    },
-    {
-      id: 3,
-      photo:
-        "https://images.unsplash.com/photo-1597318181409-cf64d0b5d8a2?w=600&q=80",
-      name: { en: "Saffron Tea", ar: "شاي الزعفران", ku: "چای زەعفەران" },
-      ingredients: {
-        en: "White tea, Herat saffron, wildflower honey, rose petals",
-        ar: "شاي أبيض، زعفران هراة، عسل أزهار، بتلات ورد",
-        ku: "چای سپی، زەعفەران، عەسڵی گوڵ، گوڵی گوڵاو",
-      },
-      price: 5500,
-      tags: ["hot", "vegan"],
-    },
-    {
-      id: 4,
-      photo:
-        "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=600&q=80",
-      name: { en: "Cardamom Latte", ar: "لاتيه بالهيل", ku: "لاتێی هێل" },
-      ingredients: {
-        en: "Strong black tea, steamed full-cream milk, fresh cardamom",
-        ar: "شاي أسود قوي، حليب مبخر كامل الدسم، هيل طازج",
-        ku: "چای ڕەشی قووڵ، شیری بخارکراو، هێلی تازە",
-      },
-      price: 4500,
-      tags: ["hot"],
-    },
+  blacktea:[
+    { id:1,  photo:"https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&q=80",  name:{ en:"Kurdish Chai",        ar:"الشاي الكردي",         ku:"چای کوردی"            }, ingredients:{ en:"Black tea, cardamom, sugar cubes, hot water",                          ar:"شاي أسود، هيل، قطع سكر، ماء ساخن",                              ku:"چای ڕەش، هێل، شەکر، ئاوی گەرم"                        }, price:2500, tags:["hot","vegan"]       },
+    { id:2,  photo:"https://images.unsplash.com/photo-1563911892437-1feda0179e1b?w=600&q=80",  name:{ en:"Earl Grey",           ar:"إيرل غراي",            ku:"ئیرل گری"             }, ingredients:{ en:"Ceylon black tea, bergamot oil, lemon slice",                           ar:"شاي سيلاني، زيت البرغموت، شريحة ليمون",                         ku:"چای سیلۆن، رۆنی بێرگامۆت، لیمۆن"                      }, price:4000, tags:["hot","vegan"]       },
+    { id:3,  photo:"https://images.unsplash.com/photo-1597318181409-cf64d0b5d8a2?w=600&q=80",  name:{ en:"Saffron Tea",         ar:"شاي الزعفران",         ku:"چای زەعفەران"         }, ingredients:{ en:"White tea, Herat saffron, wildflower honey, rose petals",               ar:"شاي أبيض، زعفران هراة، عسل أزهار، بتلات ورد",                   ku:"چای سپی، زەعفەران، عەسڵی گوڵ، گوڵی گوڵاو"             }, price:5500, tags:["hot","vegan"]       },
+    { id:4,  photo:"https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=600&q=80",  name:{ en:"Cardamom Latte",      ar:"لاتيه بالهيل",         ku:"لاتێی هێل"            }, ingredients:{ en:"Strong black tea, steamed full-cream milk, fresh cardamom",             ar:"شاي أسود قوي، حليب مبخر كامل الدسم، هيل طازج",                  ku:"چای ڕەشی قووڵ، شیری بخارکراو، هێلی تازە"              }, price:4500, tags:["hot"]              },
   ],
-  herbal: [
-    {
-      id: 5,
-      photo:
-        "https://images.unsplash.com/photo-1587796697483-2b6d98d35f16?w=600&q=80",
-      name: { en: "Rose Hibiscus", ar: "الورد والكركديه", ku: "گوڵ و ڕووکەند" },
-      ingredients: {
-        en: "Dried rose buds, hibiscus flowers, wildflower honey, hot water",
-        ar: "براعم ورد مجففة، كركديه، عسل أزهار برية، ماء ساخن",
-        ku: "گوڵی وشک، گوڵی ڕووکەند، عەسڵ، ئاوی گەرم",
-      },
-      price: 5000,
-      tags: ["hot", "vegan"],
-    },
-    {
-      id: 6,
-      photo:
-        "https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=600&q=80",
-      name: { en: "Fresh Mint Tea", ar: "شاي النعناع", ku: "چای نەعنا" },
-      ingredients: {
-        en: "Fresh garden mint leaves, hot water, honey (optional)",
-        ar: "أوراق نعناع طازجة، ماء ساخن، عسل (اختياري)",
-        ku: "گەڵای نەعنای تازە، ئاوی گەرم، عەسڵ (ئارەزووی)",
-      },
-      price: 3500,
-      tags: ["hot", "vegan"],
-    },
-    {
-      id: 7,
-      photo:
-        "https://images.unsplash.com/photo-1571934811356-5cc061b6d7c3?w=600&q=80",
-      name: {
-        en: "Chamomile Honey",
-        ar: "البابونج بالعسل",
-        ku: "کامیۆمیل و عەسڵ",
-      },
-      ingredients: {
-        en: "Chamomile flowers, wildflower honey, lemon juice, hot water",
-        ar: "زهور بابونج، عسل أزهار برية، عصير ليمون، ماء ساخن",
-        ku: "گوڵی کامیۆمیل، عەسڵ، ئاوی لیمۆن، ئاوی گەرم",
-      },
-      price: 4500,
-      tags: ["hot", "vegan"],
-    },
-    {
-      id: 8,
-      photo:
-        "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&q=80",
-      name: {
-        en: "Ginger Lemon",
-        ar: "الزنجبيل والليمون",
-        ku: "زەنجەفیل و لیمۆن",
-      },
-      ingredients: {
-        en: "Fresh ginger root, lemon juice, raw honey, hot water",
-        ar: "جذر زنجبيل طازج، عصير ليمون، عسل خام، ماء ساخن",
-        ku: "ڕەگی زەنجەفیلی تازە، ئاوی لیمۆن، عەسڵی خام",
-      },
-      price: 4000,
-      tags: ["hot", "vegan", "new"],
-    },
+  herbal:[
+    { id:5,  photo:"https://images.unsplash.com/photo-1587796697483-2b6d98d35f16?w=600&q=80",  name:{ en:"Rose Hibiscus",       ar:"الورد والكركديه",      ku:"گوڵ و ڕووکەند"        }, ingredients:{ en:"Dried rose buds, hibiscus flowers, wildflower honey, hot water",       ar:"براعم ورد مجففة، كركديه، عسل أزهار برية، ماء ساخن",             ku:"گوڵی وشک، گوڵی ڕووکەند، عەسڵ، ئاوی گەرم"             }, price:5000, tags:["hot","vegan"]       },
+    { id:6,  photo:"https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=600&q=80",  name:{ en:"Fresh Mint Tea",      ar:"شاي النعناع",          ku:"چای نەعنا"            }, ingredients:{ en:"Fresh garden mint leaves, hot water, honey (optional)",                ar:"أوراق نعناع طازجة، ماء ساخن، عسل (اختياري)",                    ku:"گەڵای نەعنای تازە، ئاوی گەرم، عەسڵ (ئارەزووی)"       }, price:3500, tags:["hot","vegan"]       },
+    { id:7,  photo:"https://images.unsplash.com/photo-1571934811356-5cc061b6d7c3?w=600&q=80",  name:{ en:"Chamomile Honey",     ar:"البابونج بالعسل",      ku:"کامیۆمیل و عەسڵ"     }, ingredients:{ en:"Chamomile flowers, wildflower honey, lemon juice, hot water",          ar:"زهور بابونج، عسل أزهار برية، عصير ليمون، ماء ساخن",             ku:"گوڵی کامیۆمیل، عەسڵ، ئاوی لیمۆن، ئاوی گەرم"         }, price:4500, tags:["hot","vegan"]       },
+    { id:8,  photo:"https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&q=80",  name:{ en:"Ginger Lemon",        ar:"الزنجبيل والليمون",   ku:"زەنجەفیل و لیمۆن"    }, ingredients:{ en:"Fresh ginger root, lemon juice, raw honey, hot water",                 ar:"جذر زنجبيل طازج، عصير ليمون، عسل خام، ماء ساخن",               ku:"ڕەگی زەنجەفیلی تازە، ئاوی لیمۆن، عەسڵی خام"          }, price:4000, tags:["hot","vegan","new"] },
   ],
-  hotdrinks: [
-    {
-      id: 9,
-      photo:
-        "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=600&q=80",
-      name: {
-        en: "Masala Chai Latte",
-        ar: "ماسالا تشاي",
-        ku: "ماسالا چای لاتێ",
-      },
-      ingredients: {
-        en: "Black tea, ginger, cinnamon, cloves, cardamom, steamed milk",
-        ar: "شاي أسود، زنجبيل، قرفة، قرنفل، هيل، حليب مبخر",
-        ku: "چای ڕەش، زەنجەفیل، دارچین، قرنفل، هێل، شیر",
-      },
-      price: 5500,
-      tags: ["hot"],
-    },
-    {
-      id: 10,
-      photo:
-        "https://images.unsplash.com/photo-1572119865084-43c285814d63?w=600&q=80",
-      name: { en: "London Fog", ar: "ضباب لندن", ku: "لۆندن فۆگ" },
-      ingredients: {
-        en: "Earl Grey tea, vanilla syrup, lavender, steamed milk, foam",
-        ar: "شاي إيرل غراي، شراب فانيليا، لافندر، حليب مبخر، رغوة",
-        ku: "چای ئیرل گری، شەربەتی وانیلا، لافەندر، شیر، فۆم",
-      },
-      price: 6000,
-      tags: ["hot"],
-    },
-    {
-      id: 11,
-      photo:
-        "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=600&q=80",
-      name: {
-        en: "Hot Chocolate Tea",
-        ar: "شوكولاتة ساخنة",
-        ku: "چۆکلاتی گەرم",
-      },
-      ingredients: {
-        en: "Valrhona dark chocolate, rooibos tea, oat milk, cinnamon",
-        ar: "شوكولاتة داكنة فالرونا، شاي رويبوس، حليب شوفان، قرفة",
-        ku: "چۆکلاتی تاریک، چای رووییبۆس، شیری جۆ، دارچین",
-      },
-      price: 6500,
-      tags: ["hot"],
-    },
+  hotdrinks:[
+    { id:9,  photo:"https://images.unsplash.com/photo-1541167760496-1628856ab772?w=600&q=80",  name:{ en:"Masala Chai Latte",   ar:"ماسالا تشاي",          ku:"ماسالا چای لاتێ"     }, ingredients:{ en:"Black tea, ginger, cinnamon, cloves, cardamom, steamed milk",          ar:"شاي أسود، زنجبيل، قرفة، قرنفل، هيل، حليب مبخر",               ku:"چای ڕەش، زەنجەفیل، دارچین، قرنفل، هێل، شیر"          }, price:5500, tags:["hot"]              },
+    { id:10, photo:"https://images.unsplash.com/photo-1572119865084-43c285814d63?w=600&q=80",  name:{ en:"London Fog",          ar:"ضباب لندن",            ku:"لۆندن فۆگ"            }, ingredients:{ en:"Earl Grey tea, vanilla syrup, lavender, steamed milk, foam",           ar:"شاي إيرل غراي، شراب فانيليا، لافندر، حليب مبخر، رغوة",         ku:"چای ئیرل گری، شەربەتی وانیلا، لافەندر، شیر، فۆم"     }, price:6000, tags:["hot"]              },
+    { id:11, photo:"https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=600&q=80",  name:{ en:"Hot Chocolate Tea",   ar:"شوكولاتة ساخنة",      ku:"چۆکلاتی گەرم"         }, ingredients:{ en:"Valrhona dark chocolate, rooibos tea, oat milk, cinnamon",              ar:"شوكولاتة داكنة فالرونا، شاي رويبوس، حليب شوفان، قرفة",         ku:"چۆکلاتی تاریک، چای رووییبۆس، شیری جۆ، دارچین"        }, price:6500, tags:["hot"]              },
   ],
-  milktea: [
-    {
-      id: 12,
-      photo:
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",
-      name: {
-        en: "Brown Sugar Milk Tea",
-        ar: "شاي الحليب بسكر بني",
-        ku: "چای شیری شەکری قاوەیی",
-      },
-      ingredients: {
-        en: "Loose-leaf black tea, tiger-stripe brown sugar caramel, full-cream milk",
-        ar: "شاي أسود، كراميل سكر بني، حليب كامل الدسم",
-        ku: "چای ڕەش، کارامێلی شەکری قاوەیی، شیری تەواو",
-      },
-      price: 6000,
-      tags: ["hot", "cold"],
-    },
-    {
-      id: 13,
-      photo:
-        "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=600&q=80",
-      name: {
-        en: "Taro Milk Tea",
-        ar: "شاي الحليب بالتارو",
-        ku: "چای شیری تارۆ",
-      },
-      ingredients: {
-        en: "Oolong tea, taro powder, oat milk, honey, ice (optional)",
-        ar: "شاي أولونج، مسحوق التارو، حليب الشوفان، عسل، ثلج (اختياري)",
-        ku: "چای ئوولۆنگ، پووری تارۆ، شیری جۆ، عەسڵ، یەخ",
-      },
-      price: 6500,
-      tags: ["hot", "cold", "new"],
-    },
-    {
-      id: 14,
-      photo:
-        "https://images.unsplash.com/photo-1571934811356-5cc061b6d7c3?w=600&q=80",
-      name: {
-        en: "Rose Milk Tea",
-        ar: "شاي الورد بالحليب",
-        ku: "چای گوڵ و شیر",
-      },
-      ingredients: {
-        en: "Assam black tea, rose water, rose syrup, steamed full-cream milk",
-        ar: "شاي أسام، ماء ورد، شراب ورد، حليب كامل الدسم مبخر",
-        ku: "چای ئاسام، ئاوی گوڵ، شەربەتی گوڵ، شیر",
-      },
-      price: 5500,
-      tags: ["hot"],
-    },
-    {
-      id: 15,
-      photo:
-        "https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=600&q=80",
-      name: {
-        en: "Chestnut Milk Tea",
-        ar: "شاي الحليب بالكستناء",
-        ku: "چای شیری بالحاء",
-      },
-      ingredients: {
-        en: "Houji-cha green tea, roasted chestnut syrup, silky steamed milk",
-        ar: "شاي هايجيشا الأخضر، شراب كستناء محمص، حليب مبخر",
-        ku: "چای هووجیچا، شەربەتی بالحاء، شیری نوشتک",
-      },
-      price: 6000,
-      tags: ["hot"],
-    },
+  milktea:[
+    { id:12, photo:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",  name:{ en:"Brown Sugar Milk Tea", ar:"شاي الحليب بسكر بني", ku:"چای شیری شەکری قاوەیی"}, ingredients:{ en:"Loose-leaf black tea, tiger-stripe brown sugar caramel, full-cream milk",ar:"شاي أسود، كراميل سكر بني، حليب كامل الدسم",                    ku:"چای ڕەش، کارامێلی شەکری قاوەیی، شیری تەواو"           }, price:6000, tags:["hot","cold"]        },
+    { id:13, photo:"https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=600&q=80",  name:{ en:"Taro Milk Tea",       ar:"شاي الحليب بالتارو",  ku:"چای شیری تارۆ"        }, ingredients:{ en:"Oolong tea, taro powder, oat milk, honey, ice (optional)",              ar:"شاي أولونج، مسحوق التارو، حليب الشوفان، عسل، ثلج (اختياري)",   ku:"چای ئوولۆنگ، پووری تارۆ، شیری جۆ، عەسڵ، یەخ"        }, price:6500, tags:["hot","cold","new"]  },
+    { id:14, photo:"https://images.unsplash.com/photo-1571934811356-5cc061b6d7c3?w=600&q=80",  name:{ en:"Rose Milk Tea",       ar:"شاي الورد بالحليب",   ku:"چای گوڵ و شیر"        }, ingredients:{ en:"Assam black tea, rose water, rose syrup, steamed full-cream milk",      ar:"شاي أسام، ماء ورد، شراب ورد، حليب كامل الدسم مبخر",            ku:"چای ئاسام، ئاوی گوڵ، شەربەتی گوڵ، شیر"                }, price:5500, tags:["hot"]              },
+    { id:15, photo:"https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=600&q=80",  name:{ en:"Chestnut Milk Tea",   ar:"شاي الحليب بالكستناء",ku:"چای شیری بالحاء"      }, ingredients:{ en:"Houji-cha green tea, roasted chestnut syrup, silky steamed milk",       ar:"شاي هايجيشا الأخضر، شراب كستناء محمص، حليب مبخر",              ku:"چای هووجیچا، شەربەتی بالحاء، شیری نوشتک"              }, price:6000, tags:["hot"]              },
   ],
-  matcha: [
-    {
-      id: 16,
-      photo:
-        "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=600&q=80",
-      name: {
-        en: "Ceremonial Matcha",
-        ar: "ماتشا احتفالية",
-        ku: "ماتچای رەسمی",
-      },
-      ingredients: {
-        en: "100% Japanese ceremonial grade matcha powder, hot water (70°C)",
-        ar: "مسحوق ماتشا ياباني احتفالي 100%، ماء ساخن (70 درجة)",
-        ku: "پووری ماتچای ژاپۆنی %100، ئاوی گەرم (70°C)",
-      },
-      price: 7000,
-      tags: ["hot", "vegan"],
-    },
-    {
-      id: 17,
-      photo:
-        "https://images.unsplash.com/photo-1515823662972-da6a2e4d3002?w=600&q=80",
-      name: { en: "Matcha Latte", ar: "لاتيه الماتشا", ku: "ماتچا لاتێ" },
-      ingredients: {
-        en: "Ceremonial matcha, wildflower honey, steamed full-cream milk, soft foam",
-        ar: "ماتشا احتفالية، عسل أزهار برية، حليب مبخر كامل الدسم، رغوة",
-        ku: "ماتچای رەسمی، عەسڵ، شیری بخارکراو، فۆم",
-      },
-      price: 6500,
-      tags: ["hot"],
-    },
-    {
-      id: 18,
-      photo:
-        "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&q=80",
-      name: {
-        en: "Iced Matcha Latte",
-        ar: "لاتيه الماتشا البارد",
-        ku: "ماتچا لاتێی سارد",
-      },
-      ingredients: {
-        en: "Double-shot matcha, oat milk, vanilla syrup, ice cubes",
-        ar: "ماتشا مزدوجة، حليب الشوفان، شراب فانيليا، مكعبات ثلج",
-        ku: "ماتچای دووتا، شیری جۆ، شەربەتی وانیلا، یەخ",
-      },
-      price: 7000,
-      tags: ["cold", "vegan"],
-    },
-    {
-      id: 19,
-      photo:
-        "https://images.unsplash.com/photo-1572119865084-43c285814d63?w=600&q=80",
-      name: {
-        en: "Matcha Yuzu Fizz",
-        ar: "ماتشا اليوزو الفوار",
-        ku: "ماتچا یووزو فیز",
-      },
-      ingredients: {
-        en: "Sparkling water, matcha, yuzu citrus juice, lychee foam, ice",
-        ar: "ماء فوار، ماتشا، عصير يوزو، رغوة ليتشي، ثلج",
-        ku: "ئاوی فوارە، ماتچا، ئاوی یووزو، فۆمی لیچی، یەخ",
-      },
-      price: 7500,
-      tags: ["cold", "vegan", "new"],
-    },
+  matcha:[
+    { id:16, photo:"https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=600&q=80",  name:{ en:"Ceremonial Matcha",   ar:"ماتشا احتفالية",      ku:"ماتچای رەسمی"         }, ingredients:{ en:"100% Japanese ceremonial grade matcha powder, hot water (70°C)",        ar:"مسحوق ماتشا ياباني احتفالي 100%، ماء ساخن (70 درجة)",           ku:"پووری ماتچای ژاپۆنی %100، ئاوی گەرم (70°C)"          }, price:7000, tags:["hot","vegan"]       },
+    { id:17, photo:"https://images.unsplash.com/photo-1515823662972-da6a2e4d3002?w=600&q=80",  name:{ en:"Matcha Latte",        ar:"لاتيه الماتشا",       ku:"ماتچا لاتێ"           }, ingredients:{ en:"Ceremonial matcha, wildflower honey, steamed full-cream milk, soft foam",ar:"ماتشا احتفالية، عسل أزهار برية، حليب مبخر كامل الدسم، رغوة",   ku:"ماتچای رەسمی، عەسڵ، شیری بخارکراو، فۆم"              }, price:6500, tags:["hot"]              },
+    { id:18, photo:"https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&q=80",  name:{ en:"Iced Matcha Latte",   ar:"لاتيه الماتشا البارد",ku:"ماتچا لاتێی سارد"    }, ingredients:{ en:"Double-shot matcha, oat milk, vanilla syrup, ice cubes",                ar:"ماتشا مزدوجة، حليب الشوفان، شراب فانيليا، مكعبات ثلج",          ku:"ماتچای دووتا، شیری جۆ، شەربەتی وانیلا، یەخ"          }, price:7000, tags:["cold","vegan"]      },
+    { id:19, photo:"https://images.unsplash.com/photo-1572119865084-43c285814d63?w=600&q=80",  name:{ en:"Matcha Yuzu Fizz",    ar:"ماتشا اليوزو الفوار", ku:"ماتچا یووزو فیز"      }, ingredients:{ en:"Sparkling water, matcha, yuzu citrus juice, lychee foam, ice",          ar:"ماء فوار، ماتشا، عصير يوزو، رغوة ليتشي، ثلج",                  ku:"ئاوی فوارە، ماتچا، ئاوی یووزو، فۆمی لیچی، یەخ"       }, price:7500, tags:["cold","vegan","new"] },
   ],
-  fruittea: [
-    {
-      id: 20,
-      photo:
-        "https://images.unsplash.com/photo-1563911892437-1feda0179e1b?w=600&q=80",
-      name: {
-        en: "Strawberry Hibiscus",
-        ar: "الفراولة والكركديه",
-        ku: "تۆوی فریز و ڕووکەند",
-      },
-      ingredients: {
-        en: "Hibiscus flowers, fresh strawberries, wild berry mix, honey, ice",
-        ar: "أزهار الكركديه، فراولة طازجة، مزيج توت بري، عسل، ثلج",
-        ku: "گوڵی ڕووکەند، تۆوی فریزی تازە، تۆوی کێوی، عەسڵ، یەخ",
-      },
-      price: 5500,
-      tags: ["cold", "vegan"],
-    },
-    {
-      id: 21,
-      photo:
-        "https://images.unsplash.com/photo-1587796697483-2b6d98d35f16?w=600&q=80",
-      name: {
-        en: "Mango Passion Tea",
-        ar: "شاي المانغو والباشن",
-        ku: "چای مانگا و پاشن",
-      },
-      ingredients: {
-        en: "Green tea, mango puree, passion fruit, honey, ice cubes",
-        ar: "شاي أخضر، هريس مانغو، باشن فروت، عسل، ثلج",
-        ku: "چای سەوز، پووری مانگا، پاشن فرووت، عەسڵ، یەخ",
-      },
-      price: 5500,
-      tags: ["cold", "vegan"],
-    },
-    {
-      id: 22,
-      photo:
-        "https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=600&q=80",
-      name: { en: "Peach Oolong", ar: "الخوخ والأولونج", ku: "خۆخ و ئوولۆنگ" },
-      ingredients: {
-        en: "Premium oolong tea, sun-ripened peach slices, wildflower honey, ice",
-        ar: "أولونج فاخر، شرائح خوخ ناضج، عسل أزهار برية، ثلج",
-        ku: "ئوولۆنگی باشتر، بڕچکەی خۆخ، عەسڵ، یەخ",
-      },
-      price: 6000,
-      tags: ["cold", "vegan"],
-    },
-    {
-      id: 23,
-      photo:
-        "https://images.unsplash.com/photo-1597318181409-cf64d0b5d8a2?w=600&q=80",
-      name: {
-        en: "Blueberry Lemonade",
-        ar: "ليمونادة التوت الأزرق",
-        ku: "لیمۆناتی بلووبێری",
-      },
-      ingredients: {
-        en: "Iced white tea, blueberry compote, fresh lemon juice, mint, ice",
-        ar: "شاي أبيض بارد، كومبوت توت أزرق، عصير ليمون طازج، نعناع، ثلج",
-        ku: "چای سپی سارد، کۆمپۆتی بلووبێری، ئاوی لیمۆن، نەعنا",
-      },
-      price: 6000,
-      tags: ["cold", "vegan", "new"],
-    },
+  fruittea:[
+    { id:20, photo:"https://images.unsplash.com/photo-1563911892437-1feda0179e1b?w=600&q=80",  name:{ en:"Strawberry Hibiscus", ar:"الفراولة والكركديه",  ku:"تۆوی فریز و ڕووکەند"  }, ingredients:{ en:"Hibiscus flowers, fresh strawberries, wild berry mix, honey, ice",     ar:"أزهار الكركديه، فراولة طازجة، مزيج توت بري، عسل، ثلج",         ku:"گوڵی ڕووکەند، تۆوی فریزی تازە، تۆوی کێوی، عەسڵ، یەخ"}, price:5500, tags:["cold","vegan"]      },
+    { id:21, photo:"https://images.unsplash.com/photo-1587796697483-2b6d98d35f16?w=600&q=80",  name:{ en:"Mango Passion Tea",   ar:"شاي المانغو والباشن", ku:"چای مانگا و پاشن"     }, ingredients:{ en:"Green tea, mango puree, passion fruit, honey, ice cubes",               ar:"شاي أخضر، هريس مانغو، باشن فروت، عسل، ثلج",                    ku:"چای سەوز، پووری مانگا، پاشن فرووت، عەسڵ، یەخ"        }, price:5500, tags:["cold","vegan"]      },
+    { id:22, photo:"https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=600&q=80",  name:{ en:"Peach Oolong",        ar:"الخوخ والأولونج",     ku:"خۆخ و ئوولۆنگ"       }, ingredients:{ en:"Premium oolong tea, sun-ripened peach slices, wildflower honey, ice",   ar:"أولونج فاخر، شرائح خوخ ناضج، عسل أزهار برية، ثلج",             ku:"ئوولۆنگی باشتر، بڕچکەی خۆخ، عەسڵ، یەخ"               }, price:6000, tags:["cold","vegan"]      },
+    { id:23, photo:"https://images.unsplash.com/photo-1597318181409-cf64d0b5d8a2?w=600&q=80",  name:{ en:"Blueberry Lemonade",  ar:"ليمونادة التوت الأزرق",ku:"لیمۆناتی بلووبێری"   }, ingredients:{ en:"Iced white tea, blueberry compote, fresh lemon juice, mint, ice",       ar:"شاي أبيض بارد، كومبوت توت أزرق، عصير ليمون طازج، نعناع، ثلج", ku:"چای سپی سارد، کۆمپۆتی بلووبێری، ئاوی لیمۆن، نەعنا"  }, price:6000, tags:["cold","vegan","new"] },
   ],
-  iced: [
-    {
-      id: 24,
-      photo:
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",
-      name: {
-        en: "Thai Iced Tea",
-        ar: "الشاي التايلاندي",
-        ku: "چای تایلاندی سارد",
-      },
-      ingredients: {
-        en: "Ceylon black tea, sweetened condensed milk, star anise, crushed ice",
-        ar: "شاي سيلاني، حليب مكثف محلى، يانسون نجمي، ثلج مجروش",
-        ku: "چای سیلۆن، شیری کۆنداسدی شیرین، ئانیسی ئەستێرە، یەخ",
-      },
-      price: 5000,
-      tags: ["cold"],
-    },
-    {
-      id: 25,
-      photo:
-        "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=600&q=80",
-      name: {
-        en: "Cold Brew Jasmine",
-        ar: "الياسمين البارد",
-        ku: "چای یاسمین سارد",
-      },
-      ingredients: {
-        en: "Jasmine green tea, cold-filtered water (12hr steep), light honey",
-        ar: "شاي الياسمين الأخضر، ماء مفلتر بارد (نقيع 12 ساعة)، عسل خفيف",
-        ku: "چای سەوزی یاسمین، ئاوی سارد (12 کاتژمێر), عەسڵی سووک",
-      },
-      price: 5500,
-      tags: ["cold", "vegan"],
-    },
-    {
-      id: 26,
-      photo:
-        "https://images.unsplash.com/photo-1571934811356-5cc061b6d7c3?w=600&q=80",
-      name: {
-        en: "Honey Lemon Iced Tea",
-        ar: "شاي الليمون والعسل",
-        ku: "چای لیمۆن و عەسڵ",
-      },
-      ingredients: {
-        en: "Black tea, wildflower honey, fresh lemon slices, mint leaves, ice",
-        ar: "شاي أسود، عسل أزهار برية، شرائح ليمون طازجة، نعناع، ثلج",
-        ku: "چای ڕەش، عەسڵ، لیمۆنی تازە، گەڵای نەعنا، یەخ",
-      },
-      price: 4500,
-      tags: ["cold", "vegan"],
-    },
+  iced:[
+    { id:24, photo:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",  name:{ en:"Thai Iced Tea",       ar:"الشاي التايلاندي",    ku:"چای تایلاندی سارد"   }, ingredients:{ en:"Ceylon black tea, sweetened condensed milk, star anise, crushed ice",   ar:"شاي سيلاني، حليب مكثف محلى، يانسون نجمي، ثلج مجروش",          ku:"چای سیلۆن، شیری کۆنداسدی شیرین، ئانیسی ئەستێرە، یەخ"}, price:5000, tags:["cold"]              },
+    { id:25, photo:"https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=600&q=80",  name:{ en:"Cold Brew Jasmine",   ar:"الياسمين البارد",     ku:"چای یاسمین سارد"     }, ingredients:{ en:"Jasmine green tea, cold-filtered water (12hr steep), light honey",      ar:"شاي الياسمين الأخضر، ماء مفلتر بارد (نقيع 12 ساعة)، عسل خفيف",ku:"چای سەوزی یاسمین، ئاوی سارد (12 کاتژمێر), عەسڵی سووک" }, price:5500, tags:["cold","vegan"]      },
+    { id:26, photo:"https://images.unsplash.com/photo-1571934811356-5cc061b6d7c3?w=600&q=80",  name:{ en:"Honey Lemon Iced Tea",ar:"شاي الليمون والعسل",  ku:"چای لیمۆن و عەسڵ"   }, ingredients:{ en:"Black tea, wildflower honey, fresh lemon slices, mint leaves, ice",     ar:"شاي أسود، عسل أزهار برية، شرائح ليمون طازجة، نعناع، ثلج",     ku:"چای ڕەش، عەسڵ، لیمۆنی تازە، گەڵای نەعنا، یەخ"       }, price:4500, tags:["cold","vegan"]      },
   ],
-  salads: [
-    {
-      id: 27,
-      photo:
-        "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=80",
-      name: {
-        en: "Golden Chicken Salad",
-        ar: "سلطة الدجاج الذهبية",
-        ku: "سەلاتەی مریشکی زێرین",
-      },
-      ingredients: {
-        en: "Lollo rosso, iceberg, sweet corn, red beans, grilled chicken, lemon dressing",
-        ar: "لولو روسو، خس جبل الثلج، ذرة حلوة، فاصولياء حمراء، دجاج مشوي، صلصة ليمون",
-        ku: "لۆلۆ ڕۆسۆ، خاس، گەنمی شیرین، لوبیای سوور، مریشک، سۆسی لیمۆن",
-      },
-      price: 12500,
-      tags: [],
-    },
-    {
-      id: 28,
-      photo:
-        "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&q=80",
-      name: {
-        en: "Tomato Pomegranate",
-        ar: "سلطة الطماطم والرمان",
-        ku: "سەلاتەی تاماتی ئەنار",
-      },
-      ingredients: {
-        en: "Fresh tomatoes, hot green peppers, crunchy walnuts, pomegranate seeds, olive oil",
-        ar: "طماطم طازجة، فلفل أخضر حار، جوز مقرمش، بذور رمان، زيت زيتون",
-        ku: "تاماتی تازە، مریچی سەوزی تیژ، گوێزی ئینگلیزی، تۆی ئەنار، رۆنی زەیتوون",
-      },
-      price: 7000,
-      tags: ["vegan"],
-    },
-    {
-      id: 29,
-      photo:
-        "https://images.unsplash.com/photo-1546793665-c74683f339c1?w=600&q=80",
-      name: {
-        en: "Chicken Caesar",
-        ar: "سلطة سيزر بالدجاج",
-        ku: "سەلاتەی سیزەری مریشک",
-      },
-      ingredients: {
-        en: "Romaine lettuce, grilled chicken, parmesan, croutons, Caesar dressing, anchovies",
-        ar: "خس روماني، دجاج مشوي، جبن بارميزان، خبز محمص، صلصة سيزر، أنشوفة",
-        ku: "خاسی رۆمانی، مریشک، پەنیری پارمیزان، کرووتۆن، سۆسی سیزار",
-      },
-      price: 13000,
-      tags: [],
-    },
-    {
-      id: 30,
-      photo:
-        "https://images.unsplash.com/photo-1551248429-40975aa4de74?w=600&q=80",
-      name: {
-        en: "Avocado Citrus",
-        ar: "سلطة الأفوكادو",
-        ku: "سەلاتەی ئاڤۆکادۆ",
-      },
-      ingredients: {
-        en: "Fresh avocado, grapefruit segments, cucumber, arugula, citrus vinaigrette",
-        ar: "أفوكادو طازج، قطع جريب فروت، خيار، جرجير، خل الحمضيات",
-        ku: "ئاڤۆکادۆی تازە، تاێفا، خیار، ئارووگولا، سۆسی سیتروس",
-      },
-      price: 11000,
-      tags: ["vegan", "new"],
-    },
+  salads:[
+    { id:27, photo:"https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=80",  name:{ en:"Golden Chicken Salad",ar:"سلطة الدجاج الذهبية", ku:"سەلاتەی مریشکی زێرین"}, ingredients:{ en:"Lollo rosso, iceberg, sweet corn, red beans, grilled chicken, lemon dressing",ar:"لولو روسو، خس جبل الثلج، ذرة حلوة، فاصولياء حمراء، دجاج مشوي، صلصة ليمون",ku:"لۆلۆ ڕۆسۆ، خاس، گەنمی شیرین، لوبیای سوور، مریشک، سۆسی لیمۆن"}, price:12500,tags:[]                  },
+    { id:28, photo:"https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&q=80",  name:{ en:"Tomato Pomegranate",  ar:"سلطة الطماطم والرمان",ku:"سەلاتەی تاماتی ئەنار"}, ingredients:{ en:"Fresh tomatoes, hot green peppers, crunchy walnuts, pomegranate seeds, olive oil",ar:"طماطم طازجة، فلفل أخضر حار، جوز مقرمش، بذور رمان، زيت زيتون",ku:"تاماتی تازە، مریچی سەوزی تیژ، گوێزی ئینگلیزی، تۆی ئەنار، رۆنی زەیتوون"}, price:7000, tags:["vegan"]             },
+    { id:29, photo:"https://images.unsplash.com/photo-1546793665-c74683f339c1?w=600&q=80",  name:{ en:"Chicken Caesar",      ar:"سلطة سيزر بالدجاج",   ku:"سەلاتەی سیزەری مریشک"}, ingredients:{ en:"Romaine lettuce, grilled chicken, parmesan, croutons, Caesar dressing, anchovies",ar:"خس روماني، دجاج مشوي، جبن بارميزان، خبز محمص، صلصة سيزر، أنشوفة",ku:"خاسی رۆمانی، مریشک، پەنیری پارمیزان، کرووتۆن، سۆسی سیزار"}, price:13000,tags:[]                  },
+    { id:30, photo:"https://images.unsplash.com/photo-1551248429-40975aa4de74?w=600&q=80",  name:{ en:"Avocado Citrus",      ar:"سلطة الأفوكادو",       ku:"سەلاتەی ئاڤۆکادۆ"   }, ingredients:{ en:"Fresh avocado, grapefruit segments, cucumber, arugula, citrus vinaigrette",ar:"أفوكادو طازج، قطع جريب فروت، خيار، جرجير، خل الحمضيات",       ku:"ئاڤۆکادۆی تازە، تاێفا، خیار، ئارووگولا، سۆسی سیتروس"}, price:11000,tags:["vegan","new"]      },
   ],
-  bites: [
-    {
-      id: 31,
-      photo:
-        "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&q=80",
-      name: {
-        en: "Butter Croissant",
-        ar: "كرواسان بالزبدة",
-        ku: "کرواسانی کەرە",
-      },
-      ingredients: {
-        en: "French butter, T45 flour, fresh yeast, milk, sea salt, egg wash",
-        ar: "زبدة فرنسية، دقيق T45، خميرة طازجة، حليب، ملح بحري، طلاء بيض",
-        ku: "کەرەی فەرەنسی، ئارد، خەمیرەی تازە، شیر، خوێی بەحری",
-      },
-      price: 5000,
-      tags: [],
-    },
-    {
-      id: 32,
-      photo:
-        "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=600&q=80",
-      name: { en: "Cheesecake Slice", ar: "تشيز كيك", ku: "چیزکێک" },
-      ingredients: {
-        en: "Cream cheese, digestive biscuit base, eggs, vanilla, sour cream, sugar",
-        ar: "جبن كريمي، قاعدة بسكويت، بيض، فانيليا، كريمة حامضة، سكر",
-        ku: "پەنیری کریمی، قاعدەی بیسکووت، هێلکە، وانیلا، شیری ترش",
-      },
-      price: 7000,
-      tags: [],
-    },
-    {
-      id: 33,
-      photo:
-        "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&q=80",
-      name: {
-        en: "Chocolate Brownie",
-        ar: "براوني الشوكولاتة",
-        ku: "براونی چۆکلاتی",
-      },
-      ingredients: {
-        en: "Valrhona dark chocolate, unsalted butter, eggs, sugar, flour, walnuts",
-        ar: "شوكولاتة داكنة فالرونا، زبدة غير مملحة، بيض، سكر، دقيق، جوز",
-        ku: "چۆکلاتی تاریک، کەرە، هێلکە، شەکر، ئارد، گوێزی ئینگلیزی",
-      },
-      price: 5500,
-      tags: [],
-    },
-    {
-      id: 34,
-      photo:
-        "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&q=80",
-      name: { en: "Pistachio Cookie", ar: "كوكيز الفستق", ku: "کووکیز پیستە" },
-      ingredients: {
-        en: "Pistachio paste, white chocolate chips, butter, flour, brown sugar, sea salt",
-        ar: "معجون فستق، قطع شوكولاتة بيضاء، زبدة، دقيق، سكر بني، ملح بحري",
-        ku: "پەیستی پیستە، چۆکلاتی سپی، کەرە، ئارد، شەکری قاوەیی، خوێ",
-      },
-      price: 3500,
-      tags: ["vegan", "new"],
-    },
+  bites:[
+    { id:31, photo:"https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&q=80",  name:{ en:"Butter Croissant",    ar:"كرواسان بالزبدة",     ku:"کرواسانی کەرە"        }, ingredients:{ en:"French butter, T45 flour, fresh yeast, milk, sea salt, egg wash",       ar:"زبدة فرنسية، دقيق T45، خميرة طازجة، حليب، ملح بحري، طلاء بيض",ku:"کەرەی فەرەنسی، ئارد، خەمیرەی تازە، شیر، خوێی بەحری"  }, price:5000, tags:[]                   },
+    { id:32, photo:"https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=600&q=80",  name:{ en:"Cheesecake Slice",    ar:"تشيز كيك",            ku:"چیزکێک"               }, ingredients:{ en:"Cream cheese, digestive biscuit base, eggs, vanilla, sour cream, sugar", ar:"جبن كريمي، قاعدة بسكويت، بيض، فانيليا، كريمة حامضة، سكر",     ku:"پەنیری کریمی، قاعدەی بیسکووت، هێلکە، وانیلا، شیری ترش"}, price:7000, tags:[]                   },
+    { id:33, photo:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&q=80",  name:{ en:"Chocolate Brownie",   ar:"براوني الشوكولاتة",   ku:"براونی چۆکلاتی"       }, ingredients:{ en:"Valrhona dark chocolate, unsalted butter, eggs, sugar, flour, walnuts",  ar:"شوكولاتة داكنة فالرونا، زبدة غير مملحة، بيض، سكر، دقيق، جوز", ku:"چۆکلاتی تاریک، کەرە، هێلکە، شەکر، ئارد، گوێزی ئینگلیزی"}, price:5500,tags:[]               },
+    { id:34, photo:"https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&q=80",  name:{ en:"Pistachio Cookie",    ar:"كوكيز الفستق",        ku:"کووکیز پیستە"         }, ingredients:{ en:"Pistachio paste, white chocolate chips, butter, flour, brown sugar, sea salt",ar:"معجون فستق، قطع شوكولاتة بيضاء، زبدة، دقيق، سكر بني، ملح بحري",ku:"پەیستی پیستە، چۆکلاتی سپی، کەرە، ئارد، شەکری قاوەیی، خوێ"}, price:3500, tags:["vegan","new"]       },
   ],
 };
 
@@ -772,29 +174,15 @@ const ALL_ITEMS = Object.values(ITEMS).flat();
 const fmt = (n) => n.toLocaleString();
 
 /* ── Send order to Telegram ── */
-async function sendTelegramOrder({
-  tableNum,
-  cartItems,
-  cart,
-  note,
-  grand,
-  tax,
-  totalIQD,
-  lang,
-}) {
-  const time = new Date().toLocaleTimeString("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  const lines = cartItems
-    .map(
-      (item) =>
-        `• ${item.name.en} × ${cart[item.id]} — ${fmt(item.price * cart[item.id])} IQD`,
-    )
-    .join("\n");
+async function sendTelegramOrder({ tableNum, cartItems, cart, note, grand, tax, totalIQD, lang }) {
+  const time = new Date().toLocaleTimeString("en-GB", { hour:"2-digit", minute:"2-digit" });
+  const lines = cartItems.map(item =>
+    `• ${item.name.en} × ${cart[item.id]} — ${fmt(item.price * cart[item.id])} IQD`
+  ).join("\n");
 
-  const noteLine = note.trim() ? `\n📝 Note: ${note.trim()}` : "";
-  const message = `🍵 *New Order — Table ${tableNum}*
+  const noteLine  = note.trim() ? `\n📝 Note: ${note.trim()}` : "";
+  const message =
+`🍵 *New Order — Table ${tableNum}*
 
 ${lines}${noteLine}
 
@@ -813,91 +201,73 @@ ${lines}${noteLine}
         text: message,
         parse_mode: "Markdown",
       }),
-    },
+    }
   );
   if (!res.ok) throw new Error("Telegram error");
 }
 
+
+
+
+
 /* ── Send bill request ── */
 async function sendTelegramBill(tableNum) {
-  const time = new Date().toLocaleTimeString("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  const res = await fetch(
-    `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: CHAT_ID,
-        parse_mode: "Markdown",
-        text: `💳 *Bill Requested — Table ${tableNum}*
+  const time = new Date().toLocaleTimeString("en-GB", { hour:"2-digit", minute:"2-digit" });
+  const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: CHAT_ID,
+      parse_mode: "Markdown",
+      text: `💳 *Bill Requested — Table ${tableNum}*
 🕐 ${time}`,
-      }),
-    },
-  );
+    }),
+  });
   if (!res.ok) throw new Error("Telegram error");
 }
 
 /* ── Send note ── */
 async function sendTelegramNote(tableNum, note) {
-  const time = new Date().toLocaleTimeString("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  const res = await fetch(
-    `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: CHAT_ID,
-        parse_mode: "Markdown",
-        text: `📝 *Note — Table ${tableNum}*
+  const time = new Date().toLocaleTimeString("en-GB", { hour:"2-digit", minute:"2-digit" });
+  const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: CHAT_ID,
+      parse_mode: "Markdown",
+      text: `📝 *Note — Table ${tableNum}*
 
 ${note}
 
 🕐 ${time}`,
-      }),
-    },
-  );
+    }),
+  });
   if (!res.ok) throw new Error("Telegram error");
 }
 
 /* ── Send feedback ── */
 async function sendTelegramFeedback(tableNum, stars, contact, comments) {
   const star = (n) => "⭐".repeat(n) + "☆".repeat(5 - n);
-  const time = new Date().toLocaleTimeString("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  const contactLine = contact
-    ? `
-📞 Contact: ${contact}`
-    : "";
-  const commentsLine = comments
-    ? `
-💬 Comments: ${comments}`
-    : "";
-  const res = await fetch(
-    `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: CHAT_ID,
-        parse_mode: "Markdown",
-        text: `⭐ *Feedback — Table ${tableNum}*
+  const time = new Date().toLocaleTimeString("en-GB", { hour:"2-digit", minute:"2-digit" });
+  const contactLine  = contact  ? `
+📞 Contact: ${contact}`      : "";
+  const commentsLine = comments ? `
+💬 Comments: ${comments}`    : "";
+  const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: CHAT_ID,
+      parse_mode: "Markdown",
+      text: `⭐ *Feedback — Table ${tableNum}*
 
 Staff: ${star(stars.staff)}
 Service: ${star(stars.service)}
 Hygiene: ${star(stars.hygiene)}${contactLine}${commentsLine}
 
 🕐 ${time}`,
-      }),
-    },
-  );
+    }),
+  });
   if (!res.ok) throw new Error("Telegram error");
 }
 
@@ -905,37 +275,40 @@ Hygiene: ${star(stars.hygiene)}${contactLine}${commentsLine}
    MAIN APP
 ══════════════════════════ */
 export default function TeaLeaves() {
-  const [lang, setLang] = useState("en");
-  const [langOpen, setLangOpen] = useState(false);
-  const [activeCat, setActiveCat] = useState("blacktea");
-  const [cart, setCart] = useState({});
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [note, setNote] = useState("");
-  const [query, setQuery] = useState("");
-  const [toast, setToast] = useState("");
-  const [orderNum] = useState(() => Math.floor(Math.random() * 9000) + 1000);
-  const [screen, setScreen] = useState("menu"); // "menu" | "success" | "error"
-  const [sending, setSending] = useState(false);
-  const [tableNum, setTableNum] = useState(null);
-  const [modal, setModal] = useState(null); // null | "bill" | "note" | "feedback"
-  const [viewMode, setViewMode] = useState("grid"); // "grid" | "list"
+  const [lang, setLang]               = useState("en");
+  const [langOpen, setLangOpen]       = useState(false);
+  const [activeCat, setActiveCat]     = useState("blacktea");
+  const [cart, setCart]               = useState({});
+  const [drawerOpen, setDrawerOpen]   = useState(false);
+  const [note, setNote]               = useState("");
+  const [query, setQuery]             = useState("");
+  const [toast, setToast]             = useState("");
+  const [orderNum]                    = useState(() => Math.floor(Math.random()*9000)+1000);
+  const [screen, setScreen]           = useState("menu"); // "menu" | "success" | "error"
+  const [sending, setSending]         = useState(false);
+  const [tableNum, setTableNum]       = useState(null);
+  const [modal, setModal]             = useState(null); // null | "bill" | "note" | "feedback"
+  const [viewMode, setViewMode]       = useState("grid"); // "grid" | "list"
   const [selectedItem, setSelectedItem] = useState(null); // item detail modal
-  const [sliderIdx, setSliderIdx] = useState(0);
-  const [noteText, setNoteText] = useState("");
+  const [sliderIdx, setSliderIdx]     = useState(0);
+  const [sliderOffset, setSliderOffset] = useState(0); // live drag offset in px
+  const [noteText, setNoteText]       = useState("");
   const [modalSending, setModalSending] = useState(false);
-  const [modalDone, setModalDone] = useState(false);
-  const [fbStars, setFbStars] = useState({ staff: 0, service: 0, hygiene: 0 });
-  const [fbContact, setFbContact] = useState("");
-  const [fbComments, setFbComments] = useState("");
+  const [modalDone, setModalDone]     = useState(false);
+  const [fbStars, setFbStars]         = useState({ staff:0, service:0, hygiene:0 });
+  const [fbContact, setFbContact]     = useState("");
+  const [fbComments, setFbComments]   = useState("");
 
-  const toastRef = useRef(null);
-  const catBarRef = useRef(null);
-  const sectionRefs = useRef({});
-  const scrollRef = useRef(null);
-  const ignoreScrollRef = useRef(false);
+  const toastRef        = useRef(null);
+  const catBarRef       = useRef(null);
+  const sectionRefs     = useRef({});
+  const scrollRef       = useRef(null);
+  const ignoreScrollRef  = useRef(false);
+  const sliderRef        = useRef(null);   // the track div
+  const sliderDrag       = useRef({ active:false, startX:0, startIdx:0, offset:0 });
 
-  const t = T[lang];
-  const isRTL = lang === "ar" || lang === "ku";
+  const t      = T[lang];
+  const isRTL  = lang === "ar" || lang === "ku";
 
   /* read ?table= silently from QR URL */
   useEffect(() => {
@@ -944,47 +317,28 @@ export default function TeaLeaves() {
     if (n >= 1 && n <= NUM_TABLES) setTableNum(n);
   }, []);
 
-  const totalQty = Object.values(cart).reduce((s, q) => s + q, 0);
-  const totalIQD = Object.entries(cart).reduce((s, [id, q]) => {
-    const item = ALL_ITEMS.find((i) => i.id === Number(id));
-    return s + (item ? item.price * q : 0);
+  const totalQty = Object.values(cart).reduce((s,q)=>s+q, 0);
+  const totalIQD = Object.entries(cart).reduce((s,[id,q])=>{
+    const item = ALL_ITEMS.find(i=>i.id===Number(id));
+    return s+(item?item.price*q:0);
   }, 0);
-  const tax = Math.round(totalIQD * 0.1);
+  const tax   = Math.round(totalIQD * 0.1);
   const grand = totalIQD + tax;
 
   const showToast = (msg) => {
     setToast(msg);
-    if (toastRef.current) clearTimeout(toastRef.current);
-    toastRef.current = setTimeout(() => setToast(""), 2000);
+    if(toastRef.current) clearTimeout(toastRef.current);
+    toastRef.current = setTimeout(()=>setToast(""), 2000);
   };
-  const add = (item) => {
-    setCart((c) => ({ ...c, [item.id]: (c[item.id] || 0) + 1 }));
-    showToast(`${item.name[lang]} ✓`);
-  };
-  const remove = (item) => {
-    setCart((c) => {
-      const n = { ...c };
-      if ((n[item.id] || 0) <= 1) delete n[item.id];
-      else n[item.id]--;
-      return n;
-    });
-  };
+  const add    = (item) => { setCart(c=>({...c,[item.id]:(c[item.id]||0)+1})); showToast(`${item.name[lang]} ✓`); };
+  const remove = (item) => { setCart(c=>{ const n={...c}; if((n[item.id]||0)<=1) delete n[item.id]; else n[item.id]--; return n; }); };
 
-  const cartItems = ALL_ITEMS.filter((i) => cart[i.id]);
+  const cartItems = ALL_ITEMS.filter(i => cart[i.id]);
 
   const placeOrder = async () => {
     setSending(true);
     try {
-      await sendTelegramOrder({
-        tableNum,
-        cartItems,
-        cart,
-        note,
-        grand,
-        tax,
-        totalIQD,
-        lang,
-      });
+      await sendTelegramOrder({ tableNum, cartItems, cart, note, grand, tax, totalIQD, lang });
       setDrawerOpen(false);
       setSending(false);
       setCart({});
@@ -1001,10 +355,11 @@ export default function TeaLeaves() {
 
   /* ── slider auto-advance ── */
   useEffect(() => {
-    const id = setInterval(
-      () => setSliderIdx((i) => (i + 1) % SLIDER_IMAGES.length),
-      4000,
-    );
+    const id = setInterval(() => {
+      if (!sliderDrag.current.active) {
+        setSliderIdx(i => (i + 1) % SLIDER_IMAGES.length);
+      }
+    }, 4000);
     return () => clearInterval(id);
   }, []);
 
@@ -1015,18 +370,11 @@ export default function TeaLeaves() {
     const container = scrollRef.current;
     if (el && container) {
       ignoreScrollRef.current = true;
-      container.scrollTo({ top: el.offsetTop - 170, behavior: "smooth" });
-      setTimeout(() => {
-        ignoreScrollRef.current = false;
-      }, 800);
+      container.scrollTo({ top: el.offsetTop - 170, behavior:"smooth" });
+      setTimeout(() => { ignoreScrollRef.current = false; }, 800);
     }
-    catBarRef.current
-      ?.querySelector(`[data-cat="${catId}"]`)
-      ?.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center",
-      });
+    catBarRef.current?.querySelector(`[data-cat="${catId}"]`)
+      ?.scrollIntoView({ behavior:"smooth", block:"nearest", inline:"center" });
   };
 
   /* ── scroll spy ── */
@@ -1040,13 +388,13 @@ export default function TeaLeaves() {
       const el = sectionRefs.current[cat.id];
       if (el && el.offsetTop <= scrollTop) current = cat.id;
     }
-    setActiveCat((prev) => (prev !== current ? current : prev));
+    setActiveCat(prev => prev !== current ? current : prev);
   }, [query]);
 
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    el.addEventListener("scroll", handleScroll, { passive: true });
+    el.addEventListener("scroll", handleScroll, { passive:true });
     return () => el.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
@@ -1054,119 +402,57 @@ export default function TeaLeaves() {
   useEffect(() => {
     const el = catBarRef.current;
     if (!el) return;
-    let down = false,
-      startX = 0,
-      sl = 0;
-    const onDown = (e) => {
-      down = true;
-      el.classList.add("drag");
-      startX = e.pageX - el.offsetLeft;
-      sl = el.scrollLeft;
-    };
-    const onUp = () => {
-      down = false;
-      el.classList.remove("drag");
-    };
-    const onMove = (e) => {
-      if (!down) return;
-      e.preventDefault();
-      el.scrollLeft = sl - (e.pageX - el.offsetLeft - startX);
-    };
-    el.addEventListener("mousedown", onDown);
-    el.addEventListener("mouseleave", onUp);
-    el.addEventListener("mouseup", onUp);
-    el.addEventListener("mousemove", onMove);
-    return () => {
-      el.removeEventListener("mousedown", onDown);
-      el.removeEventListener("mouseleave", onUp);
-      el.removeEventListener("mouseup", onUp);
-      el.removeEventListener("mousemove", onMove);
-    };
+    let down=false, startX=0, sl=0;
+    const onDown = e => { down=true; el.classList.add("drag"); startX=e.pageX-el.offsetLeft; sl=el.scrollLeft; };
+    const onUp   = () => { down=false; el.classList.remove("drag"); };
+    const onMove = e => { if(!down) return; e.preventDefault(); el.scrollLeft=sl-(e.pageX-el.offsetLeft-startX); };
+    el.addEventListener("mousedown",onDown); el.addEventListener("mouseleave",onUp);
+    el.addEventListener("mouseup",onUp);     el.addEventListener("mousemove",onMove);
+    return () => { el.removeEventListener("mousedown",onDown); el.removeEventListener("mouseleave",onUp); el.removeEventListener("mouseup",onUp); el.removeEventListener("mousemove",onMove); };
   }, []);
 
   const filtered = query.trim()
-    ? ALL_ITEMS.filter(
-        (i) =>
-          i.name[lang].toLowerCase().includes(query.toLowerCase()) ||
-          i.desc[lang].toLowerCase().includes(query.toLowerCase()),
-      )
+    ? ALL_ITEMS.filter(i => i.name[lang].toLowerCase().includes(query.toLowerCase()) || i.desc[lang].toLowerCase().includes(query.toLowerCase()))
     : null;
 
   const itemCard = (item) => {
     const qty = cart[item.id] || 0;
     if (viewMode === "list") {
       return (
-        <div
-          key={item.id}
-          className={`l-card${qty > 0 ? " incart" : ""}`}
-          onClick={() => setSelectedItem(item)}
-        >
+        <div key={item.id} className={`l-card${qty > 0 ? " incart" : ""}`} onClick={() => setSelectedItem(item)}>
           <div className="l-body">
             <div className="l-name">{item.name[lang]}</div>
             <div className="l-price">IQD {fmt(item.price)}</div>
             <div className="l-ing">{item.ingredients[lang]}</div>
           </div>
           <div className="l-img-wrap">
-            <img
-              className="l-img"
-              src={item.photo}
-              alt={item.name[lang]}
-              loading="lazy"
-            />
+            <img className="l-img" src={item.photo} alt={item.name[lang]} loading="lazy"/>
             {qty > 0 && <div className="img-badge">{qty}</div>}
           </div>
         </div>
       );
     }
     return (
-      <div
-        key={item.id}
-        className={`g-card${qty > 0 ? " incart" : ""}`}
-        onClick={() => setSelectedItem(item)}
-      >
-        <img
-          className="g-img"
-          src={item.photo}
-          alt={item.name[lang]}
-          loading="lazy"
-        />
+      <div key={item.id} className={`g-card${qty > 0 ? " incart" : ""}`} onClick={() => setSelectedItem(item)}>
+        <img className="g-img" src={item.photo} alt={item.name[lang]} loading="lazy"/>
         {qty > 0 && <div className="img-badge">{qty}</div>}
         <div className="g-body">
           <div className="g-name">{item.name[lang]}</div>
           <div className="g-price">{fmt(item.price)}</div>
           <div className="g-foot">
             <div className="g-tags">
-              {item.tags.includes("hot") && (
-                <span className="tag t-hot">{t.hot}</span>
-              )}
-              {item.tags.includes("cold") && (
-                <span className="tag t-cold">{t.cold}</span>
-              )}
-              {item.tags.includes("vegan") && (
-                <span className="tag t-vegan">{t.vegan}</span>
-              )}
-              {item.tags.includes("new") && (
-                <span className="tag t-new">{t.new}</span>
-              )}
+              {item.tags.includes("hot")   && <span className="tag t-hot">{t.hot}</span>}
+              {item.tags.includes("cold")  && <span className="tag t-cold">{t.cold}</span>}
+              {item.tags.includes("vegan") && <span className="tag t-vegan">{t.vegan}</span>}
+              {item.tags.includes("new")   && <span className="tag t-new">{t.new}</span>}
             </div>
-            <div className="qty-r" onClick={(e) => e.stopPropagation()}>
-              {!tableNum ? (
-                <div className="no-order-badge">🔒</div>
-              ) : qty === 0 ? (
-                <button className="qb solid" onClick={() => add(item)}>
-                  +
-                </button>
-              ) : (
-                <>
-                  <button className="qb" onClick={() => remove(item)}>
-                    −
-                  </button>
-                  <span className="qnum">{qty}</span>
-                  <button className="qb" onClick={() => add(item)}>
-                    +
-                  </button>
-                </>
-              )}
+            <div className="qty-r" onClick={e => e.stopPropagation()}>
+              {!tableNum
+                ? <div className="no-order-badge">🔒</div>
+                : qty === 0
+                ? <button className="qb solid" onClick={() => add(item)}>+</button>
+                : <><button className="qb" onClick={() => remove(item)}>−</button><span className="qnum">{qty}</span><button className="qb" onClick={() => add(item)}>+</button></>
+              }
             </div>
           </div>
         </div>
@@ -1180,7 +466,7 @@ export default function TeaLeaves() {
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
         body{background:#1b3a2d;font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;}
-        .app{width:100%;max-width:430px;min-height:100vh;height:100vh;background:#1b3a2d;color:#fff;direction:${isRTL ? "rtl" : "ltr"};display:flex;flex-direction:column;position:relative;overflow:hidden;margin:0 auto;}
+        .app{width:100%;max-width:430px;min-height:100vh;height:100vh;background:#1b3a2d;color:#fff;direction:${isRTL?"rtl":"ltr"};display:flex;flex-direction:column;position:relative;overflow:hidden;margin:0 auto;}
         .hdr{background:#1b3a2d;padding:14px 16px 0;flex-shrink:0;border-bottom:1px solid #2d5a42;z-index:10;}
         .hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
         .hdr-title{font-size:18px;font-weight:700;color:#fff;text-align:center;flex:1;}
@@ -1190,7 +476,7 @@ export default function TeaLeaves() {
         .lang-btn:hover{border-color:#52b788;}
         .chev{transition:transform .2s;}
         .chev.open{transform:rotate(180deg);}
-        .lang-drop{position:absolute;top:calc(100% + 8px);${isRTL ? "right" : "left"}:0;background:#1e3d2f;border:1px solid #2d5a42;border-radius:12px;overflow:hidden;z-index:300;min-width:145px;box-shadow:0 8px 24px rgba(0,0,0,.55);}
+        .lang-drop{position:absolute;top:calc(100% + 8px);${isRTL?"right":"left"}:0;background:#1e3d2f;border:1px solid #2d5a42;border-radius:12px;overflow:hidden;z-index:300;min-width:145px;box-shadow:0 8px 24px rgba(0,0,0,.55);}
         .lang-opt{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:14px;font-weight:500;cursor:pointer;color:#fff;transition:background .15s;}
         .lang-opt:hover{background:#2d6a4f;}
         .lang-opt.sel{color:#52b788;}
@@ -1234,7 +520,7 @@ export default function TeaLeaves() {
         .qb:hover,.qb.solid{background:#52b788;color:#1b3a2d;border-color:#52b788;}
         .qnum{font-size:13px;font-weight:800;min-width:14px;text-align:center;}
         .no-order-badge{width:26px;height:26px;border-radius:50%;background:#243f30;border:1.5px solid #2d5a42;display:flex;align-items:center;justify-content:center;font-size:12px;opacity:0.6;}
-        .img-badge{position:absolute;top:8px;${isRTL ? "left" : "right"}:8px;background:#40916c;color:#fff;font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+        .img-badge{position:absolute;top:8px;${isRTL?"left":"right"}:8px;background:#40916c;color:#fff;font-size:11px;font-weight:800;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
         .search-results{padding:14px 12px 140px;}
         .sec-lbl{font-size:13px;font-weight:600;color:#6ba882;margin-bottom:12px;padding:0 2px;}
         .btm-bar{position:absolute;bottom:0;left:0;right:0;padding:10px 12px 24px;background:linear-gradient(to top,#1b3a2d 65%,transparent);pointer-events:none;z-index:20;}
@@ -1244,7 +530,7 @@ export default function TeaLeaves() {
         .vob-n{background:rgba(255,255,255,.25);width:24px;height:24px;border-radius:50%;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;}
         .overlay{position:absolute;inset:0;background:rgba(0,0,0,.6);z-index:30;opacity:0;pointer-events:none;transition:opacity .3s;}
         .overlay.open{opacity:1;pointer-events:all;}
-        .drawer{position:absolute;bottom:0;left:0;right:0;background:#1e3d2f;border-top-left-radius:22px;border-top-right-radius:22px;z-index:40;max-height:88%;display:flex;flex-direction:column;transition:transform .35s cubic-bezier(.4,0,.2,1);transform:translateY(100%);direction:${isRTL ? "rtl" : "ltr"};}
+        .drawer{position:absolute;bottom:0;left:0;right:0;background:#1e3d2f;border-top-left-radius:22px;border-top-right-radius:22px;z-index:40;max-height:88%;display:flex;flex-direction:column;transition:transform .35s cubic-bezier(.4,0,.2,1);transform:translateY(100%);direction:${isRTL?"rtl":"ltr"};}
         .drawer.open{transform:translateY(0);}
         .d-handle{width:34px;height:4px;background:#2d5a42;border-radius:2px;margin:11px auto 0;flex-shrink:0;}
         .d-head{padding:13px 18px;border-bottom:1px solid #2d5a42;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
@@ -1261,7 +547,7 @@ export default function TeaLeaves() {
         .d-name{font-size:13px;font-weight:600;}
         .d-unit{font-size:11px;color:#6ba882;margin-top:1px;}
         .d-r{display:flex;align-items:center;gap:8px;}
-        .d-tot{font-size:13px;font-weight:700;color:#52b788;min-width:65px;text-align:${isRTL ? "left" : "right"};}
+        .d-tot{font-size:13px;font-weight:700;color:#52b788;min-width:65px;text-align:${isRTL?"left":"right"};}
         .note-sec{padding:0 18px 10px;flex-shrink:0;}
         .note-lbl{font-size:11px;color:#6ba882;margin-bottom:5px;}
         .note-ta{width:100%;background:#243f30;border:1px solid #2d5a42;border-radius:10px;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;resize:none;transition:border-color .2s;}
@@ -1279,7 +565,7 @@ export default function TeaLeaves() {
         .empty-c p{font-size:14px;line-height:1.7;white-space:pre-line;}
         .toast{position:absolute;bottom:110px;left:50%;transform:translateX(-50%) translateY(8px);background:#1e3d2f;border:1px solid #52b788;color:#52b788;padding:8px 18px;border-radius:30px;font-size:13px;font-weight:600;z-index:50;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;}
         .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-        .fullscreen{position:absolute;inset:0;background:#1b3a2d;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 32px;transform:translateY(100%);transition:transform .4s cubic-bezier(.4,0,.2,1);direction:${isRTL ? "rtl" : "ltr"};}
+        .fullscreen{position:absolute;inset:0;background:#1b3a2d;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 32px;transform:translateY(100%);transition:transform .4s cubic-bezier(.4,0,.2,1);direction:${isRTL?"rtl":"ltr"};}
         .fullscreen.show{transform:translateY(0);}
         .s-icon{font-size:68px;margin-bottom:18px;}
         .s-title{font-size:26px;font-weight:800;color:#52b788;margin-bottom:10px;}
@@ -1296,9 +582,10 @@ export default function TeaLeaves() {
         .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
 
         /* ── SLIDER ── */
-        .slider-wrap{position:relative;width:100%;height:180px;overflow:hidden;flex-shrink:0;}
-        .slide-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .7s ease;}
-        .slide-img.active{opacity:1;}
+        .slider-wrap{position:relative;width:100%;height:200px;overflow:hidden;border-radius:12px;margin-bottom:20px;user-select:none;-webkit-user-select:none;}
+        .slider-track{display:flex;height:100%;}
+        .slide-item{height:100%;flex-shrink:0;}
+        .slide-img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;-webkit-user-drag:none;user-drag:none;}
         .slider-dots{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:2;}
         .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.45);cursor:pointer;transition:background .2s,transform .2s;}
         .dot.active{background:#fff;transform:scale(1.3);}
@@ -1379,47 +666,16 @@ export default function TeaLeaves() {
         <div className="hdr">
           <div className="hdr-top">
             <div className="lang-wrap">
-              <button
-                className="lang-btn"
-                onClick={() => setLangOpen((v) => !v)}
-              >
-                <svg
-                  width="13"
-                  height="13"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" />
-                </svg>
-                <span>{LANG_OPTS.find((l) => l.code === lang)?.flag}</span>
-                <svg
-                  className={`chev${langOpen ? " open" : ""}`}
-                  width="11"
-                  height="11"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                >
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
+              <button className="lang-btn" onClick={() => setLangOpen(v => !v)}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+                <span>{LANG_OPTS.find(l => l.code === lang)?.flag}</span>
+                <svg className={`chev${langOpen?" open":""}`} width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg>
               </button>
               {langOpen && (
                 <div className="lang-drop">
-                  {LANG_OPTS.map((lo) => (
-                    <div
-                      key={lo.code}
-                      className={`lang-opt${lang === lo.code ? " sel" : ""}`}
-                      onClick={() => {
-                        setLang(lo.code);
-                        setLangOpen(false);
-                      }}
-                    >
-                      <span style={{ fontSize: 18 }}>{lo.flag}</span>
-                      <span>{lo.label}</span>
+                  {LANG_OPTS.map(lo => (
+                    <div key={lo.code} className={`lang-opt${lang===lo.code?" sel":""}`} onClick={() => { setLang(lo.code); setLangOpen(false); }}>
+                      <span style={{fontSize:18}}>{lo.flag}</span><span>{lo.label}</span>
                     </div>
                   ))}
                 </div>
@@ -1430,178 +686,51 @@ export default function TeaLeaves() {
 
             <div className="hdr-right">
               {/* Action buttons — only shown when arrived via QR */}
-              {tableNum && (
-                <>
-                  {/* Bill */}
-                  <button
-                    className="act-btn"
-                    title="Request Bill"
-                    onClick={() => {
-                      setModal("bill");
-                      setModalDone(false);
-                    }}
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                      <polyline points="14 2 14 8 20 8" />
-                      <line x1="16" y1="13" x2="8" y2="13" />
-                      <line x1="16" y1="17" x2="8" y2="17" />
-                      <polyline points="10 9 9 9 8 9" />
-                    </svg>
-                  </button>
-                  {/* Note */}
-                  <button
-                    className="act-btn"
-                    title="Leave a Note"
-                    onClick={() => {
-                      setModal("note");
-                      setModalDone(false);
-                      setNoteText("");
-                    }}
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-                    </svg>
-                  </button>
-                  {/* Feedback */}
-                  <button
-                    className="act-btn"
-                    title="Give Feedback"
-                    onClick={() => {
-                      setModal("feedback");
-                      setModalDone(false);
-                      setFbStars({ staff: 0, service: 0, hygiene: 0 });
-                      setFbContact("");
-                      setFbComments("");
-                    }}
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                    </svg>
-                  </button>
-                  {/* Cart */}
-                  <button
-                    className="icon-btn"
-                    onClick={() => setDrawerOpen(true)}
-                  >
-                    <svg
-                      width="22"
-                      height="22"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                    >
-                      <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-                      <line x1="3" y1="6" x2="21" y2="6" />
-                      <path d="M16 10a4 4 0 01-8 0" />
-                    </svg>
-                    {totalQty > 0 && (
-                      <span
-                        style={{
-                          position: "absolute",
-                          top: -4,
-                          right: -5,
-                          background: "#e63946",
-                          color: "#fff",
-                          fontSize: 10,
-                          fontWeight: 800,
-                          width: 16,
-                          height: 16,
-                          borderRadius: "50%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        {totalQty}
-                      </span>
-                    )}
-                  </button>
-                </>
-              )}
+              {tableNum && (<>
+                {/* Bill */}
+                <button className="act-btn" title="Request Bill" onClick={() => { setModal("bill"); setModalDone(false); }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+                  </svg>
+                </button>
+                {/* Note */}
+                <button className="act-btn" title="Leave a Note" onClick={() => { setModal("note"); setModalDone(false); setNoteText(""); }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                  </svg>
+                </button>
+                {/* Feedback */}
+                <button className="act-btn" title="Give Feedback" onClick={() => { setModal("feedback"); setModalDone(false); setFbStars({staff:0,service:0,hygiene:0}); setFbContact(""); setFbComments(""); }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                </button>
+                {/* Cart */}
+                <button className="icon-btn" onClick={() => setDrawerOpen(true)}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <path d="M16 10a4 4 0 01-8 0"/>
+                  </svg>
+                  {totalQty > 0 && <span style={{position:"absolute",top:-4,right:-5,background:"#e63946",color:"#fff",fontSize:10,fontWeight:800,width:16,height:16,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center"}}>{totalQty}</span>}
+                </button>
+              </>)}
             </div>
           </div>
 
           {/* Search */}
           <div className="search-row">
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={t.search}
-            />
-            {query && (
-              <button className="clr-btn" onClick={() => setQuery("")}>
-                ✕
-              </button>
-            )}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input value={query} onChange={e => setQuery(e.target.value)} placeholder={t.search}/>
+            {query && <button className="clr-btn" onClick={() => setQuery("")}>✕</button>}
           </div>
-
-          {/* ── SLIDER ── */}
-          {!query && (
-            <div className="slider-wrap">
-              {SLIDER_IMAGES.map((img, i) => (
-                <img
-                  key={i}
-                  src={img}
-                  alt="Tea Leaves Cafe"
-                  className={`slide-img${i === sliderIdx ? " active" : ""}`}
-                />
-              ))}
-              <div className="slider-dots">
-                {SLIDER_IMAGES.map((_, i) => (
-                  <div
-                    key={i}
-                    className={`dot${i === sliderIdx ? " active" : ""}`}
-                    onClick={() => setSliderIdx(i)}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Categories */}
           {!query && (
             <div className="cats" ref={catBarRef}>
-              {CATS.map((c) => (
-                <div
-                  key={c.id}
-                  data-cat={c.id}
-                  className={`cat-item${activeCat === c.id ? " active" : ""}`}
-                  onClick={() => handleCatClick(c.id)}
-                >
+              {CATS.map(c => (
+                <div key={c.id} data-cat={c.id} className={`cat-item${activeCat===c.id?" active":""}`} onClick={() => handleCatClick(c.id)}>
                   <div className="cat-icon">{c.emoji}</div>
                   <span className="cat-lbl">{c.label[lang]}</span>
                 </div>
@@ -1614,74 +743,99 @@ export default function TeaLeaves() {
         <div className="scroll-body" ref={scrollRef}>
           {filtered ? (
             <div className="search-results">
-              <div className="sec-lbl">
-                {filtered.length} {t.results} "{query}"
-              </div>
-              {filtered.length === 0 ? (
-                <div
-                  style={{
-                    textAlign: "center",
-                    color: "#4a7a5a",
-                    padding: "44px 0",
-                  }}
-                >
-                  <div style={{ fontSize: 44, marginBottom: 12 }}>🫖</div>
-                  <div style={{ fontSize: 14 }}>{t.noItems}</div>
-                </div>
-              ) : (
-                <div className="grid">{filtered.map(itemCard)}</div>
-              )}
+              <div className="sec-lbl">{filtered.length} {t.results} "{query}"</div>
+              {filtered.length === 0
+                ? <div style={{textAlign:"center",color:"#4a7a5a",padding:"44px 0"}}><div style={{fontSize:44,marginBottom:12}}>🫖</div><div style={{fontSize:14}}>{t.noItems}</div></div>
+                : <div className="grid">{filtered.map(itemCard)}</div>
+              }
             </div>
           ) : (
             <div className="menu-body">
-              {CATS.map((cat) => (
-                <div
-                  key={cat.id}
-                  ref={(el) => (sectionRefs.current[cat.id] = el)}
-                >
+              {/* ── SLIDER ── */}
+              {(() => {
+                const n = SLIDER_IMAGES.length;
+                const startDrag = (clientX) => {
+                  sliderDrag.current = { active:true, startX:clientX, startIdx:sliderIdx, offset:0 };
+                };
+                const moveDrag = (clientX) => {
+                  if (!sliderDrag.current.active) return;
+                  const w = sliderRef.current?.offsetWidth || 390;
+                  const raw = clientX - sliderDrag.current.startX;
+                  // clamp so you can't drag past first/last
+                  const clamped = Math.max(-(w * 0.7), Math.min(w * 0.7, raw));
+                  setSliderOffset(clamped);
+                };
+                const endDrag = (clientX) => {
+                  if (!sliderDrag.current.active) return;
+                  sliderDrag.current.active = false;
+                  const w = sliderRef.current?.offsetWidth || 390;
+                  const dx = clientX - sliderDrag.current.startX;
+                  setSliderOffset(0);
+                  if (Math.abs(dx) > w * 0.18) {
+                    setSliderIdx(i => Math.max(0, Math.min(n - 1, i + (dx < 0 ? 1 : -1))));
+                  }
+                };
+                const w = sliderRef.current?.offsetWidth || 390;
+                const trackX = -sliderIdx * w + sliderOffset;
+                const isDragging = sliderDrag.current.active;
+                return (
+                  <div
+                    className="slider-wrap"
+                    ref={sliderRef}
+                    style={{ cursor: isDragging ? "grabbing" : "grab" }}
+                    onMouseDown={e => { e.preventDefault(); startDrag(e.clientX); }}
+                    onMouseMove={e => moveDrag(e.clientX)}
+                    onMouseUp={e => endDrag(e.clientX)}
+                    onMouseLeave={e => { if (sliderDrag.current.active) endDrag(e.clientX); }}
+                    onTouchStart={e => startDrag(e.touches[0].clientX)}
+                    onTouchMove={e => { e.stopPropagation(); moveDrag(e.touches[0].clientX); }}
+                    onTouchEnd={e => endDrag(e.changedTouches[0].clientX)}
+                  >
+                    <div
+                      className="slider-track"
+                      style={{
+                        transform: `translateX(${trackX}px)`,
+                        transition: sliderDrag.current.active ? "none" : "transform .35s cubic-bezier(.4,0,.2,1)",
+                        width: `${n * 100}%`,
+                      }}
+                    >
+                      {SLIDER_IMAGES.map((img, i) => (
+                        <div key={i} className="slide-item" style={{ width:`${100/n}%` }}>
+                          <img
+                            src={img}
+                            alt="Tea Leaves Cafe"
+                            className="slide-img"
+                            draggable="false"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="slider-dots">
+                      {SLIDER_IMAGES.map((_, i) => (
+                        <div key={i} className={`dot${i === sliderIdx ? " active" : ""}`} onClick={() => setSliderIdx(i)}/>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {CATS.map(cat => (
+                <div key={cat.id} ref={el => sectionRefs.current[cat.id] = el}>
                   <div className="sec-head">
                     <button
                       type="button"
                       className="list-toggle"
-                      onClick={() =>
-                        setViewMode((v) => (v === "grid" ? "list" : "grid"))
-                      }
+                      onClick={() => setViewMode(v => v === "grid" ? "list" : "grid")}
                       title="Toggle view"
                     >
-                      {viewMode === "grid" ? (
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.2"
-                        >
-                          <line x1="3" y1="6" x2="21" y2="6" />
-                          <line x1="3" y1="12" x2="21" y2="12" />
-                          <line x1="3" y1="18" x2="21" y2="18" />
-                        </svg>
-                      ) : (
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <rect x="3" y="3" width="7" height="7" />
-                          <rect x="14" y="3" width="7" height="7" />
-                          <rect x="3" y="14" width="7" height="7" />
-                          <rect x="14" y="14" width="7" height="7" />
-                        </svg>
-                      )}
+                      {viewMode === "grid"
+                        ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                        : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                      }
                     </button>
                     <span>{cat.label[lang]}</span>
                   </div>
-                  <div className={viewMode === "list" ? "list-view" : "grid"}>
-                    {(ITEMS[cat.id] || []).map(itemCard)}
-                  </div>
+                  <div className={viewMode === "list" ? "list-view" : "grid"}>{(ITEMS[cat.id]||[]).map(itemCard)}</div>
                 </div>
               ))}
             </div>
@@ -1692,134 +846,71 @@ export default function TeaLeaves() {
         {tableNum && totalQty > 0 && !drawerOpen && (
           <div className="btm-bar">
             <button className="vob" onClick={() => setDrawerOpen(true)}>
-              <div className="vob-l">
-                <span className="vob-n">{totalQty}</span>
-                <span>{t.viewOrder}</span>
-              </div>
+              <div className="vob-l"><span className="vob-n">{totalQty}</span><span>{t.viewOrder}</span></div>
               <span>{fmt(totalIQD)} IQD</span>
             </button>
           </div>
         )}
 
         {/* OVERLAY */}
-        <div
-          className={`overlay${drawerOpen ? " open" : ""}`}
-          onClick={() => setDrawerOpen(false)}
-        />
+        <div className={`overlay${drawerOpen?" open":""}`} onClick={() => setDrawerOpen(false)}/>
 
         {/* CART DRAWER */}
-        <div className={`drawer${drawerOpen ? " open" : ""}`}>
-          <div className="d-handle" />
+        <div className={`drawer${drawerOpen?" open":""}`}>
+          <div className="d-handle"/>
           <div className="d-head">
             <div className="d-title">🍵 {t.yourOrder}</div>
-            <button className="d-close" onClick={() => setDrawerOpen(false)}>
-              ✕
-            </button>
+            <button className="d-close" onClick={() => setDrawerOpen(false)}>✕</button>
           </div>
           <div className="d-list">
-            {cartItems.length === 0 ? (
-              <div className="empty-c">
-                <div className="e-ico">🫖</div>
-                <p>{t.empty}</p>
-              </div>
-            ) : (
-              cartItems.map((item) => (
-                <div key={item.id} className="d-item">
-                  <div className="d-l">
-                    <img
-                      className="d-img"
-                      src={item.photo}
-                      alt={item.name[lang]}
-                    />
-                    <div>
-                      <div className="d-name">{item.name[lang]}</div>
-                      <div className="d-unit">
-                        {fmt(item.price)} IQD {t.each}
+            {cartItems.length === 0
+              ? <div className="empty-c"><div className="e-ico">🫖</div><p>{t.empty}</p></div>
+              : cartItems.map(item => (
+                  <div key={item.id} className="d-item">
+                    <div className="d-l">
+                      <img className="d-img" src={item.photo} alt={item.name[lang]}/>
+                      <div><div className="d-name">{item.name[lang]}</div><div className="d-unit">{fmt(item.price)} IQD {t.each}</div></div>
+                    </div>
+                    <div className="d-r">
+                      <div className="qty-r">
+                        <button className="qb" style={{width:23,height:23,fontSize:14}} onClick={() => remove(item)}>−</button>
+                        <span className="qnum">{cart[item.id]}</span>
+                        <button className="qb" style={{width:23,height:23,fontSize:14}} onClick={() => add(item)}>+</button>
                       </div>
+                      <div className="d-tot">{fmt(item.price*cart[item.id])}</div>
                     </div>
                   </div>
-                  <div className="d-r">
-                    <div className="qty-r">
-                      <button
-                        className="qb"
-                        style={{ width: 23, height: 23, fontSize: 14 }}
-                        onClick={() => remove(item)}
-                      >
-                        −
-                      </button>
-                      <span className="qnum">{cart[item.id]}</span>
-                      <button
-                        className="qb"
-                        style={{ width: 23, height: 23, fontSize: 14 }}
-                        onClick={() => add(item)}
-                      >
-                        +
-                      </button>
-                    </div>
-                    <div className="d-tot">
-                      {fmt(item.price * cart[item.id])}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
+                ))
+            }
           </div>
-          {cartItems.length > 0 && (
-            <>
-              <div className="note-sec">
-                <div className="note-lbl">📝 {t.specialNote}</div>
-                <textarea
-                  className="note-ta"
-                  rows={2}
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder={t.notePlaceholder}
-                />
-              </div>
-              <div className="d-foot">
-                <div className="s-row">
-                  <span>{t.subtotal}</span>
-                  <span>{fmt(totalIQD)} IQD</span>
-                </div>
-                <div className="s-row">
-                  <span>{t.service}</span>
-                  <span>{fmt(tax)} IQD</span>
-                </div>
-                <div className="t-row">
-                  <span>{t.total}</span>
-                  <span>{fmt(grand)} IQD</span>
-                </div>
-                <button
-                  className="place-btn"
-                  onClick={placeOrder}
-                  disabled={sending}
-                >
-                  {sending ? (
-                    <>
-                      <div className="spinner" />
-                      {t.sending}
-                    </>
-                  ) : (
-                    `${t.placeOrder} · ${fmt(grand)} IQD`
-                  )}
-                </button>
-              </div>
-            </>
-          )}
+          {cartItems.length > 0 && <>
+            <div className="note-sec">
+              <div className="note-lbl">📝 {t.specialNote}</div>
+              <textarea className="note-ta" rows={2} value={note} onChange={e => setNote(e.target.value)} placeholder={t.notePlaceholder}/>
+            </div>
+            <div className="d-foot">
+              <div className="s-row"><span>{t.subtotal}</span><span>{fmt(totalIQD)} IQD</span></div>
+              <div className="s-row"><span>{t.service}</span><span>{fmt(tax)} IQD</span></div>
+              <div className="t-row"><span>{t.total}</span><span>{fmt(grand)} IQD</span></div>
+              <button className="place-btn" onClick={placeOrder} disabled={sending}>
+                {sending
+                  ? <><div className="spinner"/>{t.sending}</>
+                  : `${t.placeOrder} · ${fmt(grand)} IQD`
+                }
+              </button>
+            </div>
+          </>}
         </div>
 
         {/* ── MODAL OVERLAY ── */}
         {modal && (
-          <div
-            className="m-overlay"
-            onClick={() => !modalSending && setModal(null)}
-          >
-            <div className="m-sheet" onClick={(e) => e.stopPropagation()}>
-              <div className="m-handle" />
+          <div className="m-overlay" onClick={() => !modalSending && setModal(null)}>
+            <div className="m-sheet" onClick={e => e.stopPropagation()}>
+              <div className="m-handle"/>
 
               {/* ── BILL MODAL ── */}
-              {modal === "bill" &&
-                (modalDone ? (
+              {modal === "bill" && (
+                modalDone ? (
                   <div className="m-done">
                     <div className="m-done-icon">💳</div>
                     <div className="m-done-text">{t.billSent}</div>
@@ -1827,40 +918,24 @@ export default function TeaLeaves() {
                 ) : (
                   <>
                     <div className="m-title">{t.billTitle}</div>
-                    <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
-                      <button
-                        className="m-btn-no"
-                        onClick={() => setModal(null)}
-                      >
-                        {t.billNo}
-                      </button>
-                      <button
-                        className="m-btn-yes"
-                        onClick={async () => {
-                          setModalSending(true);
-                          try {
-                            await sendTelegramBill(tableNum);
-                          } catch {}
-                          setModalSending(false);
-                          setModalDone(true);
-                          setTimeout(() => setModal(null), 2200);
-                        }}
-                      >
-                        {modalSending ? (
-                          <>
-                            <div className="spinner" />
-                          </>
-                        ) : (
-                          t.billYes
-                        )}
+                    <div style={{display:"flex",gap:10,marginTop:8}}>
+                      <button className="m-btn-no" onClick={() => setModal(null)}>{t.billNo}</button>
+                      <button className="m-btn-yes" onClick={async () => {
+                        setModalSending(true);
+                        try { await sendTelegramBill(tableNum); } catch {}
+                        setModalSending(false); setModalDone(true);
+                        setTimeout(() => setModal(null), 2200);
+                      }}>
+                        {modalSending ? <><div className="spinner"/></> : t.billYes}
                       </button>
                     </div>
                   </>
-                ))}
+                )
+              )}
 
               {/* ── NOTE MODAL ── */}
-              {modal === "note" &&
-                (modalDone ? (
+              {modal === "note" && (
+                modalDone ? (
                   <div className="m-done">
                     <div className="m-done-icon">📝</div>
                     <div className="m-done-text">{t.noteSent}</div>
@@ -1872,7 +947,7 @@ export default function TeaLeaves() {
                       className="m-textarea"
                       rows={4}
                       value={noteText}
-                      onChange={(e) => setNoteText(e.target.value)}
+                      onChange={e => setNoteText(e.target.value)}
                       placeholder={t.noteMsgPlaceholder}
                       autoFocus
                     />
@@ -1881,29 +956,20 @@ export default function TeaLeaves() {
                       disabled={!noteText.trim() || modalSending}
                       onClick={async () => {
                         setModalSending(true);
-                        try {
-                          await sendTelegramNote(tableNum, noteText);
-                        } catch {}
-                        setModalSending(false);
-                        setModalDone(true);
+                        try { await sendTelegramNote(tableNum, noteText); } catch {}
+                        setModalSending(false); setModalDone(true);
                         setTimeout(() => setModal(null), 2200);
                       }}
                     >
-                      {modalSending ? (
-                        <>
-                          <div className="spinner" />
-                          {t.noteSendingNote}
-                        </>
-                      ) : (
-                        t.noteSend
-                      )}
+                      {modalSending ? <><div className="spinner"/>{t.noteSendingNote}</> : t.noteSend}
                     </button>
                   </>
-                ))}
+                )
+              )}
 
               {/* ── FEEDBACK MODAL ── */}
-              {modal === "feedback" &&
-                (modalDone ? (
+              {modal === "feedback" && (
+                modalDone ? (
                   <div className="m-done">
                     <div className="m-done-icon">⭐</div>
                     <div className="m-done-text">{t.feedbackSent}</div>
@@ -1913,24 +979,20 @@ export default function TeaLeaves() {
                     <div className="m-title">{t.feedbackTitle}</div>
                     <div className="m-scroll">
                       {[
-                        { key: "staff", label: t.feedbackStaff },
-                        { key: "service", label: t.feedbackService },
-                        { key: "hygiene", label: t.feedbackHygiene },
+                        { key:"staff",   label:t.feedbackStaff   },
+                        { key:"service", label:t.feedbackService  },
+                        { key:"hygiene", label:t.feedbackHygiene  },
                       ].map(({ key, label }) => (
                         <div key={key} className="fb-row">
                           <div className="fb-label">{label}</div>
                           <div className="fb-stars">
-                            {[1, 2, 3, 4, 5].map((n) => (
+                            {[1,2,3,4,5].map(n => (
                               <button
                                 key={n}
                                 type="button"
                                 className={`star-btn${fbStars[key] >= n ? " lit" : ""}`}
-                                onClick={() =>
-                                  setFbStars((s) => ({ ...s, [key]: n }))
-                                }
-                              >
-                                <span aria-hidden="true">★</span>
-                              </button>
+                                onClick={() => setFbStars(s => ({ ...s, [key]: n }))}
+                              ><span aria-hidden="true">★</span></button>
                             ))}
                           </div>
                         </div>
@@ -1940,7 +1002,7 @@ export default function TeaLeaves() {
                         className="m-input"
                         type="tel"
                         value={fbContact}
-                        onChange={(e) => setFbContact(e.target.value)}
+                        onChange={e => setFbContact(e.target.value)}
                         placeholder="+964 7XX XXX XXXX"
                       />
                       <div className="fb-field-label">{t.feedbackComments}</div>
@@ -1948,192 +1010,99 @@ export default function TeaLeaves() {
                         className="m-textarea"
                         rows={3}
                         value={fbComments}
-                        onChange={(e) => setFbComments(e.target.value)}
+                        onChange={e => setFbComments(e.target.value)}
                         placeholder="…"
                       />
                     </div>
                     <button
                       className="m-send-btn"
-                      disabled={
-                        modalSending ||
-                        (!fbStars.staff && !fbStars.service && !fbStars.hygiene)
-                      }
+                      disabled={modalSending || (!fbStars.staff && !fbStars.service && !fbStars.hygiene)}
                       onClick={async () => {
                         setModalSending(true);
-                        try {
-                          await sendTelegramFeedback(
-                            tableNum,
-                            fbStars,
-                            fbContact,
-                            fbComments,
-                          );
-                        } catch {}
-                        setModalSending(false);
-                        setModalDone(true);
+                        try { await sendTelegramFeedback(tableNum, fbStars, fbContact, fbComments); } catch {}
+                        setModalSending(false); setModalDone(true);
                         setTimeout(() => setModal(null), 2500);
                       }}
                     >
-                      {modalSending ? (
-                        <>
-                          <div className="spinner" />
-                          {t.feedbackSending}
-                        </>
-                      ) : (
-                        t.feedbackSend
-                      )}
+                      {modalSending ? <><div className="spinner"/>{t.feedbackSending}</> : t.feedbackSend}
                     </button>
                   </>
-                ))}
+                )
+              )}
+
             </div>
           </div>
         )}
 
         {/* ── ITEM DETAIL MODAL ── */}
-        {selectedItem &&
-          (() => {
-            const item = selectedItem;
-            const qty = cart[item.id] || 0;
-            return (
-              <div
-                className="det-overlay"
-                onClick={() => setSelectedItem(null)}
-              >
-                <div className="det-sheet" onClick={(e) => e.stopPropagation()}>
-                  <div className="det-handle" />
-                  <div className="det-img-wrap">
-                    <img
-                      className="det-img"
-                      src={item.photo}
-                      alt={item.name[lang]}
-                    />
-                    <button
-                      className="det-close"
-                      onClick={() => setSelectedItem(null)}
-                    >
-                      ✕
-                    </button>
-                    {item.tags.length > 0 && (
-                      <div className="det-tags">
-                        {item.tags.includes("hot") && (
-                          <span className="tag t-hot">{t.hot}</span>
-                        )}
-                        {item.tags.includes("cold") && (
-                          <span className="tag t-cold">{t.cold}</span>
-                        )}
-                        {item.tags.includes("vegan") && (
-                          <span className="tag t-vegan">{t.vegan}</span>
-                        )}
-                        {item.tags.includes("new") && (
-                          <span className="tag t-new">{t.new}</span>
-                        )}
-                      </div>
-                    )}
+        {selectedItem && (() => {
+          const item = selectedItem;
+          const qty  = cart[item.id] || 0;
+          return (
+            <div className="det-overlay" onClick={() => setSelectedItem(null)}>
+              <div className="det-sheet" onClick={e => e.stopPropagation()}>
+                <div className="det-handle"/>
+                <div className="det-img-wrap">
+                  <img className="det-img" src={item.photo} alt={item.name[lang]}/>
+                  <button className="det-close" onClick={() => setSelectedItem(null)}>✕</button>
+                  {item.tags.length > 0 && (
+                    <div className="det-tags">
+                      {item.tags.includes("hot")   && <span className="tag t-hot">{t.hot}</span>}
+                      {item.tags.includes("cold")  && <span className="tag t-cold">{t.cold}</span>}
+                      {item.tags.includes("vegan") && <span className="tag t-vegan">{t.vegan}</span>}
+                      {item.tags.includes("new")   && <span className="tag t-new">{t.new}</span>}
+                    </div>
+                  )}
+                </div>
+                <div className="det-body">
+                  <div className="det-row">
+                    <div className="det-name">{item.name[lang]}</div>
+                    <div className="det-price">IQD {fmt(item.price)}</div>
                   </div>
-                  <div className="det-body">
-                    <div className="det-row">
-                      <div className="det-name">{item.name[lang]}</div>
-                      <div className="det-price">IQD {fmt(item.price)}</div>
-                    </div>
-                    <div className="det-ing-label">
-                      {isRTL
-                        ? "المكونات"
-                        : lang === "ku"
-                          ? "پێکهاتەکان"
-                          : "Ingredients"}
-                    </div>
-                    <div className="det-ing">{item.ingredients[lang]}</div>
-                    {tableNum && (
-                      <div className="det-actions">
-                        {qty === 0 ? (
-                          <button
-                            className="det-add"
-                            onClick={() => {
-                              add(item);
-                              setSelectedItem(null);
-                            }}
-                          >
-                            +{" "}
-                            {lang === "ar"
-                              ? "أضف للطلب"
-                              : lang === "ku"
-                                ? "زیادبکە"
-                                : "Add to Order"}
+                  <div className="det-ing-label">{isRTL ? "المكونات" : lang === "ku" ? "پێکهاتەکان" : "Ingredients"}</div>
+                  <div className="det-ing">{item.ingredients[lang]}</div>
+                  {tableNum && (
+                    <div className="det-actions">
+                      {qty === 0
+                        ? <button className="det-add" onClick={() => { add(item); setSelectedItem(null); }}>
+                            + {lang === "ar" ? "أضف للطلب" : lang === "ku" ? "زیادبکە" : "Add to Order"}
                           </button>
-                        ) : (
-                          <div className="det-qty-row">
-                            <button
-                              className="qb"
-                              style={{ width: 36, height: 36, fontSize: 20 }}
-                              onClick={() => remove(item)}
-                            >
-                              −
-                            </button>
-                            <span
-                              style={{
-                                fontSize: 18,
-                                fontWeight: 800,
-                                minWidth: 28,
-                                textAlign: "center",
-                              }}
-                            >
-                              {qty}
-                            </span>
-                            <button
-                              className="qb solid"
-                              style={{ width: 36, height: 36, fontSize: 20 }}
-                              onClick={() => add(item)}
-                            >
-                              +
-                            </button>
-                            <div style={{ flex: 1 }} />
-                            <div
-                              style={{
-                                fontSize: 14,
-                                fontWeight: 700,
-                                color: "#52b788",
-                              }}
-                            >
-                              IQD {fmt(item.price * qty)}
-                            </div>
+                        : <div className="det-qty-row">
+                            <button className="qb" style={{width:36,height:36,fontSize:20}} onClick={() => remove(item)}>−</button>
+                            <span style={{fontSize:18,fontWeight:800,minWidth:28,textAlign:"center"}}>{qty}</span>
+                            <button className="qb solid" style={{width:36,height:36,fontSize:20}} onClick={() => add(item)}>+</button>
+                            <div style={{flex:1}}/>
+                            <div style={{fontSize:14,fontWeight:700,color:"#52b788"}}>IQD {fmt(item.price * qty)}</div>
                           </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                      }
+                    </div>
+                  )}
                 </div>
               </div>
-            );
-          })()}
+            </div>
+          );
+        })()}
 
         {/* TOAST */}
-        <div className={`toast${toast ? " show" : ""}`}>{toast}</div>
+        <div className={`toast${toast?" show":""}`}>{toast}</div>
 
         {/* SUCCESS */}
-        <div className={`fullscreen${screen === "success" ? " show" : ""}`}>
+        <div className={`fullscreen${screen==="success"?" show":""}`}>
           <div className="s-icon">☕</div>
           <div className="s-title">{t.orderPlaced}</div>
           <div className="s-msg">{t.orderMsg}</div>
           <div className="s-num">Order #TL-{orderNum}</div>
-          <button className="s-back" onClick={reset}>
-            {t.orderMore}
-          </button>
+          <button className="s-back" onClick={reset}>{t.orderMore}</button>
         </div>
 
         {/* ERROR */}
-        <div className={`fullscreen${screen === "error" ? " show" : ""}`}>
+        <div className={`fullscreen${screen==="error"?" show":""}`}>
           <div className="err-icon">⚠️</div>
           <div className="err-title">{t.errorTitle}</div>
           <div className="err-msg">{t.errorMsg}</div>
-          <button
-            className="err-btn"
-            onClick={() => {
-              setScreen("menu");
-              setDrawerOpen(true);
-            }}
-          >
-            {t.tryAgain}
-          </button>
+          <button className="err-btn" onClick={() => { setScreen("menu"); setDrawerOpen(true); }}>{t.tryAgain}</button>
         </div>
+
       </div>
     </>
   );
