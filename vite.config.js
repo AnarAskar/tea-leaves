@@ -19,24 +19,42 @@ function readJsonBody(req) {
   });
 }
 
-function telegramApiDevPlugin() {
-  return {
-    name: "telegram-api-dev",
-    configureServer(server) {
-      server.middlewares.use("/api/telegram", async (req, res, next) => {
-        if (req.method !== "POST") {
-          return next();
-        }
+function readRequest(req) {
+  return new Promise((resolve, reject) => {
+    if (req.method === "GET" || req.method === "HEAD") {
+      resolve({ body: {}, headers: req.headers });
+      return;
+    }
+    readJsonBody(req)
+      .then((body) => resolve({ body, headers: req.headers }))
+      .catch(reject);
+  });
+}
 
+function apiDevPlugin(path, handler) {
+  return {
+    name: `api-dev-${path}`,
+    configureServer(server) {
+      server.middlewares.use(path, async (req, res, next) => {
         try {
-          const body = await readJsonBody(req);
-          const result = await handleTelegramApi(body);
+          const { body, headers } = await readRequest(req);
+          const result = await handler({
+            method: req.method,
+            body,
+            headers,
+          });
           res.statusCode = 200;
           res.setHeader("Content-Type", "application/json");
-          res.end(JSON.stringify(result));
+          res.end(JSON.stringify(result.ok !== undefined ? result : { ok: true, ...result }));
         } catch (err) {
           const message = err instanceof Error ? err.message : "Request failed";
-          const status = message.startsWith("Invalid") ? 400 : 500;
+          const status =
+            err.status ||
+            (message === "Unauthorized"
+              ? 401
+              : message.startsWith("Invalid") || message === "Method not allowed"
+                ? 400
+                : 500);
           res.statusCode = status;
           res.setHeader("Content-Type", "application/json");
           res.end(JSON.stringify({ error: message }));
@@ -50,6 +68,14 @@ export default defineConfig(({ mode }) => {
   Object.assign(process.env, loadEnv(mode, process.cwd(), ""));
 
   return {
-    plugins: [react(), telegramApiDevPlugin()],
+    plugins: [
+      react(),
+      apiDevPlugin("/api/telegram", async (req) => {
+        if (req.method !== "POST") {
+          throw Object.assign(new Error("Method not allowed"), { status: 405 });
+        }
+        return handleTelegramApi(req.body);
+      }),
+    ],
   };
 });

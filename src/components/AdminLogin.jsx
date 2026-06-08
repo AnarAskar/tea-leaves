@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import "../styles/admin.css";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -10,24 +11,14 @@ export default function AdminLogin() {
   const { session, signIn, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // If still checking auth, show loading
   if (authLoading) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "#1b3a2d",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div style={{ color: "#fff" }}>Loading...</div>
+      <div className="admin-loading">
+        <div className="admin-spinner" />
       </div>
     );
   }
 
-  // If already logged in, redirect to admin panel
   if (session) {
     return <Navigate to="/admin" replace />;
   }
@@ -47,75 +38,60 @@ export default function AdminLogin() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#1b3a2d",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <div
-        style={{
-          background: "#1e3d2f",
-          padding: 30,
-          borderRadius: 12,
-          width: "100%",
-          maxWidth: 400,
-          color: "#fff",
-        }}
-      >
-        <h2 style={{ marginTop: 0 }}>Admin Login</h2>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={inputStyle}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={inputStyle}
-          />
-          {error && (
-            <p style={{ color: "#e63946", marginBottom: 10 }}>{error}</p>
-          )}
-          <button type="submit" disabled={loading} style={buttonStyle}>
-            {loading ? "Logging in..." : "Login"}
+    <div className="admin-login-shell">
+      <div className="admin-login-card">
+        <div className="admin-login-brand">
+          <div className="admin-login-brand-icon">🍵</div>
+          <h1>Tea Leaves</h1>
+          <p>Sign in to manage your menu</p>
+        </div>
+
+        <form className="admin-login-form" onSubmit={handleSubmit}>
+          <div>
+            <label className="admin-label" htmlFor="admin-email">
+              Email
+            </label>
+            <input
+              id="admin-email"
+              className="admin-input"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label className="admin-label" htmlFor="admin-password">
+              Password
+            </label>
+            <input
+              id="admin-password"
+              className="admin-input"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          {error && <div className="admin-login-error">{error}</div>}
+
+          <button
+            type="submit"
+            className="admin-btn admin-btn-primary"
+            style={{ width: "100%", padding: "13px" }}
+            disabled={loading}
+          >
+            {loading ? "Signing in…" : "Sign in"}
           </button>
         </form>
+
+        <p className="admin-login-footer">
+          Authorized staff only
+        </p>
       </div>
     </div>
   );
 }
-
-const inputStyle = {
-  display: "block",
-  width: "100%",
-  padding: "10px 12px",
-  marginBottom: 12,
-  borderRadius: 6,
-  border: "1px solid #2d5a42",
-  background: "#243f30",
-  color: "#fff",
-  fontSize: 14,
-  outline: "none",
-};
-
-const buttonStyle = {
-  width: "100%",
-  padding: "12px",
-  background: "#40916c",
-  border: "none",
-  borderRadius: 6,
-  color: "#fff",
-  fontWeight: "bold",
-  cursor: "pointer",
-};

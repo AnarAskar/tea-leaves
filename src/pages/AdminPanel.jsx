@@ -4,6 +4,24 @@ import { supabase } from "../utils/supabaseClient";
 import { useAuth } from "../contexts/AuthContext";
 import { uploadCategoryImage } from "../utils/uploadCategoryImage";
 import { formatSupabaseError } from "../utils/formatSupabaseError";
+import "../styles/admin.css";
+
+function AdminLoading() {
+  return (
+    <div className="admin-loading">
+      <div className="admin-spinner" />
+    </div>
+  );
+}
+
+function Field({ label, children }) {
+  return (
+    <div>
+      {label && <label className="admin-label">{label}</label>}
+      {children}
+    </div>
+  );
+}
 
 export default function AdminPanel() {
   const { session, signOut, loading: authLoading } = useAuth();
@@ -13,9 +31,9 @@ export default function AdminPanel() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [activeTab, setActiveTab] = useState("items");
 
-  // Item form state
   const [editingItem, setEditingItem] = useState(null);
   const [itemForm, setItemForm] = useState({
     category_id: "",
@@ -31,7 +49,6 @@ export default function AdminPanel() {
     is_available: true,
   });
 
-  // Category form state
   const [editingCategory, setEditingCategory] = useState(null);
   const [categoryForm, setCategoryForm] = useState({
     id: "",
@@ -42,6 +59,17 @@ export default function AdminPanel() {
     sort_order: 0,
   });
   const [imageUploading, setImageUploading] = useState(false);
+
+  const showSuccess = (msg) => {
+    setSuccess(msg);
+    setError(null);
+  };
+
+  useEffect(() => {
+    if (!success) return;
+    const t = setTimeout(() => setSuccess(null), 3500);
+    return () => clearTimeout(t);
+  }, [success]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -63,7 +91,7 @@ export default function AdminPanel() {
       }
     } catch (err) {
       console.error("Fetch error:", err);
-      setError("Failed to load data.");
+      setError("Failed to load menu data.");
     } finally {
       setLoading(false);
     }
@@ -78,7 +106,6 @@ export default function AdminPanel() {
     navigate("/admin/login");
   };
 
-  // ------------------- ITEM HANDLERS -------------------
   const resetItemForm = () => {
     setItemForm({
       category_id: categories[0]?.id || "",
@@ -131,7 +158,7 @@ export default function AdminPanel() {
       ing_ar: itemForm.ing_ar.trim() || null,
       ing_ku: itemForm.ing_ku.trim() || null,
       price: parseInt(itemForm.price, 10),
-      photo_url: itemForm.photo_url.trim() || null,
+      photo_url: itemForm.photo_url.trim() || "",
       tags: itemForm.tags
         .split(",")
         .map((t) => t.trim())
@@ -145,11 +172,11 @@ export default function AdminPanel() {
           .update(itemData)
           .eq("id", editingItem.id);
         if (error) throw error;
-        alert("Item updated!");
+        showSuccess(`"${itemData.name_en}" updated successfully.`);
       } else {
         const { error } = await supabase.from("menu_items").insert([itemData]);
         if (error) throw error;
-        alert("Item added!");
+        showSuccess(`"${itemData.name_en}" added to the menu.`);
       }
       resetItemForm();
       fetchData();
@@ -163,10 +190,12 @@ export default function AdminPanel() {
     if (!window.confirm(`Delete "${name}"?`)) return;
     const { error } = await supabase.from("menu_items").delete().eq("id", id);
     if (error) setError(formatSupabaseError(error));
-    else fetchData();
+    else {
+      showSuccess(`"${name}" removed from the menu.`);
+      fetchData();
+    }
   };
 
-  // ------------------- CATEGORY HANDLERS -------------------
   const resetCategoryForm = () => {
     setCategoryForm({
       id: "",
@@ -220,6 +249,7 @@ export default function AdminPanel() {
       label_ku: cat.label_ku,
       sort_order: cat.sort_order,
     });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleSubmitCategory = async (e) => {
@@ -245,11 +275,11 @@ export default function AdminPanel() {
           .update(catData)
           .eq("id", editingCategory.id);
         if (error) throw error;
-        alert("Category updated!");
+        showSuccess(`Category "${catData.label_en}" updated.`);
       } else {
         const { error } = await supabase.from("categories").insert([catData]);
         if (error) throw error;
-        alert("Category added!");
+        showSuccess(`Category "${catData.label_en}" created.`);
       }
       resetCategoryForm();
       fetchData();
@@ -262,613 +292,623 @@ export default function AdminPanel() {
   const handleDeleteCategory = async (id, label) => {
     if (
       !window.confirm(
-        `Delete category "${label}"? This will also delete all its items.`,
+        `Delete category "${label}"? All items in this category will also be removed.`,
       )
     )
       return;
     const { error } = await supabase.from("categories").delete().eq("id", id);
     if (error) setError(formatSupabaseError(error));
-    else fetchData();
+    else {
+      showSuccess(`Category "${label}" deleted.`);
+      fetchData();
+    }
   };
 
-  // Loading state while checking auth
-  if (authLoading) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "#1b3a2d",
-          color: "#fff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div>Loading...</div>
-      </div>
-    );
-  }
+  if (authLoading) return <AdminLoading />;
 
-  // If not logged in, should not happen due to ProtectedRoute, but handle anyway
   if (!session) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "#1b3a2d",
-          color: "#fff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div
-          style={{
-            background: "#1e3d2f",
-            padding: 30,
-            borderRadius: 12,
-            maxWidth: 400,
-          }}
-        >
-          <h2>Not logged in</h2>
-          <button onClick={() => navigate("/admin/login")}>Go to Login</button>
+      <div className="admin-login-shell">
+        <div className="admin-login-card">
+          <h1>Session expired</h1>
+          <p style={{ color: "#6ba882", marginBottom: 20 }}>
+            Please sign in again to continue.
+          </p>
+          <button
+            type="button"
+            className="admin-btn admin-btn-primary"
+            style={{ width: "100%" }}
+            onClick={() => navigate("/admin/login")}
+          >
+            Go to login
+          </button>
         </div>
       </div>
     );
   }
 
+  const availableCount = items.filter((i) => i.is_available).length;
+
   return (
-    <div
-      style={{
-        padding: 20,
-        color: "white",
-        background: "#1b3a2d",
-        minHeight: "100vh",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 20,
-        }}
-      >
-        <h2 style={{ margin: 0 }}>🔧 Menu Admin Panel</h2>
-        <button
-          onClick={handleLogout}
-          style={{
-            background: "#2d5a42",
-            border: "1px solid #40916c",
-            color: "#fff",
-            padding: "8px 16px",
-            borderRadius: 6,
-            cursor: "pointer",
-            fontWeight: 600,
-          }}
-        >
-          Logout
-        </button>
-      </div>
-
-      {error && (
-        <div
-          style={{
-            background: "#e63946",
-            padding: "12px 16px",
-            marginBottom: 20,
-            borderRadius: 6,
-          }}
-        >
-          Error: {error}
+    <div className="admin-shell">
+      <header className="admin-header">
+        <div className="admin-header-inner">
+          <div className="admin-brand">
+            <div className="admin-brand-icon">🍵</div>
+            <div className="admin-brand-text">
+              <h1>Tea Leaves</h1>
+              <p>Menu management</p>
+            </div>
+          </div>
+          <div className="admin-header-actions">
+            <span className="admin-user-email">{session.user.email}</span>
+            <button
+              type="button"
+              className="admin-btn admin-btn-ghost admin-btn-sm"
+              onClick={handleLogout}
+            >
+              Sign out
+            </button>
+          </div>
         </div>
-      )}
+      </header>
 
-      {/* Tabs */}
-      <div style={{ display: "flex", gap: 4, marginBottom: 20 }}>
-        <button
-          onClick={() => setActiveTab("items")}
-          style={{
-            padding: "10px 20px",
-            background: activeTab === "items" ? "#40916c" : "#1e3d2f",
-            border: "none",
-            borderRadius: "8px 8px 0 0",
-            color: "#fff",
-            cursor: "pointer",
-            fontWeight: 600,
-          }}
-        >
-          Menu Items
-        </button>
-        <button
-          onClick={() => setActiveTab("categories")}
-          style={{
-            padding: "10px 20px",
-            background: activeTab === "categories" ? "#40916c" : "#1e3d2f",
-            border: "none",
-            borderRadius: "8px 8px 0 0",
-            color: "#fff",
-            cursor: "pointer",
-            fontWeight: 600,
-          }}
-        >
-          Categories
-        </button>
-      </div>
+      <main className="admin-main">
+        <div className="admin-stats">
+          <div className="admin-stat-card">
+            <div className="admin-stat-label">Menu items</div>
+            <div className="admin-stat-value">{items.length}</div>
+          </div>
+          <div className="admin-stat-card">
+            <div className="admin-stat-label">Live on menu</div>
+            <div className="admin-stat-value">{availableCount}</div>
+          </div>
+          <div className="admin-stat-card">
+            <div className="admin-stat-label">Categories</div>
+            <div className="admin-stat-value">{categories.length}</div>
+          </div>
+        </div>
 
-      {activeTab === "items" && (
-        <>
-          <form
-            onSubmit={handleSubmitItem}
-            style={{
-              background: "#1e3d2f",
-              padding: 20,
-              marginBottom: 30,
-              borderRadius: 12,
-            }}
+        <div className="admin-tabs">
+          <button
+            type="button"
+            className={`admin-tab${activeTab === "items" ? " active" : ""}`}
+            onClick={() => setActiveTab("items")}
           >
-            <h3 style={{ marginTop: 0 }}>
-              {editingItem ? "✏️ Edit Item" : "➕ Add New Item"}
-            </h3>
-            <div style={{ display: "grid", gap: 12 }}>
-              <select
-                value={itemForm.category_id}
-                onChange={(e) =>
-                  setItemForm({ ...itemForm, category_id: e.target.value })
-                }
-                required
-                style={inputStyle}
-              >
-                <option value="">Select Category</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.label_en} / {c.label_ar}
-                  </option>
-                ))}
-              </select>
-              <input
-                placeholder="Name (English) *"
-                value={itemForm.name_en}
-                onChange={(e) =>
-                  setItemForm({ ...itemForm, name_en: e.target.value })
-                }
-                required
-                style={inputStyle}
-              />
-              <input
-                placeholder="Name (Arabic)"
-                value={itemForm.name_ar}
-                onChange={(e) =>
-                  setItemForm({ ...itemForm, name_ar: e.target.value })
-                }
-                style={inputStyle}
-              />
-              <input
-                placeholder="Name (Kurdish)"
-                value={itemForm.name_ku}
-                onChange={(e) =>
-                  setItemForm({ ...itemForm, name_ku: e.target.value })
-                }
-                style={inputStyle}
-              />
-              <textarea
-                placeholder="Ingredients (English)"
-                value={itemForm.ing_en}
-                onChange={(e) =>
-                  setItemForm({ ...itemForm, ing_en: e.target.value })
-                }
-                rows={2}
-                style={inputStyle}
-              />
-              <textarea
-                placeholder="Ingredients (Arabic)"
-                value={itemForm.ing_ar}
-                onChange={(e) =>
-                  setItemForm({ ...itemForm, ing_ar: e.target.value })
-                }
-                rows={2}
-                style={inputStyle}
-              />
-              <textarea
-                placeholder="Ingredients (Kurdish)"
-                value={itemForm.ing_ku}
-                onChange={(e) =>
-                  setItemForm({ ...itemForm, ing_ku: e.target.value })
-                }
-                rows={2}
-                style={inputStyle}
-              />
-              <div style={{ display: "flex", gap: 12 }}>
-                <input
-                  type="number"
-                  placeholder="Price (IQD) *"
-                  value={itemForm.price}
-                  onChange={(e) =>
-                    setItemForm({ ...itemForm, price: e.target.value })
-                  }
-                  required
-                  min="0"
-                  style={{ ...inputStyle, flex: 1 }}
-                />
-                <input
-                  placeholder="Photo URL"
-                  value={itemForm.photo_url}
-                  onChange={(e) =>
-                    setItemForm({ ...itemForm, photo_url: e.target.value })
-                  }
-                  style={{ ...inputStyle, flex: 2 }}
-                />
-              </div>
-              <input
-                placeholder="Tags (comma separated: hot, cold, vegan, new)"
-                value={itemForm.tags}
-                onChange={(e) =>
-                  setItemForm({ ...itemForm, tags: e.target.value })
-                }
-                style={inputStyle}
-              />
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  color: "#fff",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={itemForm.is_available}
-                  onChange={(e) =>
-                    setItemForm({ ...itemForm, is_available: e.target.checked })
-                  }
-                />
-                Available (visible to customers)
-              </label>
-              <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  style={primaryButtonStyle}
-                >
-                  {editingItem ? "Update Item" : "Save Item"}
-                </button>
+            Menu items
+          </button>
+          <button
+            type="button"
+            className={`admin-tab${activeTab === "categories" ? " active" : ""}`}
+            onClick={() => setActiveTab("categories")}
+          >
+            Categories
+          </button>
+        </div>
+
+        {error && (
+          <div className="admin-alert admin-alert-error" role="alert">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="admin-alert admin-alert-success" role="status">
+            {success}
+          </div>
+        )}
+
+        {activeTab === "items" && (
+          <>
+            <div className="admin-card">
+              <div className="admin-card-header">
+                <div>
+                  <h2>{editingItem ? "Edit menu item" : "Add menu item"}</h2>
+                  <p>
+                    {editingItem
+                      ? "Update details below and save changes."
+                      : "Fill in the details for a new item."}
+                  </p>
+                </div>
                 {editingItem && (
                   <button
                     type="button"
+                    className="admin-btn admin-btn-secondary admin-btn-sm"
                     onClick={resetItemForm}
-                    style={secondaryButtonStyle}
                   >
-                    Cancel
+                    Cancel edit
                   </button>
                 )}
               </div>
-            </div>
-          </form>
-
-          <h3>Current Items ({items.length})</h3>
-          {loading && <p>Loading...</p>}
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {items.map((item) => (
-              <div
-                key={item.id}
-                style={{
-                  background: "#1e3d2f",
-                  padding: "12px 16px",
-                  borderRadius: 8,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  flexWrap: "wrap",
-                  gap: 10,
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  {item.photo_url && (
-                    <img
-                      src={item.photo_url}
-                      alt={item.name_en}
-                      style={{
-                        width: 50,
-                        height: 50,
-                        borderRadius: 6,
-                        objectFit: "cover",
-                      }}
-                    />
-                  )}
-                  <div>
-                    <strong>{item.name_en}</strong>{" "}
-                    <span style={{ color: "#52b788" }}>{item.price} IQD</span>
-                    <div style={{ fontSize: 12, color: "#8ab8a0" }}>
-                      {categories.find((c) => c.id === item.category_id)
-                        ?.label_en || item.category_id}
-                      {!item.is_available && (
-                        <span style={{ color: "#e63946", marginLeft: 8 }}>
-                          (Hidden)
-                        </span>
-                      )}
+              <div className="admin-card-body">
+                <form className="admin-form-grid" onSubmit={handleSubmitItem}>
+                  <div className="admin-form-section">
+                    <div className="admin-form-section-title">Basic info</div>
+                    <Field label="Category">
+                      <select
+                        className="admin-select"
+                        value={itemForm.category_id}
+                        onChange={(e) =>
+                          setItemForm({ ...itemForm, category_id: e.target.value })
+                        }
+                        required
+                      >
+                        <option value="">Select category</option>
+                        {categories.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.label_en}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                    <div className="admin-field-row admin-field-row-3">
+                      <Field label="Name (English) *">
+                        <input
+                          className="admin-input"
+                          value={itemForm.name_en}
+                          onChange={(e) =>
+                            setItemForm({ ...itemForm, name_en: e.target.value })
+                          }
+                          required
+                        />
+                      </Field>
+                      <Field label="Name (Arabic)">
+                        <input
+                          className="admin-input"
+                          dir="rtl"
+                          value={itemForm.name_ar}
+                          onChange={(e) =>
+                            setItemForm({ ...itemForm, name_ar: e.target.value })
+                          }
+                        />
+                      </Field>
+                      <Field label="Name (Kurdish)">
+                        <input
+                          className="admin-input"
+                          dir="rtl"
+                          value={itemForm.name_ku}
+                          onChange={(e) =>
+                            setItemForm({ ...itemForm, name_ku: e.target.value })
+                          }
+                        />
+                      </Field>
                     </div>
                   </div>
-                </div>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button
-                    onClick={() => handleEditItem(item)}
-                    style={{
-                      background: "#2d6a4f",
-                      border: "none",
-                      color: "#fff",
-                      padding: "6px 12px",
-                      borderRadius: 4,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteItem(item.id, item.name_en)}
-                    style={{
-                      background: "#aa2222",
-                      border: "none",
-                      color: "#fff",
-                      padding: "6px 12px",
-                      borderRadius: 4,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
 
-      {activeTab === "categories" && (
-        <>
-          <form
-            onSubmit={handleSubmitCategory}
-            style={{
-              background: "#1e3d2f",
-              padding: 20,
-              marginBottom: 30,
-              borderRadius: 12,
-            }}
-          >
-            <h3 style={{ marginTop: 0 }}>
-              {editingCategory ? "✏️ Edit Category" : "➕ Add New Category"}
-            </h3>
-            <div style={{ display: "grid", gap: 12 }}>
-              <input
-                placeholder="ID (e.g., blacktea) *"
-                value={categoryForm.id}
-                onChange={(e) =>
-                  setCategoryForm({ ...categoryForm, id: e.target.value })
-                }
-                required
-                disabled={!!editingCategory}
-                style={inputStyle}
-              />
-              <input
-                placeholder="Image URL (optional if uploading below)"
-                value={categoryForm.image_url}
-                onChange={(e) =>
-                  setCategoryForm({ ...categoryForm, image_url: e.target.value })
-                }
-                style={inputStyle}
-              />
-              <div>
-                <label
-                  style={{
-                    display: "inline-block",
-                    padding: "10px 16px",
-                    background: "#2d6a4f",
-                    borderRadius: 8,
-                    cursor: imageUploading ? "wait" : "pointer",
-                    fontSize: 14,
-                  }}
-                >
-                  {imageUploading ? "Uploading…" : "Upload category image"}
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,image/gif"
-                    onChange={handleCategoryImageSelect}
-                    disabled={imageUploading}
-                    style={{ display: "none" }}
-                  />
-                </label>
-                {categoryForm.image_url && (
-                  <img
-                    src={categoryForm.image_url}
-                    alt="Category preview"
-                    style={{
-                      display: "block",
-                      marginTop: 12,
-                      width: 72,
-                      height: 72,
-                      borderRadius: "50%",
-                      objectFit: "cover",
-                      border: "2px solid #52b788",
-                    }}
-                  />
-                )}
+                  <div className="admin-form-section">
+                    <div className="admin-form-section-title">Ingredients</div>
+                    <div className="admin-field-row admin-field-row-3">
+                      <Field label="English">
+                        <textarea
+                          className="admin-textarea"
+                          value={itemForm.ing_en}
+                          onChange={(e) =>
+                            setItemForm({ ...itemForm, ing_en: e.target.value })
+                          }
+                          rows={2}
+                        />
+                      </Field>
+                      <Field label="Arabic">
+                        <textarea
+                          className="admin-textarea"
+                          dir="rtl"
+                          value={itemForm.ing_ar}
+                          onChange={(e) =>
+                            setItemForm({ ...itemForm, ing_ar: e.target.value })
+                          }
+                          rows={2}
+                        />
+                      </Field>
+                      <Field label="Kurdish">
+                        <textarea
+                          className="admin-textarea"
+                          dir="rtl"
+                          value={itemForm.ing_ku}
+                          onChange={(e) =>
+                            setItemForm({ ...itemForm, ing_ku: e.target.value })
+                          }
+                          rows={2}
+                        />
+                      </Field>
+                    </div>
+                  </div>
+
+                  <div className="admin-form-section">
+                    <div className="admin-form-section-title">Pricing & media</div>
+                    <div className="admin-field-row admin-field-row-price">
+                      <Field label="Price (IQD) *">
+                        <input
+                          className="admin-input"
+                          type="number"
+                          value={itemForm.price}
+                          onChange={(e) =>
+                            setItemForm({ ...itemForm, price: e.target.value })
+                          }
+                          required
+                          min="0"
+                        />
+                      </Field>
+                      <Field label="Photo URL">
+                        <input
+                          className="admin-input"
+                          type="url"
+                          placeholder="https://..."
+                          value={itemForm.photo_url}
+                          onChange={(e) =>
+                            setItemForm({ ...itemForm, photo_url: e.target.value })
+                          }
+                        />
+                      </Field>
+                    </div>
+                    <Field label="Tags">
+                      <input
+                        className="admin-input"
+                        placeholder="hot, cold, vegan, new"
+                        value={itemForm.tags}
+                        onChange={(e) =>
+                          setItemForm({ ...itemForm, tags: e.target.value })
+                        }
+                      />
+                    </Field>
+                    <label className="admin-checkbox-row">
+                      <input
+                        type="checkbox"
+                        checked={itemForm.is_available}
+                        onChange={(e) =>
+                          setItemForm({
+                            ...itemForm,
+                            is_available: e.target.checked,
+                          })
+                        }
+                      />
+                      Visible to customers
+                    </label>
+                  </div>
+
+                  <div className="admin-form-actions">
+                    <button
+                      type="submit"
+                      className="admin-btn admin-btn-primary"
+                      disabled={loading}
+                    >
+                      {editingItem ? "Save changes" : "Add item"}
+                    </button>
+                  </div>
+                </form>
               </div>
-              <input
-                placeholder="Label (English) *"
-                value={categoryForm.label_en}
-                onChange={(e) =>
-                  setCategoryForm({ ...categoryForm, label_en: e.target.value })
-                }
-                required
-                style={inputStyle}
-              />
-              <input
-                placeholder="Label (Arabic)"
-                value={categoryForm.label_ar}
-                onChange={(e) =>
-                  setCategoryForm({ ...categoryForm, label_ar: e.target.value })
-                }
-                style={inputStyle}
-              />
-              <input
-                placeholder="Label (Kurdish)"
-                value={categoryForm.label_ku}
-                onChange={(e) =>
-                  setCategoryForm({ ...categoryForm, label_ku: e.target.value })
-                }
-                style={inputStyle}
-              />
-              <input
-                type="number"
-                placeholder="Sort Order"
-                value={categoryForm.sort_order}
-                onChange={(e) =>
-                  setCategoryForm({
-                    ...categoryForm,
-                    sort_order: e.target.value,
-                  })
-                }
-                style={inputStyle}
-              />
-              <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  style={primaryButtonStyle}
-                >
-                  {editingCategory ? "Update Category" : "Save Category"}
-                </button>
+            </div>
+
+            <div className="admin-card">
+              <div className="admin-card-header">
+                <div>
+                  <h2>All items</h2>
+                  <p>{items.length} items in your menu</p>
+                </div>
+              </div>
+              {loading ? (
+                <div className="admin-empty">
+                  <div className="admin-spinner" style={{ margin: "0 auto" }} />
+                </div>
+              ) : items.length === 0 ? (
+                <div className="admin-empty">
+                  <div className="admin-empty-icon">🫖</div>
+                  <p>No menu items yet. Add your first item above.</p>
+                </div>
+              ) : (
+                <div className="admin-table-wrap">
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>Item</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {items.map((item) => (
+                        <tr key={item.id}>
+                          <td>
+                            <div className="admin-table-item">
+                              {item.photo_url ? (
+                                <img
+                                  className="admin-table-thumb"
+                                  src={item.photo_url}
+                                  alt=""
+                                />
+                              ) : (
+                                <div className="admin-table-thumb admin-table-thumb-placeholder">
+                                  🍵
+                                </div>
+                              )}
+                              <div>
+                                <div className="admin-table-name">
+                                  {item.name_en}
+                                </div>
+                                {(item.name_ar || item.name_ku) && (
+                                  <div className="admin-table-meta">
+                                    {[item.name_ar, item.name_ku]
+                                      .filter(Boolean)
+                                      .join(" · ")}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="admin-table-meta">
+                            {categories.find((c) => c.id === item.category_id)
+                              ?.label_en || item.category_id}
+                          </td>
+                          <td className="admin-price">
+                            {item.price.toLocaleString()} IQD
+                          </td>
+                          <td>
+                            <span
+                              className={`admin-badge ${item.is_available ? "admin-badge-live" : "admin-badge-hidden"}`}
+                            >
+                              {item.is_available ? "Live" : "Hidden"}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="admin-table-actions">
+                              <button
+                                type="button"
+                                className="admin-btn admin-btn-edit admin-btn-sm"
+                                onClick={() => handleEditItem(item)}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                className="admin-btn admin-btn-danger admin-btn-sm"
+                                onClick={() =>
+                                  handleDeleteItem(item.id, item.name_en)
+                                }
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {activeTab === "categories" && (
+          <>
+            <div className="admin-card">
+              <div className="admin-card-header">
+                <div>
+                  <h2>{editingCategory ? "Edit category" : "Add category"}</h2>
+                  <p>
+                    Categories appear in the navigation bar on the customer menu.
+                  </p>
+                </div>
                 {editingCategory && (
                   <button
                     type="button"
+                    className="admin-btn admin-btn-secondary admin-btn-sm"
                     onClick={resetCategoryForm}
-                    style={secondaryButtonStyle}
                   >
-                    Cancel
+                    Cancel edit
                   </button>
                 )}
               </div>
-            </div>
-          </form>
-
-          <h3>Categories ({categories.length})</h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {categories.map((cat) => (
-              <div
-                key={cat.id}
-                style={{
-                  background: "#1e3d2f",
-                  padding: "12px 16px",
-                  borderRadius: 8,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  {cat.image_url ? (
-                    <img
-                      src={cat.image_url}
-                      alt={cat.label_en}
-                      style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: "50%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  ) : (
-                    <span
-                      style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: "50%",
-                        background: "#2d5a42",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: 18,
-                      }}
-                    >
-                      🍵
-                    </span>
-                  )}
-                  <div>
-                    <strong>{cat.label_en}</strong>{" "}
-                    <span style={{ color: "#8ab8a0" }}>
-                      / {cat.label_ar} / {cat.label_ku}
-                    </span>
-                    <span
-                      style={{ marginLeft: 12, fontSize: 12, color: "#6ba882" }}
-                    >
-                      Order: {cat.sort_order}
-                    </span>
+              <div className="admin-card-body">
+                <form className="admin-form-grid" onSubmit={handleSubmitCategory}>
+                  <div className="admin-form-section">
+                    <div className="admin-form-section-title">Identity</div>
+                    <div className="admin-field-row admin-field-row-2">
+                      <Field label="ID (slug) *">
+                        <input
+                          className="admin-input"
+                          placeholder="e.g. blacktea"
+                          value={categoryForm.id}
+                          onChange={(e) =>
+                            setCategoryForm({ ...categoryForm, id: e.target.value })
+                          }
+                          required
+                          disabled={!!editingCategory}
+                        />
+                      </Field>
+                      <Field label="Sort order">
+                        <input
+                          className="admin-input"
+                          type="number"
+                          value={categoryForm.sort_order}
+                          onChange={(e) =>
+                            setCategoryForm({
+                              ...categoryForm,
+                              sort_order: e.target.value,
+                            })
+                          }
+                        />
+                      </Field>
+                    </div>
                   </div>
-                </div>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button
-                    onClick={() => handleEditCategory(cat)}
-                    style={{
-                      background: "#2d6a4f",
-                      border: "none",
-                      color: "#fff",
-                      padding: "6px 12px",
-                      borderRadius: 4,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteCategory(cat.id, cat.label_en)}
-                    style={{
-                      background: "#aa2222",
-                      border: "none",
-                      color: "#fff",
-                      padding: "6px 12px",
-                      borderRadius: 4,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Delete
-                  </button>
+
+                  <div className="admin-form-section">
+                    <div className="admin-form-section-title">Icon image</div>
+                    <Field label="Image URL">
+                      <input
+                        className="admin-input"
+                        type="url"
+                        placeholder="https://... or upload below"
+                        value={categoryForm.image_url}
+                        onChange={(e) =>
+                          setCategoryForm({
+                            ...categoryForm,
+                            image_url: e.target.value,
+                          })
+                        }
+                      />
+                    </Field>
+                    <div className="admin-upload-zone">
+                      <label className="admin-upload-btn">
+                        {imageUploading ? "Uploading…" : "Upload image"}
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,image/gif"
+                          onChange={handleCategoryImageSelect}
+                          disabled={imageUploading}
+                        />
+                      </label>
+                      {categoryForm.image_url && (
+                        <img
+                          className="admin-preview-img"
+                          src={categoryForm.image_url}
+                          alt="Preview"
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="admin-form-section">
+                    <div className="admin-form-section-title">Labels</div>
+                    <div className="admin-field-row admin-field-row-3">
+                      <Field label="English *">
+                        <input
+                          className="admin-input"
+                          value={categoryForm.label_en}
+                          onChange={(e) =>
+                            setCategoryForm({
+                              ...categoryForm,
+                              label_en: e.target.value,
+                            })
+                          }
+                          required
+                        />
+                      </Field>
+                      <Field label="Arabic">
+                        <input
+                          className="admin-input"
+                          dir="rtl"
+                          value={categoryForm.label_ar}
+                          onChange={(e) =>
+                            setCategoryForm({
+                              ...categoryForm,
+                              label_ar: e.target.value,
+                            })
+                          }
+                        />
+                      </Field>
+                      <Field label="Kurdish">
+                        <input
+                          className="admin-input"
+                          dir="rtl"
+                          value={categoryForm.label_ku}
+                          onChange={(e) =>
+                            setCategoryForm({
+                              ...categoryForm,
+                              label_ku: e.target.value,
+                            })
+                          }
+                        />
+                      </Field>
+                    </div>
+                  </div>
+
+                  <div className="admin-form-actions">
+                    <button
+                      type="submit"
+                      className="admin-btn admin-btn-primary"
+                      disabled={loading}
+                    >
+                      {editingCategory ? "Save changes" : "Add category"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <div className="admin-card">
+              <div className="admin-card-header">
+                <div>
+                  <h2>All categories</h2>
+                  <p>{categories.length} categories configured</p>
                 </div>
               </div>
-            ))}
-          </div>
-        </>
-      )}
+              {categories.length === 0 ? (
+                <div className="admin-empty">
+                  <div className="admin-empty-icon">📂</div>
+                  <p>No categories yet. Create one above to get started.</p>
+                </div>
+              ) : (
+                <div className="admin-table-wrap">
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>Category</th>
+                        <th>ID</th>
+                        <th>Order</th>
+                        <th />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {categories.map((cat) => (
+                        <tr key={cat.id}>
+                          <td>
+                            <div className="admin-table-item">
+                              {cat.image_url ? (
+                                <img
+                                  className="admin-table-thumb admin-table-thumb-round"
+                                  src={cat.image_url}
+                                  alt=""
+                                />
+                              ) : (
+                                <div className="admin-table-thumb admin-table-thumb-round admin-table-thumb-placeholder">
+                                  🍵
+                                </div>
+                              )}
+                              <div>
+                                <div className="admin-table-name">
+                                  {cat.label_en}
+                                </div>
+                                <div className="admin-table-meta">
+                                  {[cat.label_ar, cat.label_ku]
+                                    .filter(Boolean)
+                                    .join(" · ")}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="admin-table-meta">{cat.id}</td>
+                          <td className="admin-table-meta">{cat.sort_order}</td>
+                          <td>
+                            <div className="admin-table-actions">
+                              <button
+                                type="button"
+                                className="admin-btn admin-btn-edit admin-btn-sm"
+                                onClick={() => handleEditCategory(cat)}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                className="admin-btn admin-btn-danger admin-btn-sm"
+                                onClick={() =>
+                                  handleDeleteCategory(cat.id, cat.label_en)
+                                }
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </main>
     </div>
   );
 }
-
-const inputStyle = {
-  padding: "10px 12px",
-  borderRadius: 6,
-  border: "1px solid #2d5a42",
-  background: "#243f30",
-  color: "#fff",
-  fontSize: 14,
-  width: "100%",
-  outline: "none",
-};
-
-const primaryButtonStyle = {
-  padding: "10px 20px",
-  background: "#40916c",
-  border: "none",
-  borderRadius: 6,
-  color: "#fff",
-  fontWeight: "bold",
-  cursor: "pointer",
-  flex: 1,
-};
-
-const secondaryButtonStyle = {
-  padding: "10px 20px",
-  background: "#2d5a42",
-  border: "1px solid #40916c",
-  borderRadius: 6,
-  color: "#fff",
-  cursor: "pointer",
-  flex: 1,
-};
