@@ -1,7 +1,7 @@
 export const LANG_OPTS = [
-  { code: "en", label: "English", flag: "🇬🇧" },
-  { code: "ar", label: "العربية", flag: "🇮🇶" },
-  { code: "ku", label: "کوردی", flag: "🏔️" },
+  { code: "en", label: "English", badge: "EN" },
+  { code: "ar", label: "العربية", badge: "AR" },
+  { code: "ku", label: "کوردی", badge: "KU" },
 ];
 
 export const T = {

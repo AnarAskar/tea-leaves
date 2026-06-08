@@ -14,7 +14,6 @@ const SPLASH_CSS = `
   .sp-socials { display:flex; align-items:center; gap:14px; margin-bottom:14px; }
   .sp-icon { width:42px; height:42px; border-radius:50%; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; color:#fff; text-decoration:none; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); transition:background .2s, transform .15s; }
   .sp-icon:hover { background:rgba(255,255,255,0.24); transform:scale(1.1); }
-  .sp-powered { font-size:11px; color:rgba(255,255,255,0.35); letter-spacing:.04em; }
 `;
 
 export default function SplashScreen({ onPickLang }) {
@@ -24,7 +23,7 @@ export default function SplashScreen({ onPickLang }) {
       <div className="sp-root">
         <video
           className="sp-video"
-          src="https://r2.mynu.site/images/67c05717d8908969203b54ba/items/455959311.mp4"
+          src="/splash.mp4"
           autoPlay
           muted
           loop
@@ -133,7 +132,6 @@ export default function SplashScreen({ onPickLang }) {
               </svg>
             </a>
           </div>
-          <div className="sp-powered">Powered by mynu</div>
         </div>
       </div>
     </>

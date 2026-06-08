@@ -10,12 +10,29 @@ import {
   sendTelegramFeedback,
 } from "../utils/telegram";
 
+function ItemPhoto({ src, alt, className, placeholderClassName = "photo-ph" }) {
+  if (!src) {
+    return (
+      <div
+        className={`${className} ${placeholderClassName}`}
+        aria-hidden="true"
+      >
+        🍵
+      </div>
+    );
+  }
+  return (
+    <img className={className} src={src} alt={alt} loading="lazy" />
+  );
+}
+
 export default function MenuApp({
   lang,
   onChangeLang,
   tableNum: initialTable,
 }) {
   const [langOpen, setLangOpen] = useState(false);
+  const langWrapRef = useRef(null);
   const [activeCat, setActiveCat] = useState("");
   const [cart, setCart] = useState({});
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -69,6 +86,17 @@ export default function MenuApp({
       setActiveCat(categories[0].id);
     }
   }, [categories, activeCat]);
+
+  useEffect(() => {
+    if (!langOpen) return;
+    const onDocClick = (e) => {
+      if (!langWrapRef.current?.contains(e.target)) setLangOpen(false);
+    };
+    document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
+  }, [langOpen]);
+
+  const currentLang = LANG_OPTS.find((l) => l.code === lang);
 
   const totalQty = Object.values(cart).reduce((s, q) => s + q, 0);
   const totalIQD = Object.entries(cart).reduce((s, [id, q]) => {
@@ -230,11 +258,10 @@ export default function MenuApp({
             <div className="l-ing">{item.ingredients[lang]}</div>
           </div>
           <div className="l-img-wrap">
-            <img
+            <ItemPhoto
               className="l-img"
               src={item.photo}
               alt={item.name[lang]}
-              loading="lazy"
             />
             {qty > 0 && <div className="img-badge">{qty}</div>}
           </div>
@@ -247,11 +274,10 @@ export default function MenuApp({
         className={`g-card${qty > 0 ? " incart" : ""}`}
         onClick={() => setSelectedItem(item)}
       >
-        <img
+        <ItemPhoto
           className="g-img"
           src={item.photo}
           alt={item.name[lang]}
-          loading="lazy"
         />
         {qty > 0 && <div className="img-badge">{qty}</div>}
         <div className="g-body">
@@ -331,18 +357,30 @@ export default function MenuApp({
         body{background:#1b3a2d;font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;}
         .app{width:100%;max-width:430px;min-height:100vh;height:100vh;background:#1b3a2d;color:#fff;direction:${isRTL ? "rtl" : "ltr"};display:flex;flex-direction:column;position:relative;overflow:hidden;margin:0 auto;}
         .hdr{background:#1b3a2d;padding:14px 16px 0;flex-shrink:0;border-bottom:1px solid #2d5a42;z-index:10;}
-        .hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-        .hdr-title{font-size:18px;font-weight:700;color:#fff;text-align:center;flex:1;}
-        .hdr-right{display:flex;align-items:center;gap:8px;}
-        .lang-wrap{position:relative;}
-        .lang-btn{display:flex;align-items:center;gap:5px;background:#1e3d2f;border:1px solid #2d5a42;border-radius:20px;padding:6px 10px;cursor:pointer;font-size:13px;font-weight:600;color:#52b788;font-family:'Plus Jakarta Sans',sans-serif;transition:border-color .2s;}
-        .lang-btn:hover{border-color:#52b788;}
-        .chev{transition:transform .2s;}
+        .hdr-top{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px;margin-bottom:12px;}
+        .hdr-title{font-size:18px;font-weight:700;color:#fff;text-align:center;justify-self:center;white-space:nowrap;}
+        .hdr-right{display:flex;align-items:center;gap:8px;justify-self:end;}
+        .lang-wrap{position:relative;z-index:300;justify-self:start;}
+        .lang-btn{display:flex;align-items:center;justify-content:center;gap:3px;min-width:34px;height:34px;padding:0 8px;background:#1e3d2f;border:1px solid #2d5a42;border-radius:10px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;color:#52b788;transition:background .2s,border-color .2s;}
+        .lang-btn:hover,.lang-btn.open{background:#2d6a4f;border-color:#52b788;color:#fff;}
+        .lang-btn-badge{font-size:11px;font-weight:800;line-height:1;letter-spacing:.05em;color:inherit;}
+        .chev{transition:transform .2s,color .2s;color:#6ba882;flex-shrink:0;}
+        .lang-btn:hover .chev,.lang-btn.open .chev{color:inherit;}
         .chev.open{transform:rotate(180deg);}
-        .lang-drop{position:absolute;top:calc(100% + 8px);${isRTL ? "right" : "left"}:0;background:#1e3d2f;border:1px solid #2d5a42;border-radius:12px;overflow:hidden;z-index:300;min-width:145px;box-shadow:0 8px 24px rgba(0,0,0,.55);}
-        .lang-opt{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:14px;font-weight:500;cursor:pointer;color:#fff;transition:background .15s;}
-        .lang-opt:hover{background:#2d6a4f;}
-        .lang-opt.sel{color:#52b788;}
+        .lang-drop{position:absolute;top:calc(100% + 6px);${isRTL ? "right" : "left"}:0;background:#1a3328;border:1px solid rgba(82,183,136,.3);border-radius:14px;padding:6px;z-index:301;min-width:168px;box-shadow:0 12px 32px rgba(0,0,0,.5);color:#fff;}
+        .lang-opt{display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:14px;font-weight:500;cursor:pointer;color:#e8f5ee;border-radius:10px;transition:background .15s,color .15s;}
+        .lang-opt:hover{background:rgba(45,106,79,.6);color:#fff;}
+        .lang-opt.sel{background:rgba(82,183,136,.18);color:#fff;}
+        .lang-opt-badge{font-size:11px;font-weight:800;line-height:1;letter-spacing:.05em;color:#52b788;background:rgba(82,183,136,.12);padding:4px 6px;border-radius:6px;min-width:28px;text-align:center;flex-shrink:0;}
+        .lang-opt.sel .lang-opt-badge{color:#fff;background:rgba(82,183,136,.35);}
+        .lang-opt-text{flex:1;font-weight:600;color:inherit;}
+        .lang-opt-check{color:#52b788;font-size:14px;font-weight:800;opacity:0;}
+        .lang-opt.sel .lang-opt-check{opacity:1;}
+        .photo-ph{display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#243f30,#1e3d2f);color:#4a7a5a;}
+        .g-img.photo-ph{height:130px;font-size:32px;}
+        .l-img.photo-ph{min-height:100px;font-size:28px;}
+        .d-img.photo-ph{width:42px;height:42px;font-size:18px;border-radius:10px;}
+        .det-img.photo-ph{font-size:52px;}
         .icon-btn{background:none;border:none;color:#8ab8a0;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center;position:relative;}
         .search-row{display:flex;align-items:center;gap:8px;background:#1e3d2f;border:1px solid #2d5a42;border-radius:20px;padding:9px 14px;margin-bottom:12px;}
         .search-row input{flex:1;background:none;border:none;outline:none;color:#fff;font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;}
@@ -531,48 +569,48 @@ export default function MenuApp({
         {/* HEADER */}
         <div className="hdr">
           <div className="hdr-top">
-            <div className="lang-wrap">
+            <div className="lang-wrap" ref={langWrapRef}>
               <button
-                className="lang-btn"
-                onClick={() => setLangOpen((v) => !v)}
+                type="button"
+                className={`lang-btn${langOpen ? " open" : ""}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLangOpen((v) => !v);
+                }}
+                aria-expanded={langOpen}
+                aria-haspopup="listbox"
+                aria-label={`Language: ${currentLang?.label}`}
+                title={currentLang?.label}
               >
-                <svg
-                  width="13"
-                  height="13"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" />
-                </svg>
-                <span>{LANG_OPTS.find((l) => l.code === lang)?.flag}</span>
+                <span className="lang-btn-badge">{currentLang?.badge}</span>
                 <svg
                   className={`chev${langOpen ? " open" : ""}`}
-                  width="11"
-                  height="11"
+                  width="8"
+                  height="8"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2.5"
+                  strokeWidth="3"
                 >
                   <path d="M6 9l6 6 6-6" />
                 </svg>
               </button>
               {langOpen && (
-                <div className="lang-drop">
+                <div className="lang-drop" role="listbox">
                   {LANG_OPTS.map((lo) => (
                     <div
                       key={lo.code}
+                      role="option"
+                      aria-selected={lang === lo.code}
                       className={`lang-opt${lang === lo.code ? " sel" : ""}`}
                       onClick={() => {
                         onChangeLang?.(lo.code);
                         setLangOpen(false);
                       }}
                     >
-                      <span style={{ fontSize: 18 }}>{lo.flag}</span>
-                      <span>{lo.label}</span>
+                      <span className="lang-opt-badge">{lo.badge}</span>
+                      <span className="lang-opt-text">{lo.label}</span>
+                      <span className="lang-opt-check">✓</span>
                     </div>
                   ))}
                 </div>
@@ -726,7 +764,7 @@ export default function MenuApp({
                   onClick={() => handleCatClick(c.id)}
                 >
                   <div className="cat-icon">
-                    {c.image_url ? (
+                    {c.image_url?.trim() ? (
                       <img src={c.image_url} alt={c[`label_${lang}`]} />
                     ) : (
                       <span className="cat-icon-fallback">🍵</span>
@@ -948,7 +986,7 @@ export default function MenuApp({
               cartItems.map((item) => (
                 <div key={item.id} className="d-item">
                   <div className="d-l">
-                    <img
+                    <ItemPhoto
                       className="d-img"
                       src={item.photo}
                       alt={item.name[lang]}
@@ -1212,7 +1250,7 @@ export default function MenuApp({
                 <div className="det-sheet" onClick={(e) => e.stopPropagation()}>
                   <div className="det-handle" />
                   <div className="det-img-wrap">
-                    <img
+                    <ItemPhoto
                       className="det-img"
                       src={item.photo}
                       alt={item.name[lang]}

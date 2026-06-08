@@ -26,7 +26,7 @@ export function useMenuData() {
         // Transform items to match UI structure
         const transformedItems = rawItems.map((item) => ({
           id: item.id,
-          photo: item.photo_url, // rename for UI
+          photo: item.photo_url?.trim() || null, // rename for UI
           name: {
             en: item.name_en,
             ar: item.name_ar,

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../utils/supabaseClient";
 import { useAuth } from "../contexts/AuthContext";
 import { uploadCategoryImage } from "../utils/uploadCategoryImage";
+import { uploadMenuImage } from "../utils/uploadMenuImage";
 import { formatSupabaseError } from "../utils/formatSupabaseError";
 import "../styles/admin.css";
 
@@ -59,6 +60,7 @@ export default function AdminPanel() {
     sort_order: 0,
   });
   const [imageUploading, setImageUploading] = useState(false);
+  const [itemImageUploading, setItemImageUploading] = useState(false);
 
   const showSuccess = (msg) => {
     setSuccess(msg);
@@ -235,6 +237,37 @@ export default function AdminPanel() {
       setError(err instanceof Error ? err.message : "Image upload failed.");
     } finally {
       setImageUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  const getItemPhotoFolder = () => {
+    const categoryId = itemForm.category_id?.trim();
+    if (!categoryId) return null;
+    const itemKey = editingItem?.id ?? "new";
+    return `items/${categoryId}/${itemKey}`;
+  };
+
+  const handleItemImageSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const folder = getItemPhotoFolder();
+    if (!folder) {
+      setError("Select a category before uploading a photo.");
+      e.target.value = "";
+      return;
+    }
+
+    setItemImageUploading(true);
+    setError(null);
+    try {
+      const url = await uploadMenuImage(file, folder);
+      setItemForm((prev) => ({ ...prev, photo_url: url }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Image upload failed.");
+    } finally {
+      setItemImageUploading(false);
       e.target.value = "";
     }
   };
@@ -531,13 +564,31 @@ export default function AdminPanel() {
                         <input
                           className="admin-input"
                           type="url"
-                          placeholder="https://..."
+                          placeholder="https://... or upload below"
                           value={itemForm.photo_url}
                           onChange={(e) =>
                             setItemForm({ ...itemForm, photo_url: e.target.value })
                           }
                         />
                       </Field>
+                      <div className="admin-upload-zone">
+                        <label className="admin-upload-btn">
+                          {itemImageUploading ? "Uploading…" : "Upload photo"}
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp,image/gif"
+                            onChange={handleItemImageSelect}
+                            disabled={itemImageUploading}
+                          />
+                        </label>
+                        {itemForm.photo_url && (
+                          <img
+                            className="admin-preview-img"
+                            src={itemForm.photo_url}
+                            alt="Preview"
+                          />
+                        )}
+                      </div>
                     </div>
                     <Field label="Tags">
                       <input
