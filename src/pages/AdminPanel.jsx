@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../utils/supabaseClient";
 import { useAuth } from "../contexts/AuthContext";
+import { uploadCategoryImage } from "../utils/uploadCategoryImage";
+import { formatSupabaseError } from "../utils/formatSupabaseError";
 
 export default function AdminPanel() {
   const { session, signOut, loading: authLoading } = useAuth();
@@ -33,12 +35,13 @@ export default function AdminPanel() {
   const [editingCategory, setEditingCategory] = useState(null);
   const [categoryForm, setCategoryForm] = useState({
     id: "",
-    emoji: "",
+    image_url: "",
     label_en: "",
     label_ar: "",
     label_ku: "",
     sort_order: 0,
   });
+  const [imageUploading, setImageUploading] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -152,14 +155,14 @@ export default function AdminPanel() {
       fetchData();
     } catch (err) {
       console.error("Submit error:", err);
-      setError(err.message);
+      setError(formatSupabaseError(err));
     }
   };
 
   const handleDeleteItem = async (id, name) => {
     if (!window.confirm(`Delete "${name}"?`)) return;
     const { error } = await supabase.from("menu_items").delete().eq("id", id);
-    if (error) setError(error.message);
+    if (error) setError(formatSupabaseError(error));
     else fetchData();
   };
 
@@ -167,7 +170,7 @@ export default function AdminPanel() {
   const resetCategoryForm = () => {
     setCategoryForm({
       id: "",
-      emoji: "",
+      image_url: "",
       label_en: "",
       label_ar: "",
       label_ku: "",
@@ -177,11 +180,41 @@ export default function AdminPanel() {
     setError(null);
   };
 
+  const getCategoryId = () =>
+    (editingCategory?.id || categoryForm.id)
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "");
+
+  const handleCategoryImageSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const categoryId = getCategoryId();
+    if (!categoryId) {
+      setError("Enter a category ID before uploading an image.");
+      e.target.value = "";
+      return;
+    }
+
+    setImageUploading(true);
+    setError(null);
+    try {
+      const url = await uploadCategoryImage(file, categoryId);
+      setCategoryForm((prev) => ({ ...prev, image_url: url }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Image upload failed.");
+    } finally {
+      setImageUploading(false);
+      e.target.value = "";
+    }
+  };
+
   const handleEditCategory = (cat) => {
     setEditingCategory(cat);
     setCategoryForm({
       id: cat.id,
-      emoji: cat.emoji,
+      image_url: cat.image_url || "",
       label_en: cat.label_en,
       label_ar: cat.label_ar,
       label_ku: cat.label_ku,
@@ -198,7 +231,8 @@ export default function AdminPanel() {
     }
     const catData = {
       id: categoryForm.id.trim().toLowerCase().replace(/\s+/g, ""),
-      emoji: categoryForm.emoji || "📦",
+      image_url: categoryForm.image_url.trim() || null,
+      emoji: "📦",
       label_en: categoryForm.label_en.trim(),
       label_ar: categoryForm.label_ar.trim(),
       label_ku: categoryForm.label_ku.trim(),
@@ -221,7 +255,7 @@ export default function AdminPanel() {
       fetchData();
     } catch (err) {
       console.error("Category error:", err);
-      setError(err.message);
+      setError(formatSupabaseError(err));
     }
   };
 
@@ -233,7 +267,7 @@ export default function AdminPanel() {
     )
       return;
     const { error } = await supabase.from("categories").delete().eq("id", id);
-    if (error) setError(error.message);
+    if (error) setError(formatSupabaseError(error));
     else fetchData();
   };
 
@@ -388,7 +422,7 @@ export default function AdminPanel() {
                 <option value="">Select Category</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.emoji} {c.label_en} / {c.label_ar}
+                    {c.label_en} / {c.label_ar}
                   </option>
                 ))}
               </select>
@@ -615,13 +649,49 @@ export default function AdminPanel() {
                 style={inputStyle}
               />
               <input
-                placeholder="Emoji (e.g., 🍵)"
-                value={categoryForm.emoji}
+                placeholder="Image URL (optional if uploading below)"
+                value={categoryForm.image_url}
                 onChange={(e) =>
-                  setCategoryForm({ ...categoryForm, emoji: e.target.value })
+                  setCategoryForm({ ...categoryForm, image_url: e.target.value })
                 }
                 style={inputStyle}
               />
+              <div>
+                <label
+                  style={{
+                    display: "inline-block",
+                    padding: "10px 16px",
+                    background: "#2d6a4f",
+                    borderRadius: 8,
+                    cursor: imageUploading ? "wait" : "pointer",
+                    fontSize: 14,
+                  }}
+                >
+                  {imageUploading ? "Uploading…" : "Upload category image"}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onChange={handleCategoryImageSelect}
+                    disabled={imageUploading}
+                    style={{ display: "none" }}
+                  />
+                </label>
+                {categoryForm.image_url && (
+                  <img
+                    src={categoryForm.image_url}
+                    alt="Category preview"
+                    style={{
+                      display: "block",
+                      marginTop: 12,
+                      width: 72,
+                      height: 72,
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      border: "2px solid #52b788",
+                    }}
+                  />
+                )}
+              </div>
               <input
                 placeholder="Label (English) *"
                 value={categoryForm.label_en}
@@ -694,19 +764,45 @@ export default function AdminPanel() {
                   justifyContent: "space-between",
                 }}
               >
-                <div>
-                  <span style={{ fontSize: 24, marginRight: 12 }}>
-                    {cat.emoji}
-                  </span>
-                  <strong>{cat.label_en}</strong>{" "}
-                  <span style={{ color: "#8ab8a0" }}>
-                    / {cat.label_ar} / {cat.label_ku}
-                  </span>
-                  <span
-                    style={{ marginLeft: 12, fontSize: 12, color: "#6ba882" }}
-                  >
-                    Order: {cat.sort_order}
-                  </span>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  {cat.image_url ? (
+                    <img
+                      src={cat.image_url}
+                      alt={cat.label_en}
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <span
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: "50%",
+                        background: "#2d5a42",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 18,
+                      }}
+                    >
+                      🍵
+                    </span>
+                  )}
+                  <div>
+                    <strong>{cat.label_en}</strong>{" "}
+                    <span style={{ color: "#8ab8a0" }}>
+                      / {cat.label_ar} / {cat.label_ku}
+                    </span>
+                    <span
+                      style={{ marginLeft: 12, fontSize: 12, color: "#6ba882" }}
+                    >
+                      Order: {cat.sort_order}
+                    </span>
+                  </div>
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
                   <button

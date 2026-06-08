@@ -75,8 +75,6 @@ export default function MenuApp({
     const item = allItems.find((i) => i.id === id);
     return s + (item ? item.price * q : 0);
   }, 0);
-  const tax = Math.round(totalIQD * 0.1);
-  const grand = totalIQD + tax;
 
   const showToast = (msg) => {
     setToast(msg);
@@ -108,8 +106,6 @@ export default function MenuApp({
         cartItems,
         cart,
         note,
-        grand,
-        tax,
         totalIQD,
         lang,
       });
@@ -357,7 +353,9 @@ export default function MenuApp({
         .cats.drag{cursor:grabbing;}
         .cat-item{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:70px;padding:0 4px 12px;cursor:pointer;flex-shrink:0;border-bottom:2.5px solid transparent;transition:border-color .2s;}
         .cat-item.active{border-bottom-color:#52b788;}
-        .cat-icon{width:52px;height:52px;background:#1e3d2f;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:23px;border:1px solid #2d5a42;transition:background .2s,border-color .2s;flex-shrink:0;}
+        .cat-icon{width:52px;height:52px;background:#1e3d2f;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid #2d5a42;transition:background .2s,border-color .2s;flex-shrink:0;overflow:hidden;}
+        .cat-icon img{width:100%;height:100%;object-fit:cover;}
+        .cat-icon-fallback{font-size:23px;line-height:1;}
         .cat-item.active .cat-icon{background:#2d6a4f;border-color:#52b788;}
         .cat-lbl{font-size:10px;font-weight:500;color:#6ba882;text-align:center;line-height:1.3;transition:color .2s;white-space:nowrap;}
         .cat-item.active .cat-lbl{color:#52b788;}
@@ -727,7 +725,13 @@ export default function MenuApp({
                   className={`cat-item${activeCat === c.id ? " active" : ""}`}
                   onClick={() => handleCatClick(c.id)}
                 >
-                  <div className="cat-icon">{c.emoji}</div>
+                  <div className="cat-icon">
+                    {c.image_url ? (
+                      <img src={c.image_url} alt={c[`label_${lang}`]} />
+                    ) : (
+                      <span className="cat-icon-fallback">🍵</span>
+                    )}
+                  </div>
                   <span className="cat-lbl">{c[`label_${lang}`]}</span>
                 </div>
               ))}
@@ -995,17 +999,9 @@ export default function MenuApp({
                 />
               </div>
               <div className="d-foot">
-                <div className="s-row">
-                  <span>{t.subtotal}</span>
-                  <span>{fmt(totalIQD)} IQD</span>
-                </div>
-                <div className="s-row">
-                  <span>{t.service}</span>
-                  <span>{fmt(tax)} IQD</span>
-                </div>
                 <div className="t-row">
                   <span>{t.total}</span>
-                  <span>{fmt(grand)} IQD</span>
+                  <span>{fmt(totalIQD)} IQD</span>
                 </div>
                 <button
                   className="place-btn"
@@ -1018,7 +1014,7 @@ export default function MenuApp({
                       {t.sending}
                     </>
                   ) : (
-                    `${t.placeOrder} · ${fmt(grand)} IQD`
+                    `${t.placeOrder} · ${fmt(totalIQD)} IQD`
                   )}
                 </button>
               </div>
