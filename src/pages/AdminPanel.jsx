@@ -48,7 +48,9 @@ export default function AdminPanel() {
     photo_url: "",
     tags: "",
     is_available: true,
+    addons: [],
   });
+  const [addonDraft, setAddonDraft] = useState({ name_en: "", name_ar: "", name_ku: "", price: "" });
 
   const [editingCategory, setEditingCategory] = useState(null);
   const [categoryForm, setCategoryForm] = useState({
@@ -123,7 +125,9 @@ export default function AdminPanel() {
       photo_url: "",
       tags: "",
       is_available: true,
+      addons: [],
     });
+    setAddonDraft({ name_en: "", name_ar: "", name_ku: "", price: "" });
     setEditingItem(null);
     setError(null);
   };
@@ -142,7 +146,9 @@ export default function AdminPanel() {
       photo_url: item.photo_url || "",
       tags: (item.tags || []).join(", "),
       is_available: item.is_available,
+      addons: item.addons || [],
     });
+    setAddonDraft({ name_en: "", name_ar: "", name_ku: "", price: "" });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -168,6 +174,7 @@ export default function AdminPanel() {
         .map((t) => t.trim())
         .filter(Boolean),
       is_available: itemForm.is_available,
+      addons: itemForm.addons,
     };
     try {
       if (editingItem) {
@@ -608,6 +615,86 @@ export default function AdminPanel() {
                         }
                       />
                     </Field>
+                    <div className="admin-addons-section">
+                      <div className="admin-form-section-title" style={{ marginBottom: 8 }}>Add-ons (single choice)</div>
+                      {itemForm.addons.length > 0 && (
+                        <div className="admin-addons-list">
+                          {itemForm.addons.map((addon, idx) => (
+                            <div key={idx} className="admin-addon-row">
+                              <span className="admin-addon-label">{addon.name_en}</span>
+                              {addon.price > 0 && <span className="admin-addon-price">+{Number(addon.price).toLocaleString()} IQD</span>}
+                              <button
+                                type="button"
+                                className="admin-btn admin-btn-danger admin-btn-sm"
+                                onClick={() =>
+                                  setItemForm((f) => ({ ...f, addons: f.addons.filter((_, i) => i !== idx) }))
+                                }
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="admin-addon-draft">
+                        <div className="admin-field-row admin-field-row-2">
+                          <Field label="Name (EN)">
+                            <input
+                              className="admin-input"
+                              placeholder="e.g. Large"
+                              value={addonDraft.name_en}
+                              onChange={(e) => setAddonDraft((d) => ({ ...d, name_en: e.target.value }))}
+                            />
+                          </Field>
+                          <Field label="Price (IQD)">
+                            <input
+                              className="admin-input"
+                              type="text"
+                              inputMode="numeric"
+                              placeholder="0"
+                              value={addonDraft.price}
+                              onChange={(e) => setAddonDraft((d) => ({ ...d, price: e.target.value.replace(/\D/g, "") }))}
+                            />
+                          </Field>
+                        </div>
+                        <div className="admin-field-row admin-field-row-2">
+                          <Field label="Name (AR)">
+                            <input
+                              className="admin-input"
+                              placeholder="اسم"
+                              value={addonDraft.name_ar}
+                              onChange={(e) => setAddonDraft((d) => ({ ...d, name_ar: e.target.value }))}
+                            />
+                          </Field>
+                          <Field label="Name (KU)">
+                            <input
+                              className="admin-input"
+                              placeholder="ناو"
+                              value={addonDraft.name_ku}
+                              onChange={(e) => setAddonDraft((d) => ({ ...d, name_ku: e.target.value }))}
+                            />
+                          </Field>
+                        </div>
+                        <button
+                          type="button"
+                          className="admin-btn admin-btn-secondary admin-btn-sm"
+                          onClick={() => {
+                            if (!addonDraft.name_en.trim()) return;
+                            const newAddon = {
+                              id: addonDraft.name_en.trim().toLowerCase().replace(/\s+/g, "-"),
+                              name_en: addonDraft.name_en.trim(),
+                              name_ar: addonDraft.name_ar.trim(),
+                              name_ku: addonDraft.name_ku.trim(),
+                              price: parseInt(addonDraft.price, 10) || 0,
+                            };
+                            setItemForm((f) => ({ ...f, addons: [...f.addons, newAddon] }));
+                            setAddonDraft({ name_en: "", name_ar: "", name_ku: "", price: "" });
+                          }}
+                        >
+                          + Add option
+                        </button>
+                      </div>
+                    </div>
                     <label className="admin-checkbox-row">
                       <input
                         type="checkbox"

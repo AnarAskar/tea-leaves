@@ -47,6 +47,8 @@ export default function MenuApp({
   const langWrapRef = useRef(null);
   const [activeCat, setActiveCat] = useState("");
   const [cart, setCart] = useState({});
+  const [cartAddons, setCartAddons] = useState({}); // { [itemId]: addonObject }
+  const [selectedAddon, setSelectedAddon] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [note, setNote] = useState("");
   const [query, setQuery] = useState("");
@@ -120,9 +122,10 @@ export default function MenuApp({
   const currentLang = LANG_OPTS.find((l) => l.code === lang);
 
   const totalQty = Object.values(cart).reduce((s, q) => s + q, 0);
+  const itemPrice = (item) => item.price + (cartAddons[item.id]?.price || 0);
   const totalIQD = Object.entries(cart).reduce((s, [id, q]) => {
     const item = allItems.find((i) => i.id === id);
-    return s + (item ? item.price * q : 0);
+    return s + (item ? itemPrice(item) * q : 0);
   }, 0);
 
   const showToast = (msg) => {
@@ -131,16 +134,21 @@ export default function MenuApp({
     toastRef.current = setTimeout(() => setToast(""), 2000);
   };
 
-  const add = (item) => {
+  const add = (item, addon) => {
     setCart((c) => ({ ...c, [item.id]: (c[item.id] || 0) + 1 }));
+    if (addon) setCartAddons((c) => ({ ...c, [item.id]: addon }));
     showToast(`${item.name[lang]} ✓`);
   };
 
   const remove = (item) => {
     setCart((c) => {
       const n = { ...c };
-      if ((n[item.id] || 0) <= 1) delete n[item.id];
-      else n[item.id]--;
+      if ((n[item.id] || 0) <= 1) {
+        delete n[item.id];
+        setCartAddons((ca) => { const x = { ...ca }; delete x[item.id]; return x; });
+      } else {
+        n[item.id]--;
+      }
       return n;
     });
   };
@@ -154,6 +162,7 @@ export default function MenuApp({
         tableNum,
         cartItems,
         cart,
+        cartAddons,
         note,
         totalIQD,
         lang,
@@ -271,7 +280,7 @@ export default function MenuApp({
         <div
           key={item.id}
           className={`l-card${qty > 0 ? " incart" : ""}`}
-          onClick={() => setSelectedItem(item)}
+          onClick={() => { setSelectedItem(item); setSelectedAddon(item.addons?.[0] ?? null); }}
         >
           <div className="l-body">
             <div className="l-name">{item.name[lang]}</div>
@@ -293,7 +302,7 @@ export default function MenuApp({
       <div
         key={item.id}
         className={`g-card${qty > 0 ? " incart" : ""}`}
-        onClick={() => setSelectedItem(item)}
+        onClick={() => { setSelectedItem(item); setSelectedAddon(item.addons?.[0] ?? null); }}
       >
         <ItemPhoto
           className="g-img"
@@ -347,11 +356,22 @@ export default function MenuApp({
   // Loading state
   if (menuLoading) {
     return (
-      <div
-        className="app"
-        style={{ alignItems: "center", justifyContent: "center" }}
-      >
-        <div style={{ color: "#fff", fontSize: 18 }}>Loading menu...</div>
+      <div className="app">
+        <div className="skel-header" />
+        <div className="skel-cats">
+          {[...Array(4)].map((_, i) => <div key={i} className="skel-cat-pill" />)}
+        </div>
+        <div className="skel-grid">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="skel-card">
+              <div className="skel-img" />
+              <div className="skel-body">
+                <div className="skel-line skel-line-lg" />
+                <div className="skel-line skel-line-sm" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -549,6 +569,13 @@ export default function MenuApp({
         .det-divider{height:1px;background:#2a4f3a;margin:14px 0;}
         .det-ing-label{font-size:11px;font-weight:700;color:#6ba882;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
         .det-ing{font-size:14px;color:#a8c9b4;line-height:1.75;font-weight:300;}
+        .det-addons{margin-top:16px;margin-bottom:4px;}
+        .addon-opt{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;border:1.5px solid #2a4f3a;margin-bottom:8px;cursor:pointer;transition:border-color .15s,background .15s;}
+        .addon-opt input[type=radio]{accent-color:#52b788;width:16px;height:16px;flex-shrink:0;}
+        .addon-opt.selected{border-color:#52b788;background:#1a3828;}
+        .addon-name{flex:1;font-size:14px;color:#e0f0e8;font-weight:500;}
+        .addon-price{font-size:13px;color:#52b788;font-weight:700;white-space:nowrap;}
+        .d-addon-lbl{font-size:12px;color:#6ba882;font-weight:400;}
         .det-actions{margin-top:24px;}
         .det-add{width:100%;background:linear-gradient(135deg,#40916c,#52b788);color:#fff;border:none;border-radius:14px;padding:16px;font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:opacity .2s;}
         .det-add:hover{opacity:.88;}
@@ -588,6 +615,7 @@ export default function MenuApp({
         .star-btn:hover{transform:scale(1.15);}
         .star-btn:focus{outline:none;}
         .fb-field-label{font-size:12px;font-weight:600;color:#6ba882;margin-bottom:6px;margin-top:14px;}
+        /* skeleton CSS lives in index.html so it works before React mounts */
       `}</style>
 
       <div className="app">
@@ -1017,9 +1045,14 @@ export default function MenuApp({
                       alt={item.name[lang]}
                     />
                     <div>
-                      <div className="d-name">{item.name[lang]}</div>
+                      <div className="d-name">
+                        {item.name[lang]}
+                        {cartAddons[item.id] && (
+                          <span className="d-addon-lbl"> · {cartAddons[item.id][`name_${lang}`] || cartAddons[item.id].name_en}</span>
+                        )}
+                      </div>
                       <div className="d-unit">
-                        {fmt(item.price)} IQD {t.each}
+                        {fmt(itemPrice(item))} IQD {t.each}
                       </div>
                     </div>
                   </div>
@@ -1042,7 +1075,7 @@ export default function MenuApp({
                       </button>
                     </div>
                     <div className="d-tot">
-                      {fmt(item.price * cart[item.id])}
+                      {fmt(itemPrice(item) * cart[item.id])}
                     </div>
                   </div>
                 </div>
@@ -1309,7 +1342,7 @@ export default function MenuApp({
                   <div className="det-body">
                     <div className="det-row">
                       <div className="det-name">{item.name[lang]}</div>
-                      <div className="det-price">IQD {fmt(item.price)}</div>
+                      <div className="det-price">IQD {fmt(item.price + (selectedAddon?.price || 0))}</div>
                     </div>
                     <div className="det-divider" />
                     <div className="det-ing-label">
@@ -1320,13 +1353,37 @@ export default function MenuApp({
                           : "Ingredients"}
                     </div>
                     <div className="det-ing">{item.ingredients[lang]}</div>
+                    {item.addons?.length > 0 && (
+                      <div className="det-addons">
+                        <div className="det-ing-label">
+                          {lang === "ar" ? "الإضافات" : lang === "ku" ? "زیادەکان" : "Add-ons"}
+                        </div>
+                        {item.addons.map((addon) => (
+                          <label
+                            key={addon.id}
+                            className={`addon-opt${selectedAddon?.id === addon.id ? " selected" : ""}`}
+                          >
+                            <input
+                              type="radio"
+                              name={`addon-${item.id}`}
+                              checked={selectedAddon?.id === addon.id}
+                              onChange={() => setSelectedAddon(addon)}
+                            />
+                            <span className="addon-name">{addon[`name_${lang}`] || addon.name_en}</span>
+                            {addon.price > 0 && (
+                              <span className="addon-price">+{fmt(addon.price)} IQD</span>
+                            )}
+                          </label>
+                        ))}
+                      </div>
+                    )}
                     {tableNum && (
                       <div className="det-actions">
                         {qty === 0 ? (
                           <button
                             className="det-add"
                             onClick={() => {
-                              add(item);
+                              add(item, selectedAddon);
                               setSelectedItem(null);
                             }}
                           >
@@ -1371,7 +1428,7 @@ export default function MenuApp({
                                 color: "#52b788",
                               }}
                             >
-                              IQD {fmt(item.price * qty)}
+                              IQD {fmt(itemPrice(item) * qty)}
                             </div>
                           </div>
                         )}

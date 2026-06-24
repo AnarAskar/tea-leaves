@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { supabase } from "../utils/supabaseClient";
+import { supabase, supabaseConfigured } from "../utils/supabaseClient";
 
 export function useMenuData() {
   const [categories, setCategories] = useState([]);
@@ -12,6 +12,9 @@ export function useMenuData() {
     async function fetchData() {
       try {
         setLoading(true);
+        if (!supabaseConfigured) {
+          throw new Error("Menu is not configured. Missing Supabase settings.");
+        }
         const [catRes, itemRes] = await Promise.all([
           supabase.from("categories").select("*").order("sort_order"),
           supabase.from("menu_items").select("*").eq("is_available", true),
@@ -39,6 +42,7 @@ export function useMenuData() {
           },
           price: item.price,
           tags: item.tags || [],
+          addons: item.addons || [],
         }));
 
         // Group by category

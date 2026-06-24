@@ -14,12 +14,14 @@ function starRating(n) {
 export function buildTelegramMessage(type, payload) {
   switch (type) {
     case "order": {
-      const { tableNum, cartItems, cart, note, totalIQD } = payload;
+      const { tableNum, cartItems, cart, cartAddons, note, totalIQD } = payload;
       const lines = cartItems
-        .map(
-          (item) =>
-            `• ${item.name.en} × ${cart[item.id]} — ${fmt(item.price * cart[item.id])} IQD`,
-        )
+        .map((item) => {
+          const addon = cartAddons?.[item.id];
+          const unitPrice = item.price + (addon?.price || 0);
+          const addonLabel = addon ? ` (${addon.name_en})` : "";
+          return `• ${item.name.en}${addonLabel} × ${cart[item.id]} — ${fmt(unitPrice * cart[item.id])} IQD`;
+        })
         .join("\n");
       const noteLine = note?.trim() ? `\n📝 Note: ${note.trim()}` : "";
       return `🍵 *New Order — Table ${tableNum}*

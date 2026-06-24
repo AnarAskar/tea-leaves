@@ -1,29 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { NUM_TABLES } from "../constants/config";
-import SplashScreen from "../components/SplashScreen";
 import MenuApp from "../components/MenuApp";
 
-export default function App() {
-  const [page, setPage] = useState("splash");
-  const [lang, setLang] = useState("en");
-  const [tableNum, setTableNum] = useState(null);
+export default function MenuPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const rawTable = parseInt(searchParams.get("table"), 10);
+  const tableNum =
+    Number.isInteger(rawTable) && rawTable >= 1 && rawTable <= NUM_TABLES
+      ? rawTable
+      : null;
+  const [lang, setLang] = useState(searchParams.get("lang") || "en");
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const n = parseInt(params.get("table"), 10);
-    if (n >= 1 && n <= NUM_TABLES) setTableNum(n);
-  }, []);
+  const handleChangeLang = (newLang) => {
+    setLang(newLang);
+    setSearchParams((p) => { p.set("lang", newLang); return p; }, { replace: true });
+  };
 
-  if (page === "splash") {
-    return (
-      <SplashScreen
-        onPickLang={(code) => {
-          setLang(code);
-          setPage("menu");
-        }}
-      />
-    );
-  }
-
-  return <MenuApp lang={lang} onChangeLang={setLang} tableNum={tableNum} />;
+  return <MenuApp lang={lang} onChangeLang={handleChangeLang} tableNum={tableNum} />;
 }
