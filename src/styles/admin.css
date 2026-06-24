@@ -251,6 +251,12 @@
   margin-bottom: 4px;
 }
 
+.admin-hint {
+  margin: 0;
+  font-size: 12px;
+  color: #6ba882;
+}
+
 .admin-field-row {
   display: grid;
   gap: 12px;

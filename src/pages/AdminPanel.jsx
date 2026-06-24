@@ -58,6 +58,8 @@ export default function AdminPanel() {
     label_ar: "",
     label_ku: "",
     sort_order: 0,
+    available_from: "",
+    available_until: "",
   });
   const [imageUploading, setImageUploading] = useState(false);
   const [itemImageUploading, setItemImageUploading] = useState(false);
@@ -206,6 +208,8 @@ export default function AdminPanel() {
       label_ar: "",
       label_ku: "",
       sort_order: categories.length,
+      available_from: "",
+      available_until: "",
     });
     setEditingCategory(null);
     setError(null);
@@ -281,6 +285,8 @@ export default function AdminPanel() {
       label_ar: cat.label_ar,
       label_ku: cat.label_ku,
       sort_order: cat.sort_order,
+      available_from: cat.available_from || "",
+      available_until: cat.available_until || "",
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -300,6 +306,8 @@ export default function AdminPanel() {
       label_ar: categoryForm.label_ar.trim(),
       label_ku: categoryForm.label_ku.trim(),
       sort_order: parseInt(categoryForm.sort_order, 10) || 0,
+      available_from: categoryForm.available_from || null,
+      available_until: categoryForm.available_until || null,
     };
     try {
       if (editingCategory) {
@@ -551,13 +559,13 @@ export default function AdminPanel() {
                       <Field label="Price (IQD) *">
                         <input
                           className="admin-input"
-                          type="number"
+                          type="text"
+                          inputMode="numeric"
                           value={itemForm.price}
                           onChange={(e) =>
-                            setItemForm({ ...itemForm, price: e.target.value })
+                            setItemForm({ ...itemForm, price: e.target.value.replace(/\D/g, "") })
                           }
                           required
-                          min="0"
                         />
                       </Field>
                       <Field label="Photo URL">
@@ -781,6 +789,39 @@ export default function AdminPanel() {
                         />
                       </Field>
                     </div>
+                  </div>
+
+                  <div className="admin-form-section">
+                    <div className="admin-form-section-title">Time availability</div>
+                    <div className="admin-field-row admin-field-row-2">
+                      <Field label="Available from">
+                        <input
+                          className="admin-input"
+                          type="time"
+                          value={categoryForm.available_from}
+                          onChange={(e) =>
+                            setCategoryForm({
+                              ...categoryForm,
+                              available_from: e.target.value,
+                            })
+                          }
+                        />
+                      </Field>
+                      <Field label="Available until">
+                        <input
+                          className="admin-input"
+                          type="time"
+                          value={categoryForm.available_until}
+                          onChange={(e) =>
+                            setCategoryForm({
+                              ...categoryForm,
+                              available_until: e.target.value,
+                            })
+                          }
+                        />
+                      </Field>
+                    </div>
+                    <p className="admin-hint">Leave blank to always show this category.</p>
                   </div>
 
                   <div className="admin-form-section">

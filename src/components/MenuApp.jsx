@@ -10,6 +10,18 @@ import {
   sendTelegramFeedback,
 } from "../utils/telegram";
 
+function isCategoryAvailable(cat) {
+  const { available_from, available_until } = cat;
+  if (!available_from && !available_until) return true;
+  const now = new Date();
+  const cur = now.getHours() * 60 + now.getMinutes();
+  const toMin = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+  if (available_from && available_until)
+    return cur >= toMin(available_from) && cur < toMin(available_until);
+  if (available_from) return cur >= toMin(available_from);
+  return cur < toMin(available_until);
+}
+
 function ItemPhoto({ src, alt, className, placeholderClassName = "photo-ph" }) {
   if (!src) {
     return (
@@ -64,6 +76,8 @@ export default function MenuApp({
     error: menuError,
   } = useMenuData();
 
+  const visibleCategories = categories.filter(isCategoryAvailable);
+
   const toastRef = useRef(null);
   const catBarRef = useRef(null);
   const sectionRefs = useRef({});
@@ -82,10 +96,17 @@ export default function MenuApp({
 
   // Set first category as active when data loads
   useEffect(() => {
-    if (categories.length > 0 && !activeCat) {
-      setActiveCat(categories[0].id);
+    if (visibleCategories.length > 0 && !activeCat) {
+      setActiveCat(visibleCategories[0].id);
     }
-  }, [categories, activeCat]);
+  }, [visibleCategories, activeCat]);
+
+  // If the active category becomes hidden (e.g. breakfast past noon), switch to the first visible one
+  useEffect(() => {
+    if (activeCat && !visibleCategories.find((c) => c.id === activeCat)) {
+      setActiveCat(visibleCategories[0]?.id ?? null);
+    }
+  }, [visibleCategories.map((c) => c.id).join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!langOpen) return;
@@ -186,13 +207,13 @@ export default function MenuApp({
     const container = scrollRef.current;
     if (!container) return;
     const scrollTop = container.scrollTop + 200;
-    let current = categories[0]?.id || "";
-    for (const cat of categories) {
+    let current = visibleCategories[0]?.id || "";
+    for (const cat of visibleCategories) {
       const el = sectionRefs.current[cat.id];
       if (el && el.offsetTop <= scrollTop) current = cat.id;
     }
     setActiveCat((prev) => (prev !== current ? current : prev));
-  }, [query, categories]);
+  }, [query, visibleCategories]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -754,9 +775,9 @@ export default function MenuApp({
             )}
           </div>
 
-          {!query && categories.length > 0 && (
+          {!query && visibleCategories.length > 0 && (
             <div className="cats" ref={catBarRef}>
-              {categories.map((c) => (
+              {visibleCategories.map((c) => (
                 <div
                   key={c.id}
                   data-cat={c.id}
@@ -896,7 +917,7 @@ export default function MenuApp({
                 );
               })()}
 
-              {categories.map((cat) => (
+              {visibleCategories.map((cat) => (
                 <div
                   key={cat.id}
                   ref={(el) => (sectionRefs.current[cat.id] = el)}
