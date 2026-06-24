@@ -532,23 +532,27 @@ export default function MenuApp({
         .l-img{width:100%;height:100%;object-fit:cover;display:block;}
 
         /* ITEM DETAIL MODAL */
-        .det-overlay{position:absolute;inset:0;background:rgba(0,0,0,.7);z-index:70;display:flex;align-items:flex-end;}
-        .det-sheet{background:#1e3d2f;border-top-left-radius:24px;border-top-right-radius:24px;width:100%;max-height:90%;display:flex;flex-direction:column;overflow:hidden;}
-        .det-handle{width:34px;height:4px;background:#2d5a42;border-radius:2px;margin:12px auto 0;flex-shrink:0;}
-        .det-img-wrap{position:relative;width:100%;height:220px;flex-shrink:0;}
-        .det-img{width:100%;height:100%;object-fit:cover;display:block;}
-        .det-close{position:absolute;top:12px;right:12px;width:32px;height:32px;background:rgba(0,0,0,.5);border:none;border-radius:50%;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
-        .det-tags{position:absolute;bottom:10px;left:12px;display:flex;gap:4px;}
-        .det-body{padding:18px 20px 32px;overflow-y:auto;flex:1;}
-        .det-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px;}
-        .det-name{font-size:20px;font-weight:800;color:#fff;line-height:1.25;flex:1;}
-        .det-price{font-size:18px;font-weight:800;color:#52b788;white-space:nowrap;flex-shrink:0;}
+        @keyframes det-up{from{transform:translateY(100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
+        .det-overlay{position:absolute;inset:0;background:rgba(0,0,0,.75);z-index:70;display:flex;align-items:flex-end;}
+        .det-sheet{background:#1e3d2f;border-top-left-radius:28px;border-top-right-radius:28px;width:100%;max-height:92%;display:flex;flex-direction:column;overflow:hidden;animation:det-up .28s cubic-bezier(0.32,0.72,0,1);}
+        .det-handle{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:40px;height:4px;background:rgba(255,255,255,.4);border-radius:2px;z-index:2;backdrop-filter:blur(4px);}
+        .det-img-wrap{position:relative;width:100%;height:260px;flex-shrink:0;overflow:hidden;}
+        .det-img-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(18px) brightness(.65);transform:scale(1.12);}
+        .det-img{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;display:block;}
+        .det-img.photo-ph{font-size:64px;display:flex;align-items:center;justify-content:center;}
+        .det-close{position:absolute;top:12px;right:12px;width:36px;height:36px;background:rgba(0,0,0,.55);border:none;border-radius:50%;color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);z-index:2;}
+        .det-tags{position:absolute;bottom:10px;left:12px;display:flex;gap:4px;z-index:2;}
+        .det-body{padding:20px 20px 36px;overflow-y:auto;flex:1;}
+        .det-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px;}
+        .det-name{font-size:22px;font-weight:800;color:#fff;line-height:1.25;flex:1;}
+        .det-price{font-size:15px;font-weight:700;color:#52b788;white-space:nowrap;background:#243f30;border-radius:20px;padding:5px 12px;flex-shrink:0;margin-top:3px;}
+        .det-divider{height:1px;background:#2a4f3a;margin:14px 0;}
         .det-ing-label{font-size:11px;font-weight:700;color:#6ba882;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
-        .det-ing{font-size:14px;color:#a8c9b4;line-height:1.7;font-weight:300;}
-        .det-actions{margin-top:22px;}
-        .det-add{width:100%;background:#40916c;color:#fff;border:none;border-radius:13px;padding:15px;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s;}
-        .det-add:hover{opacity:.9;}
-        .det-qty-row{display:flex;align-items:center;gap:12px;background:#243f30;border-radius:13px;padding:10px 16px;}
+        .det-ing{font-size:14px;color:#a8c9b4;line-height:1.75;font-weight:300;}
+        .det-actions{margin-top:24px;}
+        .det-add{width:100%;background:linear-gradient(135deg,#40916c,#52b788);color:#fff;border:none;border-radius:14px;padding:16px;font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:opacity .2s;}
+        .det-add:hover{opacity:.88;}
+        .det-qty-row{display:flex;align-items:center;gap:12px;background:#162e20;border-radius:14px;padding:12px 16px;border:1px solid #2a4f3a;}
         .act-btn{background:#1e3d2f;border:1px solid #2d5a42;border-radius:10px;color:#8ab8a0;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0;flex-shrink:0;}
         .act-btn:hover{border-color:#52b788;color:#52b788;background:#243f30;}
         .m-overlay{position:absolute;inset:0;background:rgba(0,0,0,.65);z-index:80;display:flex;align-items:flex-end;justify-content:center;}
@@ -1269,8 +1273,11 @@ export default function MenuApp({
                 onClick={() => setSelectedItem(null)}
               >
                 <div className="det-sheet" onClick={(e) => e.stopPropagation()}>
-                  <div className="det-handle" />
                   <div className="det-img-wrap">
+                    <div className="det-handle" />
+                    {item.photo && (
+                      <img className="det-img-bg" src={item.photo} alt="" aria-hidden="true" />
+                    )}
                     <ItemPhoto
                       className="det-img"
                       src={item.photo}
@@ -1304,6 +1311,7 @@ export default function MenuApp({
                       <div className="det-name">{item.name[lang]}</div>
                       <div className="det-price">IQD {fmt(item.price)}</div>
                     </div>
+                    <div className="det-divider" />
                     <div className="det-ing-label">
                       {isRTL
                         ? "المكونات"
