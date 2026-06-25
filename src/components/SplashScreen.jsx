@@ -9,8 +9,8 @@ const SPLASH_CSS = `
   .sp-overlay { position:absolute; inset:0; z-index:1; background:linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.05) 30%, rgba(0,0,0,0.62) 65%, rgba(0,0,0,0.90) 100%); }
   .sp-content { position:relative; z-index:2; width:100%; padding:0 24px 44px; display:flex; flex-direction:column; align-items:center; }
   .sp-langs { display:flex; flex-direction:column; gap:8px; width:100%; margin-bottom:22px; }
-  .sp-btn { width:100%; padding:13px 20px; background:rgba(30,61,47,0.82); border:1px solid rgba(82,183,136,0.4); border-radius:12px; color:#fff; font-family:'Plus Jakarta Sans',sans-serif; font-size:15px; font-weight:600; cursor:pointer; text-align:center; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); transition:background .2s, border-color .2s, transform .15s; }
-  .sp-btn:hover { background:rgba(64,145,108,0.9); border-color:rgba(82,183,136,0.9); transform:translateY(-2px); }
+  .sp-btn { width:100%; padding:15px 20px; background:rgba(25,50,36,0.7); border:1px solid rgba(255,255,255,0.14); border-radius:16px; color:#fff; font-family:'Plus Jakarta Sans',sans-serif; font-size:15px; font-weight:600; cursor:pointer; text-align:center; backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); transition:background .25s, border-color .25s, transform .18s cubic-bezier(.22,1,.36,1), box-shadow .25s; }
+  .sp-btn:hover { background:linear-gradient(135deg,rgba(64,145,108,0.95),rgba(82,183,136,0.95)); border-color:rgba(82,183,136,0.9); transform:translateY(-2px); box-shadow:0 10px 28px rgba(64,145,108,0.4); }
   .sp-socials { display:flex; align-items:center; gap:14px; margin-bottom:14px; }
   .sp-icon { width:42px; height:42px; border-radius:50%; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; color:#fff; text-decoration:none; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); transition:background .2s, transform .15s; }
   .sp-icon:hover { background:rgba(255,255,255,0.24); transform:scale(1.1); }
