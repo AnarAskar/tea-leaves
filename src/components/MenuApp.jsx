@@ -34,7 +34,7 @@ function ItemPhoto({ src, alt, className, placeholderClassName = "photo-ph" }) {
     );
   }
   return (
-    <img className={className} src={src} alt={alt} loading="lazy" />
+    <img className={className} src={src} alt={alt} decoding="async" />
   );
 }
 
