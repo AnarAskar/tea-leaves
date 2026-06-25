@@ -393,9 +393,9 @@ export default function MenuApp({
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Cairo:wght@300;400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Cairo:wght@300;400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap');
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-        :root{--f:${lang==="ku"?"'IBM Plex Sans Arabic'"  : lang==="ar"?"'Cairo'":"'Plus Jakarta Sans'"},sans-serif;}
+        :root{--f:${lang==="ku"?"'Noto Naskh Arabic'" : lang==="ar"?"'Cairo'":"'Plus Jakarta Sans'"},sans-serif;}
         body{background:#1b3a2d;font-family:var(--f);min-height:100dvh;}
         .app{width:100%;max-width:430px;min-height:100dvh;height:100dvh;background:#1b3a2d;color:#fff;direction:${isRTL ? "rtl" : "ltr"};display:flex;flex-direction:column;position:relative;overflow:hidden;margin:0 auto;}
         .hdr{background:#1b3a2d;padding:14px 16px 0;flex-shrink:0;border-bottom:1px solid #2d5a42;z-index:10;}
