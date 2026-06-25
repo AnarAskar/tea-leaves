@@ -395,8 +395,8 @@ export default function MenuApp({
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-        body{background:#1b3a2d;font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;}
-        .app{width:100%;max-width:430px;min-height:100vh;height:100vh;background:#1b3a2d;color:#fff;direction:${isRTL ? "rtl" : "ltr"};display:flex;flex-direction:column;position:relative;overflow:hidden;margin:0 auto;}
+        body{background:#1b3a2d;font-family:'Plus Jakarta Sans',sans-serif;min-height:100dvh;}
+        .app{width:100%;max-width:430px;min-height:100dvh;height:100dvh;background:#1b3a2d;color:#fff;direction:${isRTL ? "rtl" : "ltr"};display:flex;flex-direction:column;position:relative;overflow:hidden;margin:0 auto;}
         .hdr{background:#1b3a2d;padding:14px 16px 0;flex-shrink:0;border-bottom:1px solid #2d5a42;z-index:10;}
         .hdr-top{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px;margin-bottom:12px;}
         .hdr-title{font-size:18px;font-weight:700;color:#fff;text-align:center;justify-self:center;white-space:nowrap;}
