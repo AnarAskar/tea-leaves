@@ -1,5 +1,21 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { supabase } from "../utils/supabaseClient";
 import { useAuth } from "../contexts/AuthContext";
 import { uploadCategoryImage } from "../utils/uploadCategoryImage";
@@ -21,6 +37,96 @@ function Field({ label, children }) {
       {label && <label className="admin-label">{label}</label>}
       {children}
     </div>
+  );
+}
+
+// A single reorderable row: drag handle + up/down arrows + content.
+function SortableRow({ id, index, count, onMoveUp, onMoveDown, children }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+    zIndex: isDragging ? 20 : "auto",
+    position: "relative",
+  };
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`admin-sort-row${isDragging ? " dragging" : ""}`}
+    >
+      <div className="admin-sort-controls">
+        <button
+          type="button"
+          className="admin-drag-handle"
+          {...attributes}
+          {...listeners}
+          aria-label="Drag to reorder"
+          title="Drag to reorder"
+        >
+          ⠿
+        </button>
+        <div className="admin-sort-arrows">
+          <button
+            type="button"
+            className="admin-sort-arrow"
+            disabled={index === 0}
+            onClick={onMoveUp}
+            aria-label="Move up"
+            title="Move up"
+          >
+            ▲
+          </button>
+          <button
+            type="button"
+            className="admin-sort-arrow"
+            disabled={index === count - 1}
+            onClick={onMoveDown}
+            aria-label="Move down"
+            title="Move down"
+          >
+            ▼
+          </button>
+        </div>
+      </div>
+      <div className="admin-sort-content">{children}</div>
+    </div>
+  );
+}
+
+// Wraps a list of SortableRows with drag-and-drop context.
+function SortableList({ ids, onReorder, children }) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = ids.indexOf(active.id);
+    const newIndex = ids.indexOf(over.id);
+    if (oldIndex !== -1 && newIndex !== -1) onReorder(oldIndex, newIndex);
+  };
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+        {children}
+      </SortableContext>
+    </DndContext>
   );
 }
 
@@ -106,6 +212,81 @@ export default function AdminPanel() {
   useEffect(() => {
     if (session) fetchData();
   }, [session, fetchData]);
+
+  // Items grouped by category, each sorted by sort_order (for reordering UI).
+  const itemsByCategory = useMemo(() => {
+    const grouped = {};
+    for (const it of items) {
+      (grouped[it.category_id] ||= []).push(it);
+    }
+    for (const key in grouped) {
+      grouped[key].sort(
+        (a, b) =>
+          (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.id - b.id,
+      );
+    }
+    return grouped;
+  }, [items]);
+
+  // Write new sort_order for rows whose position changed. Resync on failure.
+  const persistOrder = useCallback(
+    async (table, orderedRows) => {
+      const updates = orderedRows
+        .map((row, i) => ({ id: row.id, next: i, prev: row.sort_order ?? 0 }))
+        .filter((u) => u.next !== u.prev);
+      if (updates.length === 0) return;
+      try {
+        const results = await Promise.all(
+          updates.map((u) =>
+            supabase
+              .from(table)
+              .update({ sort_order: u.next })
+              .eq("id", u.id),
+          ),
+        );
+        const failed = results.find((r) => r.error);
+        if (failed?.error) throw failed.error;
+      } catch (err) {
+        console.error("Reorder error:", err);
+        setError(formatSupabaseError(err));
+        fetchData();
+      }
+    },
+    [fetchData],
+  );
+
+  const reorderCategories = (oldIndex, newIndex) => {
+    if (oldIndex === newIndex) return;
+    const reordered = arrayMove(categories, oldIndex, newIndex);
+    persistOrder("categories", reordered);
+    setCategories(reordered.map((c, i) => ({ ...c, sort_order: i })));
+  };
+
+  const moveCategory = (index, dir) => {
+    const target = index + dir;
+    if (target < 0 || target >= categories.length) return;
+    reorderCategories(index, target);
+  };
+
+  const reorderItems = (catId, oldIndex, newIndex) => {
+    if (oldIndex === newIndex) return;
+    const catItems = itemsByCategory[catId] || [];
+    const reordered = arrayMove(catItems, oldIndex, newIndex);
+    persistOrder("menu_items", reordered);
+    const orderMap = new Map(reordered.map((it, i) => [it.id, i]));
+    setItems((prev) =>
+      prev.map((it) =>
+        orderMap.has(it.id) ? { ...it, sort_order: orderMap.get(it.id) } : it,
+      ),
+    );
+  };
+
+  const moveItem = (catId, index, dir) => {
+    const target = index + dir;
+    const catItems = itemsByCategory[catId] || [];
+    if (target < 0 || target >= catItems.length) return;
+    reorderItems(catId, index, target);
+  };
 
   const handleLogout = async () => {
     await signOut();
@@ -312,7 +493,7 @@ export default function AdminPanel() {
       label_en: categoryForm.label_en.trim(),
       label_ar: categoryForm.label_ar.trim(),
       label_ku: categoryForm.label_ku.trim(),
-      sort_order: parseInt(categoryForm.sort_order, 10) || 0,
+      sort_order: editingCategory ? editingCategory.sort_order : categories.length,
       available_from: categoryForm.available_from || null,
       available_until: categoryForm.available_until || null,
     };
@@ -726,8 +907,8 @@ export default function AdminPanel() {
             <div className="admin-card">
               <div className="admin-card-header">
                 <div>
-                  <h2>All items</h2>
-                  <p>{items.length} items in your menu</p>
+                  <h2>Menu items by category</h2>
+                  <p>Drag rows or use ▲▼ to reorder items within a category</p>
                 </div>
               </div>
               {loading ? (
@@ -740,85 +921,100 @@ export default function AdminPanel() {
                   <p>No menu items yet. Add your first item above.</p>
                 </div>
               ) : (
-                <div className="admin-table-wrap">
-                  <table className="admin-table">
-                    <thead>
-                      <tr>
-                        <th>Item</th>
-                        <th>Category</th>
-                        <th>Price</th>
-                        <th>Status</th>
-                        <th />
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {items.map((item) => (
-                        <tr key={item.id}>
-                          <td>
-                            <div className="admin-table-item">
-                              {item.photo_url ? (
-                                <img
-                                  className="admin-table-thumb"
-                                  src={item.photo_url}
-                                  alt=""
-                                />
-                              ) : (
-                                <div className="admin-table-thumb admin-table-thumb-placeholder">
-                                  🍵
-                                </div>
-                              )}
-                              <div>
-                                <div className="admin-table-name">
-                                  {item.name_en}
-                                </div>
-                                {(item.name_ar || item.name_ku) && (
-                                  <div className="admin-table-meta">
-                                    {[item.name_ar, item.name_ku]
-                                      .filter(Boolean)
-                                      .join(" · ")}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="admin-table-meta">
-                            {categories.find((c) => c.id === item.category_id)
-                              ?.label_en || item.category_id}
-                          </td>
-                          <td className="admin-price">
-                            {item.price.toLocaleString()} IQD
-                          </td>
-                          <td>
-                            <span
-                              className={`admin-badge ${item.is_available ? "admin-badge-live" : "admin-badge-hidden"}`}
+                <div className="admin-sort-groups">
+                  {[
+                    ...categories.map((c) => ({ id: c.id, label: c.label_en })),
+                    ...Object.keys(itemsByCategory)
+                      .filter((k) => !categories.some((c) => c.id === k))
+                      .map((k) => ({ id: k, label: `${k} (no category)` })),
+                  ].map((group) => {
+                    const catItems = itemsByCategory[group.id] || [];
+                    if (catItems.length === 0) return null;
+                    const ids = catItems.map((it) => it.id);
+                    return (
+                      <div key={group.id} className="admin-sort-group">
+                        <div className="admin-sort-group-head">
+                          <span className="admin-sort-group-title">
+                            {group.label}
+                          </span>
+                          <span className="admin-sort-group-count">
+                            {catItems.length}
+                          </span>
+                        </div>
+                        <SortableList
+                          ids={ids}
+                          onReorder={(o, n) => reorderItems(group.id, o, n)}
+                        >
+                          {catItems.map((item, idx) => (
+                            <SortableRow
+                              key={item.id}
+                              id={item.id}
+                              index={idx}
+                              count={catItems.length}
+                              onMoveUp={() => moveItem(group.id, idx, -1)}
+                              onMoveDown={() => moveItem(group.id, idx, 1)}
                             >
-                              {item.is_available ? "Live" : "Hidden"}
-                            </span>
-                          </td>
-                          <td>
-                            <div className="admin-table-actions">
-                              <button
-                                type="button"
-                                className="admin-btn admin-btn-edit admin-btn-sm"
-                                onClick={() => handleEditItem(item)}
-                              >
-                                Edit
-                              </button>
-                              <button
-                                type="button"
-                                className="admin-btn admin-btn-danger admin-btn-sm"
-                                onClick={() =>
-                                  handleDeleteItem(item.id, item.name_en)
-                                }
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                              <div className="admin-sort-main">
+                                <div className="admin-table-item">
+                                  {item.photo_url ? (
+                                    <img
+                                      className="admin-table-thumb"
+                                      src={item.photo_url}
+                                      alt=""
+                                    />
+                                  ) : (
+                                    <div className="admin-table-thumb admin-table-thumb-placeholder">
+                                      🍵
+                                    </div>
+                                  )}
+                                  <div>
+                                    <div className="admin-table-name">
+                                      {item.name_en}
+                                    </div>
+                                    {(item.name_ar || item.name_ku) && (
+                                      <div className="admin-table-meta">
+                                        {[item.name_ar, item.name_ku]
+                                          .filter(Boolean)
+                                          .join(" · ")}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="admin-sort-side">
+                                  <span className="admin-price">
+                                    {item.price.toLocaleString()} IQD
+                                  </span>
+                                  <span
+                                    className={`admin-badge ${item.is_available ? "admin-badge-live" : "admin-badge-hidden"}`}
+                                  >
+                                    {item.is_available ? "Live" : "Hidden"}
+                                  </span>
+                                  <div className="admin-table-actions">
+                                    <button
+                                      type="button"
+                                      className="admin-btn admin-btn-edit admin-btn-sm"
+                                      onClick={() => handleEditItem(item)}
+                                    >
+                                      Edit
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="admin-btn admin-btn-danger admin-btn-sm"
+                                      onClick={() =>
+                                        handleDeleteItem(item.id, item.name_en)
+                                      }
+                                    >
+                                      Delete
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </SortableRow>
+                          ))}
+                        </SortableList>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -849,33 +1045,22 @@ export default function AdminPanel() {
                 <form className="admin-form-grid" onSubmit={handleSubmitCategory}>
                   <div className="admin-form-section">
                     <div className="admin-form-section-title">Identity</div>
-                    <div className="admin-field-row admin-field-row-2">
-                      <Field label="ID (slug) *">
-                        <input
-                          className="admin-input"
-                          placeholder="e.g. blacktea"
-                          value={categoryForm.id}
-                          onChange={(e) =>
-                            setCategoryForm({ ...categoryForm, id: e.target.value })
-                          }
-                          required
-                          disabled={!!editingCategory}
-                        />
-                      </Field>
-                      <Field label="Sort order">
-                        <input
-                          className="admin-input"
-                          type="number"
-                          value={categoryForm.sort_order}
-                          onChange={(e) =>
-                            setCategoryForm({
-                              ...categoryForm,
-                              sort_order: e.target.value,
-                            })
-                          }
-                        />
-                      </Field>
-                    </div>
+                    <Field label="ID (slug) *">
+                      <input
+                        className="admin-input"
+                        placeholder="e.g. blacktea"
+                        value={categoryForm.id}
+                        onChange={(e) =>
+                          setCategoryForm({ ...categoryForm, id: e.target.value })
+                        }
+                        required
+                        disabled={!!editingCategory}
+                      />
+                    </Field>
+                    <p className="admin-hint">
+                      Drag rows or use the ▲▼ arrows in the list below to change
+                      the order categories appear on the menu.
+                    </p>
                   </div>
 
                   <div className="admin-form-section">
@@ -1018,47 +1203,48 @@ export default function AdminPanel() {
                   <p>No categories yet. Create one above to get started.</p>
                 </div>
               ) : (
-                <div className="admin-table-wrap">
-                  <table className="admin-table">
-                    <thead>
-                      <tr>
-                        <th>Category</th>
-                        <th>ID</th>
-                        <th>Order</th>
-                        <th />
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {categories.map((cat) => (
-                        <tr key={cat.id}>
-                          <td>
-                            <div className="admin-table-item">
-                              {cat.image_url ? (
-                                <img
-                                  className="admin-table-thumb admin-table-thumb-round"
-                                  src={cat.image_url}
-                                  alt=""
-                                />
-                              ) : (
-                                <div className="admin-table-thumb admin-table-thumb-round admin-table-thumb-placeholder">
-                                  🍵
-                                </div>
-                              )}
-                              <div>
-                                <div className="admin-table-name">
-                                  {cat.label_en}
-                                </div>
-                                <div className="admin-table-meta">
-                                  {[cat.label_ar, cat.label_ku]
-                                    .filter(Boolean)
-                                    .join(" · ")}
-                                </div>
+                <div className="admin-sort-groups">
+                  <SortableList
+                    ids={categories.map((c) => c.id)}
+                    onReorder={reorderCategories}
+                  >
+                    {categories.map((cat, idx) => (
+                      <SortableRow
+                        key={cat.id}
+                        id={cat.id}
+                        index={idx}
+                        count={categories.length}
+                        onMoveUp={() => moveCategory(idx, -1)}
+                        onMoveDown={() => moveCategory(idx, 1)}
+                      >
+                        <div className="admin-sort-main">
+                          <div className="admin-table-item">
+                            {cat.image_url ? (
+                              <img
+                                className="admin-table-thumb admin-table-thumb-round"
+                                src={cat.image_url}
+                                alt=""
+                              />
+                            ) : (
+                              <div className="admin-table-thumb admin-table-thumb-round admin-table-thumb-placeholder">
+                                🍵
+                              </div>
+                            )}
+                            <div>
+                              <div className="admin-table-name">
+                                {cat.label_en}
+                              </div>
+                              <div className="admin-table-meta">
+                                {[cat.label_ar, cat.label_ku]
+                                  .filter(Boolean)
+                                  .join(" · ") || cat.id}
                               </div>
                             </div>
-                          </td>
-                          <td className="admin-table-meta">{cat.id}</td>
-                          <td className="admin-table-meta">{cat.sort_order}</td>
-                          <td>
+                          </div>
+                          <div className="admin-sort-side">
+                            <span className="admin-table-meta admin-sort-id">
+                              {cat.id}
+                            </span>
                             <div className="admin-table-actions">
                               <button
                                 type="button"
@@ -1077,11 +1263,11 @@ export default function AdminPanel() {
                                 Delete
                               </button>
                             </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                          </div>
+                        </div>
+                      </SortableRow>
+                    ))}
+                  </SortableList>
                 </div>
               )}
             </div>

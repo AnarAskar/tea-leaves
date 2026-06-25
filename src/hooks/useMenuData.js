@@ -17,7 +17,12 @@ export function useMenuData() {
         }
         const [catRes, itemRes] = await Promise.all([
           supabase.from("categories").select("*").order("sort_order"),
-          supabase.from("menu_items").select("*").eq("is_available", true),
+          supabase
+            .from("menu_items")
+            .select("*")
+            .eq("is_available", true)
+            .order("sort_order", { ascending: true })
+            .order("id", { ascending: true }),
         ]);
 
         if (catRes.error) throw catRes.error;
