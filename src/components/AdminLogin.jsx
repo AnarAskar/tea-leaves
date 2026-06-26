@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { ADMIN_PATH } from "../constants/config";
 import "../styles/admin.css";
 
 export default function AdminLogin() {
@@ -20,7 +21,7 @@ export default function AdminLogin() {
   }
 
   if (session) {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to={`/${ADMIN_PATH}`} replace />;
   }
 
   const handleSubmit = async (e) => {
@@ -29,7 +30,7 @@ export default function AdminLogin() {
     setLoading(true);
     try {
       await signIn(email, password);
-      navigate("/admin");
+      navigate(`/${ADMIN_PATH}`);
     } catch (err) {
       setError(err.message);
     } finally {

@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { ADMIN_PATH } from "../constants/config";
 import "../styles/admin.css";
 
 export default function ProtectedRoute({ children }) {
@@ -13,5 +14,5 @@ export default function ProtectedRoute({ children }) {
     );
   }
 
-  return session ? children : <Navigate to="/admin/login" replace />;
+  return session ? children : <Navigate to={`/${ADMIN_PATH}/login`} replace />;
 }

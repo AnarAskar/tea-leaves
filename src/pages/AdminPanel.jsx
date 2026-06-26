@@ -16,6 +16,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { ADMIN_PATH } from "../constants/config";
 import { supabase } from "../utils/supabaseClient";
 import { useAuth } from "../contexts/AuthContext";
 import { uploadCategoryImage } from "../utils/uploadCategoryImage";
@@ -302,7 +303,7 @@ export default function AdminPanel() {
 
   const handleLogout = async () => {
     await signOut();
-    navigate("/admin/login");
+    navigate(`/${ADMIN_PATH}/login`);
   };
 
   const resetItemForm = () => {
@@ -562,7 +563,7 @@ export default function AdminPanel() {
             type="button"
             className="admin-btn admin-btn-primary"
             style={{ width: "100%" }}
-            onClick={() => navigate("/admin/login")}
+            onClick={() => navigate(`/${ADMIN_PATH}/login`)}
           >
             Go to login
           </button>

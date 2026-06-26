@@ -1,9 +1,10 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SplashPage from "./pages/SplashPage";
 import MenuPage from "./pages/TeaLeaves";
+import { ADMIN_PATH } from "./constants/config";
 
 // Admin code (and its @dnd-kit deps) is split out so customers loading the
 // menu don't download it.
@@ -26,7 +27,7 @@ export default function App() {
           <Route path="/" element={<SplashPage />} />
           <Route path="/menu" element={<MenuPage />} />
           <Route
-            path="/admin/login"
+            path={`/${ADMIN_PATH}/login`}
             element={
               <Suspense fallback={<AdminFallback />}>
                 <AdminLogin />
@@ -34,7 +35,7 @@ export default function App() {
             }
           />
           <Route
-            path="/admin"
+            path={`/${ADMIN_PATH}`}
             element={
               <Suspense fallback={<AdminFallback />}>
                 <ProtectedRoute>
@@ -43,6 +44,8 @@ export default function App() {
               </Suspense>
             }
           />
+          {/* Unknown paths (including the old /admin) fall back to the menu. */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
