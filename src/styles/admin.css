@@ -880,3 +880,79 @@
   background: #52b788;
   border-color: #52b788;
 }
+
+/* ===== Table QR codes tab ===== */
+.admin-qr-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.admin-qr-controls > div {
+  max-width: 180px;
+}
+.admin-qr-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+.admin-qr-card {
+  background: #11271c;
+  border: 1px solid rgba(82, 183, 136, 0.12);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.admin-qr-code {
+  background: #fff;
+  padding: 8px;
+  border-radius: 8px;
+  line-height: 0;
+}
+.admin-qr-label {
+  font-weight: 700;
+  color: #fff;
+  font-size: 14px;
+}
+
+/* Print-only: each table's QR on its own centered page. */
+.qr-print-area {
+  display: none;
+}
+@media print {
+  .admin-shell {
+    display: none !important;
+  }
+  .qr-print-area {
+    display: block !important;
+  }
+  .qr-print-card {
+    height: 100vh;
+    page-break-after: always;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    color: #000;
+  }
+  .qr-print-card:last-child {
+    page-break-after: auto;
+  }
+  .qr-print-brand {
+    font-size: 28px;
+    font-weight: 800;
+  }
+  .qr-print-table {
+    font-size: 42px;
+    font-weight: 800;
+  }
+  .qr-print-hint {
+    font-size: 16px;
+    color: #444;
+  }
+}

@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { NUM_TABLES } from "../constants/config";
+import { MAX_TABLE } from "../constants/config";
 import MenuApp from "../components/MenuApp";
 
 export default function MenuPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const rawTable = parseInt(searchParams.get("table"), 10);
   const tableNum =
-    Number.isInteger(rawTable) && rawTable >= 1 && rawTable <= NUM_TABLES
+    Number.isInteger(rawTable) && rawTable >= 1 && rawTable <= MAX_TABLE
       ? rawTable
       : null;
   const [lang, setLang] = useState(searchParams.get("lang") || "en");

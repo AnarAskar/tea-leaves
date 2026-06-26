@@ -2,7 +2,7 @@ import { buildTelegramMessage } from "../shared/telegramMessages.js";
 import { sendTelegramMessage } from "../shared/sendTelegram.js";
 
 const VALID_TYPES = new Set(["order", "bill", "note", "feedback"]);
-const MAX_TABLE = 99;
+const MAX_TABLE = 999;
 
 // Best-effort in-memory rate limit to protect the staff Telegram chat from
 // flooding. Note: on serverless this is per warm instance, so for strict

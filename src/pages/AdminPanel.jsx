@@ -16,7 +16,8 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { ADMIN_PATH } from "../constants/config";
+import { QRCodeSVG } from "qrcode.react";
+import { ADMIN_PATH, BASE_URL, NUM_TABLES } from "../constants/config";
 import { supabase } from "../utils/supabaseClient";
 import { useAuth } from "../contexts/AuthContext";
 import { uploadCategoryImage } from "../utils/uploadCategoryImage";
@@ -149,6 +150,32 @@ export default function AdminPanel() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [activeTab, setActiveTab] = useState("items");
+
+  // Table QR generator state. The table count is remembered in the browser.
+  const [qrCount, setQrCount] = useState(() => {
+    const saved = parseInt(localStorage.getItem("tl_qr_count"), 10);
+    return Number.isInteger(saved) && saved > 0 ? Math.min(saved, 999) : NUM_TABLES;
+  });
+  const [printQueue, setPrintQueue] = useState([]);
+  const qrBaseUrl = (
+    BASE_URL ||
+    (typeof window !== "undefined" ? window.location.origin : "")
+  ).replace(/\/+$/, "");
+  const tableUrl = (n) => `${qrBaseUrl}/?table=${n}`;
+
+  useEffect(() => {
+    localStorage.setItem("tl_qr_count", String(qrCount));
+  }, [qrCount]);
+
+  // When a print is queued, let the print-only DOM render, then open the dialog.
+  useEffect(() => {
+    if (!printQueue.length) return;
+    const id = setTimeout(() => {
+      window.print();
+      setPrintQueue([]);
+    }, 60);
+    return () => clearTimeout(id);
+  }, [printQueue]);
 
   const [editingItem, setEditingItem] = useState(null);
   const [itemForm, setItemForm] = useState({
@@ -575,6 +602,7 @@ export default function AdminPanel() {
   const availableCount = items.filter((i) => i.is_available).length;
 
   return (
+    <>
     <div className="admin-shell">
       <header className="admin-header">
         <div className="admin-header-inner">
@@ -628,6 +656,13 @@ export default function AdminPanel() {
             onClick={() => setActiveTab("categories")}
           >
             Categories
+          </button>
+          <button
+            type="button"
+            className={`admin-tab${activeTab === "qr" ? " active" : ""}`}
+            onClick={() => setActiveTab("qr")}
+          >
+            Table QR codes
           </button>
         </div>
 
@@ -1325,7 +1360,90 @@ export default function AdminPanel() {
             </div>
           </>
         )}
+
+        {activeTab === "qr" && (
+          <div className="admin-card">
+            <div className="admin-card-header">
+              <div>
+                <h2>Table QR codes</h2>
+                <p>
+                  One QR per table. Scanning it opens the menu already set to
+                  that table so guests can order.
+                </p>
+              </div>
+            </div>
+            <div className="admin-card-body">
+              <div className="admin-qr-controls">
+                <Field label="Number of tables">
+                  <input
+                    className="admin-input"
+                    type="number"
+                    min="1"
+                    max="999"
+                    value={qrCount}
+                    onChange={(e) => {
+                      const v = parseInt(e.target.value, 10);
+                      setQrCount(
+                        Number.isInteger(v) ? Math.max(1, Math.min(999, v)) : 1,
+                      );
+                    }}
+                  />
+                </Field>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-primary"
+                  onClick={() =>
+                    setPrintQueue(
+                      Array.from({ length: qrCount }, (_, i) => i + 1),
+                    )
+                  }
+                >
+                  🖨 Print all ({qrCount})
+                </button>
+              </div>
+
+              {!BASE_URL && (
+                <p className="admin-hint" style={{ marginTop: 10 }}>
+                  Tip: set <code>VITE_BASE_URL</code> to your live domain so the
+                  codes work off your phone. Currently using{" "}
+                  <code>{qrBaseUrl || "this page's origin"}</code>.
+                </p>
+              )}
+
+              <div className="admin-qr-grid">
+                {Array.from({ length: qrCount }, (_, i) => i + 1).map((n) => (
+                  <div className="admin-qr-card" key={n}>
+                    <div className="admin-qr-code">
+                      <QRCodeSVG value={tableUrl(n)} size={132} level="M" marginSize={2} />
+                    </div>
+                    <div className="admin-qr-label">Table {n}</div>
+                    <button
+                      type="button"
+                      className="admin-btn admin-btn-secondary admin-btn-sm"
+                      onClick={() => setPrintQueue([n])}
+                    >
+                      🖨 Print
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
+
+    {/* Print-only area: rendered for whatever is queued, shown only when printing. */}
+    <div className="qr-print-area" aria-hidden="true">
+      {printQueue.map((n) => (
+        <div className="qr-print-card" key={n}>
+          <div className="qr-print-brand">🍵 Tea Leaves</div>
+          <QRCodeSVG value={tableUrl(n)} size={260} level="M" marginSize={2} />
+          <div className="qr-print-table">Table {n}</div>
+          <div className="qr-print-hint">Scan to view the menu &amp; order</div>
+        </div>
+      ))}
+    </div>
+    </>
   );
 }
