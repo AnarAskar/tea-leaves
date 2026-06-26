@@ -29,7 +29,20 @@ function ItemPhoto({ src, alt, className, placeholderClassName = "photo-ph" }) {
         className={`${className} ${placeholderClassName}`}
         aria-hidden="true"
       >
-        🍵
+        <svg
+          className="photo-ph-ico"
+          viewBox="0 0 64 64"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M26 10c-2.2 2.4-2.2 4.8 0 7.2M34 8.5c-2.2 2.4-2.2 4.8 0 7.2" />
+          <path d="M14 25h32v8c0 8.8-7.2 16-16 16s-16-7.2-16-16v-8z" />
+          <path d="M46 28h4.5a5.5 5.5 0 0 1 0 11H49" />
+          <path d="M12 55h36" />
+        </svg>
       </div>
     );
   }
@@ -429,7 +442,8 @@ export default function MenuApp({
         .lang-opt-text{flex:1;font-weight:600;color:inherit;}
         .lang-opt-check{color:var(--mint);font-size:14px;font-weight:800;opacity:0;}
         .lang-opt.sel .lang-opt-check{opacity:1;}
-        .photo-ph{display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,#2a4a37,#193224);color:#4a7a5a;}
+        .photo-ph{display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,#2a4a37,#193224);color:#5f9c78;}
+        .photo-ph-ico{width:42%;max-width:58px;height:auto;opacity:.85;}
         .g-img.photo-ph{height:140px;font-size:34px;}
         .l-img.photo-ph{min-height:100px;font-size:28px;}
         .d-img.photo-ph{width:46px;height:46px;font-size:18px;border-radius:12px;}

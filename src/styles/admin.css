@@ -850,3 +850,33 @@
   font-family: ui-monospace, monospace;
   opacity: 0.8;
 }
+
+/* ===== Tag chips (item form) ===== */
+.admin-tag-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-tag-chip {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #95d5b2;
+  background: rgba(82, 183, 136, 0.06);
+  border: 1px solid rgba(82, 183, 136, 0.2);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.admin-tag-chip:hover {
+  border-color: rgba(82, 183, 136, 0.5);
+}
+
+.admin-tag-chip.active {
+  color: #0f2419;
+  background: #52b788;
+  border-color: #52b788;
+}

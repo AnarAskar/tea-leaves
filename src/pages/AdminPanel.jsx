@@ -23,6 +23,14 @@ import { uploadMenuImage } from "../utils/uploadMenuImage";
 import { formatSupabaseError } from "../utils/formatSupabaseError";
 import "../styles/admin.css";
 
+// The only tags the customer menu renders (hot/cold/vegan/new badges).
+const TAG_OPTIONS = [
+  { value: "hot", label: "Hot" },
+  { value: "cold", label: "Cold" },
+  { value: "vegan", label: "Vegan" },
+  { value: "new", label: "New" },
+];
+
 function AdminLoading() {
   return (
     <div className="admin-loading">
@@ -152,7 +160,7 @@ export default function AdminPanel() {
     ing_ku: "",
     price: "",
     photo_url: "",
-    tags: "",
+    tags: [],
     is_available: true,
     addons: [],
   });
@@ -166,6 +174,7 @@ export default function AdminPanel() {
     label_ar: "",
     label_ku: "",
     sort_order: 0,
+    hours_enabled: false,
     available_from: "",
     available_until: "",
   });
@@ -228,38 +237,35 @@ export default function AdminPanel() {
     return grouped;
   }, [items]);
 
-  // Write new sort_order for rows whose position changed. Resync on failure.
-  const persistOrder = useCallback(
-    async (table, orderedRows) => {
-      const updates = orderedRows
-        .map((row, i) => ({ id: row.id, next: i, prev: row.sort_order ?? 0 }))
-        .filter((u) => u.next !== u.prev);
-      if (updates.length === 0) return;
-      try {
-        const results = await Promise.all(
-          updates.map((u) =>
-            supabase
-              .from(table)
-              .update({ sort_order: u.next })
-              .eq("id", u.id),
-          ),
-        );
-        const failed = results.find((r) => r.error);
-        if (failed?.error) throw failed.error;
-      } catch (err) {
-        console.error("Reorder error:", err);
-        setError(formatSupabaseError(err));
-        fetchData();
-      }
-    },
-    [fetchData],
-  );
+  // Write new sort_order for rows whose position changed.
+  // On failure, runs revert() to restore the previous order locally — no
+  // full refetch, so the list doesn't flash a loading spinner.
+  const persistOrder = useCallback(async (table, orderedRows, revert) => {
+    const updates = orderedRows
+      .map((row, i) => ({ id: row.id, next: i, prev: row.sort_order ?? 0 }))
+      .filter((u) => u.next !== u.prev);
+    if (updates.length === 0) return;
+    try {
+      const results = await Promise.all(
+        updates.map((u) =>
+          supabase.from(table).update({ sort_order: u.next }).eq("id", u.id),
+        ),
+      );
+      const failed = results.find((r) => r.error);
+      if (failed?.error) throw failed.error;
+    } catch (err) {
+      console.error("Reorder error:", err);
+      setError(formatSupabaseError(err));
+      revert?.();
+    }
+  }, []);
 
   const reorderCategories = (oldIndex, newIndex) => {
     if (oldIndex === newIndex) return;
+    const prev = categories;
     const reordered = arrayMove(categories, oldIndex, newIndex);
-    persistOrder("categories", reordered);
     setCategories(reordered.map((c, i) => ({ ...c, sort_order: i })));
+    persistOrder("categories", reordered, () => setCategories(prev));
   };
 
   const moveCategory = (index, dir) => {
@@ -272,13 +278,14 @@ export default function AdminPanel() {
     if (oldIndex === newIndex) return;
     const catItems = itemsByCategory[catId] || [];
     const reordered = arrayMove(catItems, oldIndex, newIndex);
-    persistOrder("menu_items", reordered);
+    const prevItems = items;
     const orderMap = new Map(reordered.map((it, i) => [it.id, i]));
     setItems((prev) =>
       prev.map((it) =>
         orderMap.has(it.id) ? { ...it, sort_order: orderMap.get(it.id) } : it,
       ),
     );
+    persistOrder("menu_items", reordered, () => setItems(prevItems));
   };
 
   const moveItem = (catId, index, dir) => {
@@ -304,7 +311,7 @@ export default function AdminPanel() {
       ing_ku: "",
       price: "",
       photo_url: "",
-      tags: "",
+      tags: [],
       is_available: true,
       addons: [],
     });
@@ -325,7 +332,7 @@ export default function AdminPanel() {
       ing_ku: item.ing_ku || "",
       price: item.price.toString(),
       photo_url: item.photo_url || "",
-      tags: (item.tags || []).join(", "),
+      tags: item.tags || [],
       is_available: item.is_available,
       addons: item.addons || [],
     });
@@ -350,10 +357,7 @@ export default function AdminPanel() {
       ing_ku: itemForm.ing_ku.trim() || null,
       price: parseInt(itemForm.price, 10),
       photo_url: itemForm.photo_url.trim() || "",
-      tags: itemForm.tags
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean),
+      tags: itemForm.tags,
       is_available: itemForm.is_available,
       addons: itemForm.addons,
     };
@@ -396,6 +400,7 @@ export default function AdminPanel() {
       label_ar: "",
       label_ku: "",
       sort_order: categories.length,
+      hours_enabled: false,
       available_from: "",
       available_until: "",
     });
@@ -473,6 +478,7 @@ export default function AdminPanel() {
       label_ar: cat.label_ar,
       label_ku: cat.label_ku,
       sort_order: cat.sort_order,
+      hours_enabled: !!(cat.available_from || cat.available_until),
       available_from: cat.available_from || "",
       available_until: cat.available_until || "",
     });
@@ -494,8 +500,12 @@ export default function AdminPanel() {
       label_ar: categoryForm.label_ar.trim(),
       label_ku: categoryForm.label_ku.trim(),
       sort_order: editingCategory ? editingCategory.sort_order : categories.length,
-      available_from: categoryForm.available_from || null,
-      available_until: categoryForm.available_until || null,
+      available_from: categoryForm.hours_enabled
+        ? categoryForm.available_from || null
+        : null,
+      available_until: categoryForm.hours_enabled
+        ? categoryForm.available_until || null
+        : null,
     };
     try {
       if (editingCategory) {
@@ -787,14 +797,29 @@ export default function AdminPanel() {
                       </div>
                     </div>
                     <Field label="Tags">
-                      <input
-                        className="admin-input"
-                        placeholder="hot, cold, vegan, new"
-                        value={itemForm.tags}
-                        onChange={(e) =>
-                          setItemForm({ ...itemForm, tags: e.target.value })
-                        }
-                      />
+                      <div className="admin-tag-chips">
+                        {TAG_OPTIONS.map((opt) => {
+                          const active = itemForm.tags.includes(opt.value);
+                          return (
+                            <button
+                              type="button"
+                              key={opt.value}
+                              className={`admin-tag-chip admin-tag-chip-${opt.value}${active ? " active" : ""}`}
+                              aria-pressed={active}
+                              onClick={() =>
+                                setItemForm((f) => ({
+                                  ...f,
+                                  tags: active
+                                    ? f.tags.filter((t) => t !== opt.value)
+                                    : [...f.tags, opt.value],
+                                }))
+                              }
+                            >
+                              {opt.label}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </Field>
                     <div className="admin-addons-section">
                       <div className="admin-form-section-title" style={{ marginBottom: 8 }}>Add-ons (single choice)</div>
@@ -1065,35 +1090,56 @@ export default function AdminPanel() {
 
                   <div className="admin-form-section">
                     <div className="admin-form-section-title">Time availability</div>
-                    <div className="admin-field-row admin-field-row-2">
-                      <Field label="Available from">
-                        <input
-                          className="admin-input"
-                          type="time"
-                          value={categoryForm.available_from}
-                          onChange={(e) =>
-                            setCategoryForm({
-                              ...categoryForm,
-                              available_from: e.target.value,
-                            })
-                          }
-                        />
-                      </Field>
-                      <Field label="Available until">
-                        <input
-                          className="admin-input"
-                          type="time"
-                          value={categoryForm.available_until}
-                          onChange={(e) =>
-                            setCategoryForm({
-                              ...categoryForm,
-                              available_until: e.target.value,
-                            })
-                          }
-                        />
-                      </Field>
-                    </div>
-                    <p className="admin-hint">Leave blank to always show this category.</p>
+                    <label className="admin-checkbox-row">
+                      <input
+                        type="checkbox"
+                        checked={categoryForm.hours_enabled}
+                        onChange={(e) =>
+                          setCategoryForm({
+                            ...categoryForm,
+                            hours_enabled: e.target.checked,
+                          })
+                        }
+                      />
+                      Only show this category during certain hours
+                    </label>
+                    {categoryForm.hours_enabled && (
+                      <>
+                        <div className="admin-field-row admin-field-row-2">
+                          <Field label="Available from">
+                            <input
+                              className="admin-input"
+                              type="time"
+                              value={categoryForm.available_from}
+                              onChange={(e) =>
+                                setCategoryForm({
+                                  ...categoryForm,
+                                  available_from: e.target.value,
+                                })
+                              }
+                            />
+                          </Field>
+                          <Field label="Available until">
+                            <input
+                              className="admin-input"
+                              type="time"
+                              value={categoryForm.available_until}
+                              onChange={(e) =>
+                                setCategoryForm({
+                                  ...categoryForm,
+                                  available_until: e.target.value,
+                                })
+                              }
+                            />
+                          </Field>
+                        </div>
+                        <p className="admin-hint">
+                          The category is hidden from the customer menu outside
+                          this window. Leave a field blank for an open-ended
+                          start or end.
+                        </p>
+                      </>
+                    )}
                   </div>
 
                   <div className="admin-form-section">
