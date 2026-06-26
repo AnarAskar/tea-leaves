@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { NUM_TABLES } from "../constants/config";
 import MenuApp from "../components/MenuApp";
@@ -11,6 +11,17 @@ export default function MenuPage() {
       ? rawTable
       : null;
   const [lang, setLang] = useState(searchParams.get("lang") || "en");
+
+  // Keep <html lang>/<dir> in sync with the chosen language for a11y + correct RTL.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.lang = lang;
+    root.dir = lang === "ar" || lang === "ku" ? "rtl" : "ltr";
+    return () => {
+      root.lang = "en";
+      root.dir = "ltr";
+    };
+  }, [lang]);
 
   const handleChangeLang = (newLang) => {
     setLang(newLang);

@@ -4,6 +4,26 @@ import { sendTelegramMessage } from "../shared/sendTelegram.js";
 const VALID_TYPES = new Set(["order", "bill", "note", "feedback"]);
 const MAX_TABLE = 99;
 
+// Best-effort in-memory rate limit to protect the staff Telegram chat from
+// flooding. Note: on serverless this is per warm instance, so for strict
+// production-grade limits use a shared store (Vercel KV / Upstash Redis).
+const RATE_WINDOW_MS = 60_000;
+const RATE_MAX_GLOBAL = 20; // total messages / minute
+const RATE_MAX_PER_TABLE = 6; // messages / minute from one table
+const recentHits = [];
+
+function enforceRateLimit(tableNum) {
+  const now = Date.now();
+  while (recentHits.length && now - recentHits[0].t > RATE_WINDOW_MS) {
+    recentHits.shift();
+  }
+  const perTable = recentHits.filter((h) => h.table === tableNum).length;
+  if (recentHits.length >= RATE_MAX_GLOBAL || perTable >= RATE_MAX_PER_TABLE) {
+    throw Object.assign(new Error("Too many requests"), { status: 429 });
+  }
+  recentHits.push({ t: now, table: tableNum });
+}
+
 function getTelegramConfig() {
   const botToken = process.env.BOT_TOKEN || process.env.VITE_BOT_TOKEN;
   const chatId = process.env.CHAT_ID || process.env.VITE_CHAT_ID;
@@ -71,6 +91,7 @@ export async function handleTelegramApi(body) {
   }
 
   validatePayload(type, payload);
+  enforceRateLimit(Number(payload.tableNum));
 
   const text = buildTelegramMessage(type, payload);
   const config = getTelegramConfig();

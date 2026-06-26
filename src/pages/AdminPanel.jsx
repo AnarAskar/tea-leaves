@@ -207,8 +207,13 @@ export default function AdminPanel() {
       if (itemRes.error) throw itemRes.error;
       setCategories(catRes.data || []);
       setItems(itemRes.data || []);
-      if (catRes.data?.length > 0 && !itemForm.category_id && !editingItem) {
-        setItemForm((prev) => ({ ...prev, category_id: catRes.data[0].id }));
+      // Default the new-item form's category to the first one, without
+      // depending on form state (which would refetch the whole menu on edits).
+      const firstCat = catRes.data?.[0]?.id;
+      if (firstCat) {
+        setItemForm((prev) =>
+          prev.category_id ? prev : { ...prev, category_id: firstCat },
+        );
       }
     } catch (err) {
       console.error("Fetch error:", err);
@@ -216,7 +221,7 @@ export default function AdminPanel() {
     } finally {
       setLoading(false);
     }
-  }, [itemForm.category_id, editingItem]);
+  }, []);
 
   useEffect(() => {
     if (session) fetchData();

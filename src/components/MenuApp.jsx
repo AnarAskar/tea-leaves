@@ -22,7 +22,13 @@ function isCategoryAvailable(cat) {
   return cur < toMin(available_until);
 }
 
-function ItemPhoto({ src, alt, className, placeholderClassName = "photo-ph" }) {
+function ItemPhoto({
+  src,
+  alt,
+  className,
+  placeholderClassName = "photo-ph",
+  eager = false,
+}) {
   if (!src) {
     return (
       <div
@@ -47,7 +53,14 @@ function ItemPhoto({ src, alt, className, placeholderClassName = "photo-ph" }) {
     );
   }
   return (
-    <img className={className} src={src} alt={alt} decoding="async" />
+    <img
+      className={className}
+      src={src}
+      alt={alt}
+      decoding="async"
+      loading={eager ? "eager" : "lazy"}
+      fetchPriority={eager ? "high" : "auto"}
+    />
   );
 }
 
@@ -194,8 +207,14 @@ export default function MenuApp({
 
   const reset = () => setScreen("menu");
 
-  // Slider auto-advance
+  // Slider auto-advance (skipped when the user prefers reduced motion)
   useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
     const id = setInterval(() => {
       if (!sliderDrag.current.active) {
         setSliderIdx((i) => (i + 1) % SLIDER_IMAGES.length);
@@ -286,14 +305,30 @@ export default function MenuApp({
       )
     : null;
 
-  const itemCard = (item) => {
+  const itemCard = (item, idx = 0, eagerEligible = false) => {
     const qty = cart[item.id] || 0;
+    const eager = eagerEligible && idx < 4;
+    const openDetail = () => {
+      setSelectedItem(item);
+      setSelectedAddon(item.addons?.[0] ?? null);
+    };
+    const cardKeyDown = (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        openDetail();
+      }
+    };
+    const cardLabel = `${item.name[lang]}, ${fmt(item.price)} IQD`;
     if (viewMode === "list") {
       return (
         <div
           key={item.id}
           className={`l-card${qty > 0 ? " incart" : ""}`}
-          onClick={() => { setSelectedItem(item); setSelectedAddon(item.addons?.[0] ?? null); }}
+          role="button"
+          tabIndex={0}
+          aria-label={cardLabel}
+          onClick={openDetail}
+          onKeyDown={cardKeyDown}
         >
           <div className="l-body">
             <div className="l-name">{item.name[lang]}</div>
@@ -305,6 +340,7 @@ export default function MenuApp({
               className="l-img"
               src={item.photo}
               alt={item.name[lang]}
+              eager={eager}
             />
             {qty > 0 && <div className="img-badge">{qty}</div>}
           </div>
@@ -315,17 +351,22 @@ export default function MenuApp({
       <div
         key={item.id}
         className={`g-card${qty > 0 ? " incart" : ""}`}
-        onClick={() => { setSelectedItem(item); setSelectedAddon(item.addons?.[0] ?? null); }}
+        role="button"
+        tabIndex={0}
+        aria-label={cardLabel}
+        onClick={openDetail}
+        onKeyDown={cardKeyDown}
       >
         <ItemPhoto
           className="g-img"
           src={item.photo}
           alt={item.name[lang]}
+          eager={eager}
         />
         {qty > 0 && <div className="img-badge">{qty}</div>}
         <div className="g-body">
           <div className="g-name">{item.name[lang]}</div>
-          <div className="g-price">{fmt(item.price)}</div>
+          <div className="g-price">{fmt(item.price)} IQD</div>
           <div className="g-foot">
             <div className="g-tags">
               {item.tags.includes("hot") && (
@@ -415,12 +456,16 @@ export default function MenuApp({
           --bg:#112619;--surface:#193224;--surface-2:#21402f;--surface-3:#284b38;
           --line:rgba(255,255,255,.08);--line-strong:#2d5a42;
           --mint:#52b788;--mint-deep:#40916c;--gold:#e3c17e;
-          --text:#f1f8f3;--text-dim:#9cc0ac;--text-faint:#5f8a70;
+          --text:#f1f8f3;--text-dim:#9cc0ac;--text-faint:#83ab94;
           --r-sm:10px;--r:16px;--r-lg:22px;--r-xl:28px;
           --sh-card:0 2px 10px rgba(0,0,0,.22);--sh-pop:0 18px 50px rgba(0,0,0,.55);--glow:0 8px 26px rgba(64,145,108,.42);
           --ease:cubic-bezier(.22,1,.36,1);
         }
         body{background:var(--bg);font-family:var(--f);min-height:100dvh;-webkit-font-smoothing:antialiased;}
+        :focus-visible{outline:2px solid var(--mint);outline-offset:2px;border-radius:4px;}
+        @media (prefers-reduced-motion:reduce){
+          *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important;}
+        }
         .app{width:100%;max-width:430px;min-height:100dvh;height:100dvh;background:linear-gradient(180deg,#1b3a2d 0%,#16301f 55%,#112619 100%);color:var(--text);direction:${isRTL ? "rtl" : "ltr"};display:flex;flex-direction:column;position:relative;overflow:hidden;margin:0 auto;}
         .hdr{background:linear-gradient(180deg,rgba(20,39,28,.94),rgba(20,39,28,.74));backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:14px 16px 0;flex-shrink:0;border-bottom:1px solid var(--line);z-index:10;}
         .hdr-top{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px;margin-bottom:13px;}
@@ -458,7 +503,7 @@ export default function MenuApp({
         .cats{display:flex;gap:4px;padding:6px 12px 2px;overflow-x:auto;scrollbar-width:none;cursor:grab;user-select:none;-webkit-overflow-scrolling:touch;}
         .cats::-webkit-scrollbar{display:none;}
         .cats.drag{cursor:grabbing;}
-        .cat-item{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:72px;padding:4px 4px 12px;cursor:pointer;flex-shrink:0;transition:transform .2s var(--ease);}
+        .cat-item{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:72px;padding:4px 4px 12px;cursor:pointer;flex-shrink:0;transition:transform .2s var(--ease);background:none;border:none;font-family:inherit;}
         .cat-item.active{transform:translateY(-2px);}
         .cat-icon{width:56px;height:56px;background:var(--surface-2);border-radius:18px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);transition:border-color .22s,box-shadow .22s;flex-shrink:0;overflow:hidden;}
         .cat-icon img{width:100%;height:100%;object-fit:cover;}
@@ -564,7 +609,7 @@ export default function MenuApp({
         .slide-item{height:100%;flex-shrink:0;}
         .slide-img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;-webkit-user-drag:none;user-drag:none;}
         .slider-dots{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:2;}
-        .dot{width:7px;height:7px;border-radius:4px;background:rgba(255,255,255,.5);cursor:pointer;transition:width .25s var(--ease),background .2s;}
+        .dot{width:7px;height:7px;border-radius:4px;background:rgba(255,255,255,.5);cursor:pointer;transition:width .25s var(--ease),background .2s;border:none;padding:0;-webkit-appearance:none;appearance:none;}
         .dot.active{background:#fff;width:20px;}
 
         /* SECTION HEAD with toggle */
@@ -653,7 +698,7 @@ export default function MenuApp({
 
       <div className="app">
         {/* HEADER */}
-        <div className="hdr">
+        <header className="hdr">
           <div className="hdr-top">
             <div className="lang-wrap" ref={langWrapRef}>
               <button
@@ -703,14 +748,15 @@ export default function MenuApp({
               )}
             </div>
 
-            <div className="hdr-title">{t.appName}</div>
+            <h1 className="hdr-title">{t.appName}</h1>
 
             <div className="hdr-right">
               {tableNum && (
                 <>
                   <button
                     className="act-btn"
-                    title="Request Bill"
+                    title={t.billTitle}
+                    aria-label={t.billTitle}
                     onClick={() => {
                       setModal("bill");
                       setModalDone(false);
@@ -733,7 +779,8 @@ export default function MenuApp({
                   </button>
                   <button
                     className="act-btn"
-                    title="Leave a Note"
+                    title={t.noteTitle}
+                    aria-label={t.noteTitle}
                     onClick={() => {
                       setModal("note");
                       setModalDone(false);
@@ -753,7 +800,8 @@ export default function MenuApp({
                   </button>
                   <button
                     className="act-btn"
-                    title="Give Feedback"
+                    title={t.feedbackTitle}
+                    aria-label={t.feedbackTitle}
                     onClick={() => {
                       setModal("feedback");
                       setModalDone(false);
@@ -776,6 +824,7 @@ export default function MenuApp({
                   <button
                     className="icon-btn"
                     onClick={() => setDrawerOpen(true)}
+                    aria-label={`${t.yourOrder}${totalQty > 0 ? ` (${totalQty})` : ""}`}
                   >
                     <svg
                       width="22"
@@ -841,29 +890,31 @@ export default function MenuApp({
           </div>
 
           {!query && visibleCategories.length > 0 && (
-            <div className="cats" ref={catBarRef}>
+            <nav className="cats" ref={catBarRef} aria-label="Menu categories">
               {visibleCategories.map((c) => (
-                <div
+                <button
+                  type="button"
                   key={c.id}
                   data-cat={c.id}
                   className={`cat-item${activeCat === c.id ? " active" : ""}`}
+                  aria-current={activeCat === c.id ? "true" : undefined}
                   onClick={() => handleCatClick(c.id)}
                 >
-                  <div className="cat-icon">
+                  <span className="cat-icon">
                     {c.image_url?.trim() ? (
-                      <img src={c.image_url} alt={c[`label_${lang}`]} />
+                      <img src={c.image_url} alt="" />
                     ) : (
                       <span className="cat-icon-fallback">🍵</span>
                     )}
-                  </div>
+                  </span>
                   <span className="cat-lbl">{c[`label_${lang}`]}</span>
-                </div>
+                </button>
               ))}
-            </div>
+            </nav>
           )}
-        </div>
+        </header>
 
-        <div className="scroll-body" ref={scrollRef}>
+        <main className="scroll-body" ref={scrollRef}>
           {filtered ? (
             <div className="search-results">
               <div className="sec-lbl">
@@ -881,7 +932,9 @@ export default function MenuApp({
                   <div style={{ fontSize: 14 }}>{t.noItems}</div>
                 </div>
               ) : (
-                <div className="grid">{filtered.map(itemCard)}</div>
+                <div className="grid">
+                  {filtered.map((it, i) => itemCard(it, i, true))}
+                </div>
               )}
             </div>
           ) : (
@@ -971,9 +1024,12 @@ export default function MenuApp({
                     </div>
                     <div className="slider-dots">
                       {SLIDER_IMAGES.map((_, i) => (
-                        <div
+                        <button
+                          type="button"
                           key={i}
                           className={`dot${i === sliderIdx ? " active" : ""}`}
+                          aria-label={`Go to slide ${i + 1}`}
+                          aria-current={i === sliderIdx ? "true" : undefined}
                           onClick={() => setSliderIdx(i)}
                         />
                       ))}
@@ -982,7 +1038,7 @@ export default function MenuApp({
                 );
               })()}
 
-              {visibleCategories.map((cat) => (
+              {visibleCategories.map((cat, catIdx) => (
                 <div
                   key={cat.id}
                   ref={(el) => (sectionRefs.current[cat.id] = el)}
@@ -1028,13 +1084,15 @@ export default function MenuApp({
                     <span>{cat[`label_${lang}`]}</span>
                   </div>
                   <div className={viewMode === "list" ? "list-view" : "grid"}>
-                    {(itemsByCategory[cat.id] || []).map(itemCard)}
+                    {(itemsByCategory[cat.id] || []).map((it, i) =>
+                      itemCard(it, i, catIdx === 0),
+                    )}
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </main>
 
         {tableNum && totalQty > 0 && !drawerOpen && (
           <div className="btm-bar">

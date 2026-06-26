@@ -11,7 +11,8 @@ export async function onRequest(context) {
     return Response.json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Request failed";
-    const status = message.startsWith("Invalid") ? 400 : 500;
+    const status =
+      err.status || (message.startsWith("Invalid") ? 400 : 500);
     return Response.json({ error: message }, { status });
   }
 }
