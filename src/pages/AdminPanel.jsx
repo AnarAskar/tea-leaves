@@ -157,6 +157,12 @@ export default function AdminPanel() {
     return Number.isInteger(saved) && saved > 0 ? Math.min(saved, 999) : NUM_TABLES;
   });
   const [printQueue, setPrintQueue] = useState([]);
+  const [wifiName, setWifiName] = useState(
+    () => localStorage.getItem("tl_wifi_name") || "",
+  );
+  const [wifiPass, setWifiPass] = useState(
+    () => localStorage.getItem("tl_wifi_pass") || "",
+  );
   const qrBaseUrl = (
     BASE_URL ||
     (typeof window !== "undefined" ? window.location.origin : "")
@@ -166,6 +172,12 @@ export default function AdminPanel() {
   useEffect(() => {
     localStorage.setItem("tl_qr_count", String(qrCount));
   }, [qrCount]);
+  useEffect(() => {
+    localStorage.setItem("tl_wifi_name", wifiName);
+  }, [wifiName]);
+  useEffect(() => {
+    localStorage.setItem("tl_wifi_pass", wifiPass);
+  }, [wifiPass]);
 
   // When a print is queued, let the print-only DOM render, then open the dialog.
   useEffect(() => {
@@ -1389,6 +1401,22 @@ export default function AdminPanel() {
                     }}
                   />
                 </Field>
+                <Field label="WiFi name (optional)">
+                  <input
+                    className="admin-input"
+                    value={wifiName}
+                    onChange={(e) => setWifiName(e.target.value)}
+                    placeholder="e.g. Tea Leaves"
+                  />
+                </Field>
+                <Field label="WiFi password (optional)">
+                  <input
+                    className="admin-input"
+                    value={wifiPass}
+                    onChange={(e) => setWifiPass(e.target.value)}
+                    placeholder="e.g. tealeaves123"
+                  />
+                </Field>
                 <button
                   type="button"
                   className="admin-btn admin-btn-primary"
@@ -1417,6 +1445,12 @@ export default function AdminPanel() {
                       <QRCodeSVG value={tableUrl(n)} size={132} level="M" marginSize={2} />
                     </div>
                     <div className="admin-qr-label">Table {n}</div>
+                    {(wifiName || wifiPass) && (
+                      <div className="admin-qr-wifi">
+                        {wifiName && <div>📶 {wifiName}</div>}
+                        {wifiPass && <div>🔑 {wifiPass}</div>}
+                      </div>
+                    )}
                     <button
                       type="button"
                       className="admin-btn admin-btn-secondary admin-btn-sm"
@@ -1437,10 +1471,24 @@ export default function AdminPanel() {
     <div className="qr-print-area" aria-hidden="true">
       {printQueue.map((n) => (
         <div className="qr-print-card" key={n}>
-          <div className="qr-print-brand">🍵 Tea Leaves</div>
-          <QRCodeSVG value={tableUrl(n)} size={260} level="M" marginSize={2} />
+          <div className="qr-print-brand">Tea Leaves</div>
+          <QRCodeSVG value={tableUrl(n)} size={150} level="M" marginSize={2} />
           <div className="qr-print-table">Table {n}</div>
-          <div className="qr-print-hint">Scan to view the menu &amp; order</div>
+          <div className="qr-print-hint">Scan for the menu &amp; to order</div>
+          {(wifiName || wifiPass) && (
+            <div className="qr-print-wifi">
+              {wifiName && (
+                <div>
+                  <strong>WiFi:</strong> {wifiName}
+                </div>
+              )}
+              {wifiPass && (
+                <div>
+                  <strong>Password:</strong> {wifiPass}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       ))}
     </div>

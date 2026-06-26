@@ -918,41 +918,71 @@
   color: #fff;
   font-size: 14px;
 }
+.admin-qr-wifi {
+  font-size: 12px;
+  color: #95d5b2;
+  text-align: center;
+  line-height: 1.5;
+  word-break: break-word;
+}
 
-/* Print-only: each table's QR on its own centered page. */
+/* Print-only: small cut-out squares, several per A4 page. */
 .qr-print-area {
   display: none;
 }
 @media print {
+  @page {
+    margin: 8mm;
+  }
   .admin-shell {
     display: none !important;
   }
   .qr-print-area {
-    display: block !important;
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 6mm;
+    align-content: flex-start;
   }
   .qr-print-card {
-    height: 100vh;
-    page-break-after: always;
+    width: 58mm;
+    box-sizing: border-box;
+    border: 0.3mm dashed #999;
+    border-radius: 3mm;
+    padding: 4mm 3mm;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 18px;
+    gap: 1.5mm;
+    page-break-inside: avoid;
+    break-inside: avoid;
     color: #000;
+    text-align: center;
+    font-family: Georgia, "Times New Roman", serif;
   }
-  .qr-print-card:last-child {
-    page-break-after: auto;
+  .qr-print-card svg {
+    width: 38mm;
+    height: 38mm;
   }
   .qr-print-brand {
-    font-size: 28px;
-    font-weight: 800;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 13pt;
+    font-weight: 700;
+    font-style: italic;
+    letter-spacing: 0.02em;
   }
   .qr-print-table {
-    font-size: 42px;
+    font-size: 13pt;
     font-weight: 800;
   }
   .qr-print-hint {
-    font-size: 16px;
+    font-size: 6.5pt;
     color: #444;
+  }
+  .qr-print-wifi {
+    font-size: 7.5pt;
+    color: #000;
+    line-height: 1.4;
+    margin-top: 1mm;
+    word-break: break-word;
   }
 }
