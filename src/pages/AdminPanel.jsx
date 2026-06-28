@@ -50,6 +50,47 @@ function Field({ label, children }) {
   );
 }
 
+// Prominent "you have unsaved order changes" bar with undo/discard/save.
+function OrderBar({ onUndo, onDiscard, onSave }) {
+  return (
+    <div className="admin-order-bar" role="status">
+      <div className="admin-order-bar-msg">
+        <span className="admin-order-bar-dot" aria-hidden="true" />
+        <div>
+          <div className="admin-order-bar-title">Unsaved order changes</div>
+          <div className="admin-order-bar-sub">
+            Your new order isn’t saved yet — click <strong>Save order</strong> to
+            keep it, or undo your changes.
+          </div>
+        </div>
+      </div>
+      <div className="admin-order-bar-actions">
+        <button
+          type="button"
+          className="admin-btn admin-btn-secondary admin-btn-sm"
+          onClick={onUndo}
+        >
+          ↶ Undo
+        </button>
+        <button
+          type="button"
+          className="admin-btn admin-btn-secondary admin-btn-sm"
+          onClick={onDiscard}
+        >
+          Discard
+        </button>
+        <button
+          type="button"
+          className="admin-btn admin-btn-primary admin-btn-sm"
+          onClick={onSave}
+        >
+          💾 Save order
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // A single reorderable row: drag handle + up/down arrows + content.
 function SortableRow({ id, index, count, onMoveUp, onMoveDown, children }) {
   const {
@@ -180,13 +221,21 @@ export default function AdminPanel() {
   }, [wifiPass]);
 
   // When a print is queued, let the print-only DOM render, then open the dialog.
+  // The queue must NOT be cleared synchronously after window.print(): on mobile
+  // print() returns immediately (it doesn't block like on desktop), so clearing
+  // right away wipes the content before the OS captures it → blank page. Instead
+  // we clear on the `afterprint` event (with a long fallback).
   useEffect(() => {
     if (!printQueue.length) return;
-    const id = setTimeout(() => {
-      window.print();
-      setPrintQueue([]);
-    }, 60);
-    return () => clearTimeout(id);
+    const clear = () => setPrintQueue([]);
+    window.addEventListener("afterprint", clear, { once: true });
+    const printId = setTimeout(() => window.print(), 120);
+    const fallbackId = setTimeout(clear, 120000);
+    return () => {
+      clearTimeout(printId);
+      clearTimeout(fallbackId);
+      window.removeEventListener("afterprint", clear);
+    };
   }, [printQueue]);
 
   const [editingItem, setEditingItem] = useState(null);
@@ -247,6 +296,9 @@ export default function AdminPanel() {
       if (itemRes.error) throw itemRes.error;
       setCategories(catRes.data || []);
       setItems(itemRes.data || []);
+      // Fresh data replaces any in-progress reorder drafts.
+      setCatUndo([]);
+      setItemUndo([]);
       // Default the new-item form's category to the first one, without
       // depending on form state (which would refetch the whole menu on edits).
       const firstCat = catRes.data?.[0]?.id;
@@ -282,35 +334,23 @@ export default function AdminPanel() {
     return grouped;
   }, [items]);
 
-  // Write new sort_order for rows whose position changed.
-  // On failure, runs revert() to restore the previous order locally — no
-  // full refetch, so the list doesn't flash a loading spinner.
-  const persistOrder = useCallback(async (table, orderedRows, revert) => {
-    const updates = orderedRows
-      .map((row, i) => ({ id: row.id, next: i, prev: row.sort_order ?? 0 }))
-      .filter((u) => u.next !== u.prev);
-    if (updates.length === 0) return;
-    try {
-      const results = await Promise.all(
-        updates.map((u) =>
-          supabase.from(table).update({ sort_order: u.next }).eq("id", u.id),
-        ),
-      );
-      const failed = results.find((r) => r.error);
-      if (failed?.error) throw failed.error;
-    } catch (err) {
-      console.error("Reorder error:", err);
-      setError(formatSupabaseError(err));
-      revert?.();
-    }
-  }, []);
+  // Draft reordering: drags/moves only change local state and push a snapshot
+  // onto an undo stack. Nothing is written to the DB until "Save order" is
+  // pressed, so accidental drags can be undone or discarded.
+  const [catUndo, setCatUndo] = useState([]);
+  const [itemUndo, setItemUndo] = useState([]);
+  const catDirty = catUndo.length > 0;
+  const itemDirty = itemUndo.length > 0;
 
   const reorderCategories = (oldIndex, newIndex) => {
     if (oldIndex === newIndex) return;
-    const prev = categories;
-    const reordered = arrayMove(categories, oldIndex, newIndex);
-    setCategories(reordered.map((c, i) => ({ ...c, sort_order: i })));
-    persistOrder("categories", reordered, () => setCategories(prev));
+    setCatUndo((s) => [...s, categories]);
+    setCategories(
+      arrayMove(categories, oldIndex, newIndex).map((c, i) => ({
+        ...c,
+        sort_order: i,
+      })),
+    );
   };
 
   const moveCategory = (index, dir) => {
@@ -319,18 +359,56 @@ export default function AdminPanel() {
     reorderCategories(index, target);
   };
 
+  const undoCategories = () => {
+    setCatUndo((s) => {
+      if (!s.length) return s;
+      setCategories(s[s.length - 1]);
+      return s.slice(0, -1);
+    });
+  };
+
+  const discardCategories = () => {
+    setCatUndo((s) => {
+      if (!s.length) return s;
+      setCategories(s[0]);
+      return [];
+    });
+  };
+
+  const saveCategories = async () => {
+    const baseline = catUndo[0] || categories;
+    const baseMap = new Map(baseline.map((c) => [c.id, c.sort_order]));
+    const changed = categories.filter((c) => baseMap.get(c.id) !== c.sort_order);
+    try {
+      const results = await Promise.all(
+        changed.map((c) =>
+          supabase
+            .from("categories")
+            .update({ sort_order: c.sort_order })
+            .eq("id", c.id),
+        ),
+      );
+      const failed = results.find((r) => r.error);
+      if (failed?.error) throw failed.error;
+      setCatUndo([]);
+      showSuccess("Category order saved.");
+    } catch (err) {
+      console.error("Save order error:", err);
+      setError(formatSupabaseError(err));
+    }
+  };
+
   const reorderItems = (catId, oldIndex, newIndex) => {
     if (oldIndex === newIndex) return;
     const catItems = itemsByCategory[catId] || [];
     const reordered = arrayMove(catItems, oldIndex, newIndex);
-    const prevItems = items;
     const orderMap = new Map(reordered.map((it, i) => [it.id, i]));
+    setItemUndo((s) => [...s, items]);
     setItems((prev) =>
       prev.map((it) =>
         orderMap.has(it.id) ? { ...it, sort_order: orderMap.get(it.id) } : it,
       ),
     );
-    persistOrder("menu_items", reordered, () => setItems(prevItems));
   };
 
   const moveItem = (catId, index, dir) => {
@@ -339,6 +417,56 @@ export default function AdminPanel() {
     if (target < 0 || target >= catItems.length) return;
     reorderItems(catId, index, target);
   };
+
+  const undoItems = () => {
+    setItemUndo((s) => {
+      if (!s.length) return s;
+      setItems(s[s.length - 1]);
+      return s.slice(0, -1);
+    });
+  };
+
+  const discardItems = () => {
+    setItemUndo((s) => {
+      if (!s.length) return s;
+      setItems(s[0]);
+      return [];
+    });
+  };
+
+  const saveItems = async () => {
+    const baseline = itemUndo[0] || items;
+    const baseMap = new Map(baseline.map((it) => [it.id, it.sort_order]));
+    const changed = items.filter((it) => baseMap.get(it.id) !== it.sort_order);
+    try {
+      const results = await Promise.all(
+        changed.map((it) =>
+          supabase
+            .from("menu_items")
+            .update({ sort_order: it.sort_order })
+            .eq("id", it.id),
+        ),
+      );
+      const failed = results.find((r) => r.error);
+      if (failed?.error) throw failed.error;
+      setItemUndo([]);
+      showSuccess("Item order saved.");
+    } catch (err) {
+      console.error("Save order error:", err);
+      setError(formatSupabaseError(err));
+    }
+  };
+
+  // Warn before leaving/refreshing with unsaved order changes.
+  useEffect(() => {
+    if (!catDirty && !itemDirty) return;
+    const handler = (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [catDirty, itemDirty]);
 
   const handleLogout = async () => {
     await signOut();
@@ -982,6 +1110,13 @@ export default function AdminPanel() {
               </div>
             </div>
 
+            {itemDirty && (
+              <OrderBar
+                onUndo={undoItems}
+                onDiscard={discardItems}
+                onSave={saveItems}
+              />
+            )}
             <div className="admin-card">
               <div className="admin-card-header">
                 <div>
@@ -1289,6 +1424,13 @@ export default function AdminPanel() {
               </div>
             </div>
 
+            {catDirty && (
+              <OrderBar
+                onUndo={undoCategories}
+                onDiscard={discardCategories}
+                onSave={saveCategories}
+              />
+            )}
             <div className="admin-card">
               <div className="admin-card-header">
                 <div>
