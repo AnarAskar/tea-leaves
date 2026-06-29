@@ -1,16 +1,16 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import SplashScreen from "../components/SplashScreen";
-import { MAX_TABLE } from "../constants/config";
 
 export default function SplashPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const raw = parseInt(searchParams.get("table"), 10);
-  const table = Number.isInteger(raw) && raw >= 1 && raw <= MAX_TABLE ? raw : null;
+  // Opaque table token from the QR code; forwarded as-is to the menu, which
+  // resolves it to a table number. Invalid tokens just become browse-only.
+  const token = searchParams.get("t");
 
   const handlePickLang = (lang) => {
     const p = new URLSearchParams({ lang });
-    if (table) p.set("table", String(table));
+    if (token) p.set("t", token);
     navigate(`/menu?${p.toString()}`);
   };
 

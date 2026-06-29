@@ -1072,3 +1072,17 @@
     animation: none;
   }
 }
+
+.admin-qr-missing {
+  width: 148px;
+  height: 148px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 12px;
+  color: #6ba882;
+  background: #0f2419;
+  border: 1px dashed rgba(82, 183, 136, 0.3);
+  border-radius: 8px;
+}

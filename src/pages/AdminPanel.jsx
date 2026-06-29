@@ -19,6 +19,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { QRCodeSVG } from "qrcode.react";
 import { ADMIN_PATH, BASE_URL, NUM_TABLES } from "../constants/config";
 import { supabase } from "../utils/supabaseClient";
+import { genTableToken } from "../utils/tableToken";
 import { useAuth } from "../contexts/AuthContext";
 import { uploadCategoryImage } from "../utils/uploadCategoryImage";
 import { uploadMenuImage } from "../utils/uploadMenuImage";
@@ -198,6 +199,8 @@ export default function AdminPanel() {
     return Number.isInteger(saved) && saved > 0 ? Math.min(saved, 999) : NUM_TABLES;
   });
   const [printQueue, setPrintQueue] = useState([]);
+  const [tables, setTables] = useState([]); // [{ number, token }] from Supabase
+  const [generating, setGenerating] = useState(false);
   const [wifiName, setWifiName] = useState(
     () => localStorage.getItem("tl_wifi_name") || "",
   );
@@ -208,7 +211,12 @@ export default function AdminPanel() {
     BASE_URL ||
     (typeof window !== "undefined" ? window.location.origin : "")
   ).replace(/\/+$/, "");
-  const tableUrl = (n) => `${qrBaseUrl}/?table=${n}`;
+  const tableUrl = (token) => `${qrBaseUrl}/?t=${token}`;
+  const tokenByNumber = useMemo(() => {
+    const m = new Map();
+    tables.forEach((t) => m.set(t.number, t.token));
+    return m;
+  }, [tables]);
 
   useEffect(() => {
     localStorage.setItem("tl_qr_count", String(qrCount));
@@ -237,6 +245,41 @@ export default function AdminPanel() {
       window.removeEventListener("afterprint", clear);
     };
   }, [printQueue]);
+
+  // Ensure a table row (with a stable, unguessable token) exists for each
+  // number 1..qrCount. Existing tables keep their tokens, so printed QR codes
+  // stay valid — only missing numbers get a freshly generated token.
+  const generateCodes = async () => {
+    setGenerating(true);
+    setError(null);
+    try {
+      const existing = new Set(tables.map((t) => t.number));
+      const toCreate = [];
+      for (let n = 1; n <= qrCount; n++) {
+        if (!existing.has(n)) toCreate.push({ number: n, token: genTableToken() });
+      }
+      if (toCreate.length) {
+        const { error } = await supabase.from("tables").insert(toCreate);
+        if (error) throw error;
+      }
+      const { data, error } = await supabase
+        .from("tables")
+        .select("number, token")
+        .order("number");
+      if (error) throw error;
+      setTables(data || []);
+      showSuccess(
+        toCreate.length
+          ? `Generated ${toCreate.length} new code${toCreate.length > 1 ? "s" : ""}.`
+          : "All tables already have codes.",
+      );
+    } catch (err) {
+      console.error("Generate codes error:", err);
+      setError(formatSupabaseError(err));
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const [editingItem, setEditingItem] = useState(null);
   const [itemForm, setItemForm] = useState({
@@ -285,17 +328,20 @@ export default function AdminPanel() {
     setLoading(true);
     setError(null);
     try {
-      const [catRes, itemRes] = await Promise.all([
+      const [catRes, itemRes, tableRes] = await Promise.all([
         supabase.from("categories").select("*").order("sort_order"),
         supabase
           .from("menu_items")
           .select("*")
           .order("created_at", { ascending: false }),
+        supabase.from("tables").select("number, token").order("number"),
       ]);
       if (catRes.error) throw catRes.error;
       if (itemRes.error) throw itemRes.error;
       setCategories(catRes.data || []);
       setItems(itemRes.data || []);
+      // Table QR rows are optional (migration 012); ignore errors if absent.
+      if (!tableRes.error) setTables(tableRes.data || []);
       // Fresh data replaces any in-progress reorder drafts.
       setCatUndo([]);
       setItemUndo([]);
@@ -1562,46 +1608,75 @@ export default function AdminPanel() {
                 <button
                   type="button"
                   className="admin-btn admin-btn-primary"
+                  onClick={generateCodes}
+                  disabled={generating}
+                >
+                  {generating ? "Generating…" : "Generate codes"}
+                </button>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-secondary"
                   onClick={() =>
                     setPrintQueue(
-                      Array.from({ length: qrCount }, (_, i) => i + 1),
+                      Array.from({ length: qrCount }, (_, i) => i + 1).filter(
+                        (n) => tokenByNumber.has(n),
+                      ),
                     )
                   }
                 >
-                  🖨 Print all ({qrCount})
+                  🖨 Print all
                 </button>
               </div>
 
-              {!BASE_URL && (
-                <p className="admin-hint" style={{ marginTop: 10 }}>
-                  Tip: set <code>VITE_BASE_URL</code> to your live domain so the
-                  codes work off your phone. Currently using{" "}
-                  <code>{qrBaseUrl || "this page's origin"}</code>.
-                </p>
-              )}
+              <p className="admin-hint" style={{ marginTop: 10 }}>
+                Each table gets one permanent QR code. Set the count, click{" "}
+                <strong>Generate codes</strong> to create any missing ones
+                (existing codes are never changed), then print.
+                {!BASE_URL && (
+                  <>
+                    {" "}
+                    Tip: set <code>VITE_BASE_URL</code> to your live domain so the
+                    codes point off your phone — currently using{" "}
+                    <code>{qrBaseUrl || "this page's origin"}</code>.
+                  </>
+                )}
+              </p>
 
               <div className="admin-qr-grid">
-                {Array.from({ length: qrCount }, (_, i) => i + 1).map((n) => (
-                  <div className="admin-qr-card" key={n}>
-                    <div className="admin-qr-code">
-                      <QRCodeSVG value={tableUrl(n)} size={132} level="M" marginSize={2} />
+                {Array.from({ length: qrCount }, (_, i) => i + 1).map((n) => {
+                  const token = tokenByNumber.get(n);
+                  return (
+                    <div className="admin-qr-card" key={n}>
+                      {token ? (
+                        <div className="admin-qr-code">
+                          <QRCodeSVG
+                            value={tableUrl(token)}
+                            size={132}
+                            level="M"
+                            marginSize={2}
+                          />
+                        </div>
+                      ) : (
+                        <div className="admin-qr-missing">Not generated yet</div>
+                      )}
+                      <div className="admin-qr-label">Table {n}</div>
+                      {(wifiName || wifiPass) && (
+                        <div className="admin-qr-wifi">
+                          {wifiName && <div>📶 {wifiName}</div>}
+                          {wifiPass && <div>🔑 {wifiPass}</div>}
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        className="admin-btn admin-btn-secondary admin-btn-sm"
+                        onClick={() => setPrintQueue([n])}
+                        disabled={!token}
+                      >
+                        🖨 Print
+                      </button>
                     </div>
-                    <div className="admin-qr-label">Table {n}</div>
-                    {(wifiName || wifiPass) && (
-                      <div className="admin-qr-wifi">
-                        {wifiName && <div>📶 {wifiName}</div>}
-                        {wifiPass && <div>🔑 {wifiPass}</div>}
-                      </div>
-                    )}
-                    <button
-                      type="button"
-                      className="admin-btn admin-btn-secondary admin-btn-sm"
-                      onClick={() => setPrintQueue([n])}
-                    >
-                      🖨 Print
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -1611,10 +1686,13 @@ export default function AdminPanel() {
 
     {/* Print-only area: rendered for whatever is queued, shown only when printing. */}
     <div className="qr-print-area" aria-hidden="true">
-      {printQueue.map((n) => (
+      {printQueue.map((n) => {
+        const token = tokenByNumber.get(n);
+        if (!token) return null;
+        return (
         <div className="qr-print-card" key={n}>
           <div className="qr-print-brand">Tea Leaves</div>
-          <QRCodeSVG value={tableUrl(n)} size={150} level="M" marginSize={2} />
+          <QRCodeSVG value={tableUrl(token)} size={150} level="M" marginSize={2} />
           <div className="qr-print-table">Table {n}</div>
           <div className="qr-print-hint">Scan for the menu &amp; to order</div>
           {(wifiName || wifiPass) && (
@@ -1632,7 +1710,8 @@ export default function AdminPanel() {
             </div>
           )}
         </div>
-      ))}
+        );
+      })}
     </div>
     </>
   );
