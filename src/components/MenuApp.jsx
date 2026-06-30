@@ -10,6 +10,43 @@ import {
   sendTelegramFeedback,
 } from "../utils/telegram";
 
+// Rendered as SVG (not text glyphs) so the +/- sit optically centered in the
+// round buttons regardless of the active language font's baseline metrics.
+function PlusIcon() {
+  return (
+    <svg
+      width="55%"
+      height="55%"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
+
+function MinusIcon() {
+  return (
+    <svg
+      width="55%"
+      height="55%"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
+
 function isCategoryAvailable(cat) {
   const { available_from, available_until } = cat;
   if (!available_from && !available_until) return true;
@@ -388,16 +425,16 @@ export default function MenuApp({
                 ""
               ) : qty === 0 ? (
                 <button className="qb solid" onClick={() => add(item)}>
-                  +
+                  <PlusIcon />
                 </button>
               ) : (
                 <>
                   <button className="qb" onClick={() => remove(item)}>
-                    −
+                    <MinusIcon />
                   </button>
                   <span className="qnum">{qty}</span>
                   <button className="qb" onClick={() => add(item)}>
-                    +
+                    <PlusIcon />
                   </button>
                 </>
               )}
@@ -635,10 +672,9 @@ export default function MenuApp({
         .det-overlay{position:absolute;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:70;display:flex;align-items:flex-end;}
         .det-sheet{background:linear-gradient(180deg,#1d3a2b,#14271c);border-top-left-radius:var(--r-xl);border-top-right-radius:var(--r-xl);width:100%;max-height:92%;display:flex;flex-direction:column;overflow:hidden;animation:det-up .3s var(--ease);box-shadow:var(--sh-pop);}
         .det-handle{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:40px;height:4px;background:rgba(255,255,255,.55);border-radius:2px;z-index:3;backdrop-filter:blur(4px);}
-        .det-img-wrap{position:relative;width:100%;height:270px;flex-shrink:0;overflow:hidden;}
-        .det-img-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(20px) brightness(.6);transform:scale(1.12);}
-        .det-img{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;display:block;}
-        .det-img.photo-ph{font-size:64px;display:flex;align-items:center;justify-content:center;}
+        .det-img-wrap{position:relative;width:100%;flex-shrink:0;overflow:hidden;}
+        .det-img{position:relative;z-index:1;width:100%;height:auto;display:block;}
+        .det-img.photo-ph{height:240px;font-size:64px;display:flex;align-items:center;justify-content:center;}
         .det-img-wrap::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,#14271c,transparent 38%);pointer-events:none;z-index:2;}
         .det-close{position:absolute;top:12px;right:12px;width:36px;height:36px;background:rgba(0,0,0,.5);border:none;border-radius:50%;color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);z-index:3;}
         .det-tags{position:absolute;bottom:12px;left:12px;display:flex;gap:4px;z-index:3;}
@@ -1197,18 +1233,18 @@ export default function MenuApp({
                     <div className="qty-r">
                       <button
                         className="qb"
-                        style={{ width: 23, height: 23, fontSize: 14 }}
+                        style={{ width: 23, height: 23 }}
                         onClick={() => remove(item)}
                       >
-                        −
+                        <MinusIcon />
                       </button>
                       <span className="qnum">{cart[item.id]}</span>
                       <button
                         className="qb"
-                        style={{ width: 23, height: 23, fontSize: 14 }}
+                        style={{ width: 23, height: 23 }}
                         onClick={() => add(item)}
                       >
-                        +
+                        <PlusIcon />
                       </button>
                     </div>
                     <div className="d-tot">
@@ -1445,9 +1481,6 @@ export default function MenuApp({
                 <div className="det-sheet" onClick={(e) => e.stopPropagation()}>
                   <div className="det-img-wrap">
                     <div className="det-handle" />
-                    {item.photo && (
-                      <img className="det-img-bg" src={item.photo} alt="" aria-hidden="true" />
-                    )}
                     <ItemPhoto
                       className="det-img"
                       src={item.photo}
@@ -1535,10 +1568,10 @@ export default function MenuApp({
                           <div className="det-qty-row">
                             <button
                               className="qb"
-                              style={{ width: 36, height: 36, fontSize: 20 }}
+                              style={{ width: 36, height: 36 }}
                               onClick={() => remove(item)}
                             >
-                              −
+                              <MinusIcon />
                             </button>
                             <span
                               style={{
@@ -1552,10 +1585,10 @@ export default function MenuApp({
                             </span>
                             <button
                               className="qb solid"
-                              style={{ width: 36, height: 36, fontSize: 20 }}
+                              style={{ width: 36, height: 36 }}
                               onClick={() => add(item)}
                             >
-                              +
+                              <PlusIcon />
                             </button>
                             <div style={{ flex: 1 }} />
                             <div
