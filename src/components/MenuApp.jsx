@@ -490,6 +490,7 @@ export default function MenuApp({
         @font-face{font-family:'DroidKufi';src:url('/fonts/DroidKufi-Bold.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap;}
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
         :root{
+          color-scheme:only dark;
           --f:${lang==="ku"?"'DroidKufi'" : lang==="ar"?"'Cairo'":"'Plus Jakarta Sans'"},sans-serif;
           --bg:#112619;--surface:#193224;--surface-2:#21402f;--surface-3:#284b38;
           --line:rgba(255,255,255,.08);--line-strong:#2d5a42;
@@ -500,6 +501,9 @@ export default function MenuApp({
           --ease:cubic-bezier(.22,1,.36,1);
         }
         body{background:var(--bg);font-family:var(--f);min-height:100dvh;-webkit-font-smoothing:antialiased;}
+        input,textarea,select,button{color-scheme:only dark;}
+        input,textarea{-webkit-text-fill-color:currentColor;caret-color:var(--mint);}
+        input:-webkit-autofill,input:-webkit-autofill:focus,textarea:-webkit-autofill{-webkit-text-fill-color:#fff;-webkit-box-shadow:0 0 0 1000px var(--surface-2) inset;caret-color:#fff;transition:background-color 9999s ease-in-out 0s;}
         :focus-visible{outline:2px solid var(--mint);outline-offset:2px;border-radius:4px;}
         @media (prefers-reduced-motion:reduce){
           *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important;}
