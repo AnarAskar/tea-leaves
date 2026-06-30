@@ -727,7 +727,7 @@ export default function MenuApp({
         .m-done{display:flex;flex-direction:column;align-items:center;padding:12px 0 4px;text-align:center;}
         .m-done-icon{font-size:52px;margin-bottom:14px;}
         .m-done-text{font-size:16px;font-weight:600;color:var(--mint);line-height:1.5;}
-        .m-scroll{flex:1;overflow-y:auto;margin-bottom:14px;}
+        .m-scroll{flex:0 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;margin-bottom:14px;}
         .m-scroll::-webkit-scrollbar{width:3px;}
         .m-scroll::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:2px;}
         .fb-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);}
@@ -737,7 +737,8 @@ export default function MenuApp({
         .star-btn{background:none;border:none;font-size:26px;color:var(--line-strong);cursor:pointer;padding:2px;line-height:1;transition:color .1s,transform .1s;outline:none;-webkit-tap-highlight-color:transparent;user-select:none;}
         .star-btn span{display:block;line-height:1;pointer-events:none;}
         .star-btn.lit{color:var(--gold);}
-        .star-btn:hover{transform:scale(1.15);}
+        @media (hover:hover){.star-btn:hover{transform:scale(1.15);}}
+        .star-btn:active{transform:scale(1.15);}
         .star-btn:focus{outline:none;}
         .fb-field-label{font-size:12px;font-weight:700;color:var(--mint);margin-bottom:6px;margin-top:14px;}
         /* skeleton CSS lives in index.html so it works before React mounts */
