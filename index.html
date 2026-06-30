@@ -46,8 +46,9 @@
     </script>
     <style>
       *{margin:0;padding:0;box-sizing:border-box}
-      html{color-scheme:only dark}
+      html{color-scheme:dark}
       html,body{background:#112619;min-height:100dvh}
+      @media (prefers-color-scheme:dark){html,body{background:#112619}}
       @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
       .skel-header{height:64px;flex-shrink:0;background:linear-gradient(90deg,#16301f 25%,#21402f 50%,#16301f 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
       .skel-cats{display:flex;gap:10px;padding:14px 16px;overflow:hidden;flex-shrink:0;}

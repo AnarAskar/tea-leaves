@@ -490,7 +490,7 @@ export default function MenuApp({
         @font-face{font-family:'DroidKufi';src:url('/fonts/DroidKufi-Bold.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap;}
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
         :root{
-          color-scheme:only dark;
+          color-scheme:dark;
           --f:${lang==="ku"?"'DroidKufi'" : lang==="ar"?"'Cairo'":"'Plus Jakarta Sans'"},sans-serif;
           --bg:#112619;--surface:#193224;--surface-2:#21402f;--surface-3:#284b38;
           --line:rgba(255,255,255,.08);--line-strong:#2d5a42;
@@ -501,7 +501,13 @@ export default function MenuApp({
           --ease:cubic-bezier(.22,1,.36,1);
         }
         body{background:var(--bg);font-family:var(--f);min-height:100dvh;-webkit-font-smoothing:antialiased;}
-        input,textarea,select,button{color-scheme:only dark;}
+        /* Declare a native dark theme so force-dark browsers (Samsung Internet)
+           detect we already handle dark mode and don't re-tint the page. */
+        @media (prefers-color-scheme:dark){
+          :root{--bg:#112619;--surface:#193224;--surface-2:#21402f;--surface-3:#284b38;--line:rgba(255,255,255,.08);--line-strong:#2d5a42;--mint:#52b788;--mint-deep:#40916c;--gold:#e3c17e;--text:#f1f8f3;--text-dim:#9cc0ac;--text-faint:#83ab94;}
+          body{background:var(--bg);}
+        }
+        input,textarea,select,button{color-scheme:dark;}
         input,textarea{-webkit-text-fill-color:currentColor;caret-color:var(--mint);}
         input:-webkit-autofill,input:-webkit-autofill:focus,textarea:-webkit-autofill{-webkit-text-fill-color:#fff;-webkit-box-shadow:0 0 0 1000px var(--surface-2) inset;caret-color:#fff;transition:background-color 9999s ease-in-out 0s;}
         :focus-visible{outline:2px solid var(--mint);outline-offset:2px;border-radius:4px;}

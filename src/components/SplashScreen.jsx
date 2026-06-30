@@ -4,6 +4,7 @@ const SPLASH_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
   *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
   body { margin:0; background:#000; font-family:'Plus Jakarta Sans',sans-serif; }
+  @media (prefers-color-scheme:dark){ body { background:#000; } }
   .sp-root { position:relative; width:100%; max-width:430px; height:100vh; margin:0 auto; overflow:hidden; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; }
   .sp-video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; }
   .sp-overlay { position:absolute; inset:0; z-index:1; background:linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.05) 30%, rgba(0,0,0,0.62) 65%, rgba(0,0,0,0.90) 100%); }
