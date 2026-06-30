@@ -678,7 +678,8 @@ export default function MenuApp({
         .det-img-wrap::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,#14271c,transparent 38%);pointer-events:none;z-index:2;}
         .det-close{position:absolute;top:12px;right:12px;width:36px;height:36px;background:rgba(0,0,0,.5);border:none;border-radius:50%;color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);z-index:3;}
         .det-tags{position:absolute;bottom:12px;left:12px;display:flex;gap:4px;z-index:3;}
-        .det-body{padding:18px 20px calc(36px + env(safe-area-inset-bottom));overflow-y:auto;flex:1;}
+        .det-body{overflow-y:auto;flex:1;min-height:0;}
+        .det-content{padding:18px 20px;}
         .det-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px;}
         .det-name{font-size:23px;font-weight:800;color:#fff;line-height:1.25;flex:1;}
         .det-price{font-size:15px;font-weight:800;color:#11261a;white-space:nowrap;background:var(--gold);border-radius:20px;padding:6px 13px;flex-shrink:0;margin-top:3px;box-shadow:0 4px 14px rgba(227,193,126,.25);}
@@ -692,7 +693,7 @@ export default function MenuApp({
         .addon-name{flex:1;font-size:14px;color:var(--text);font-weight:500;}
         .addon-price{font-size:13px;color:var(--gold);font-weight:800;white-space:nowrap;}
         .d-addon-lbl{font-size:12px;color:var(--text-dim);font-weight:400;}
-        .det-actions{margin-top:24px;}
+        .det-actions{flex-shrink:0;padding:12px 20px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(20,39,28,0),#14271c 22%);border-top:1px solid var(--line);}
         .det-add{width:100%;background:linear-gradient(135deg,#40916c,#52b788);color:#fff;border:none;border-radius:14px;padding:16px;font-family:var(--f);font-size:16px;font-weight:700;cursor:pointer;transition:transform .15s var(--ease),box-shadow .2s;box-shadow:var(--glow);}
         .det-add:hover{transform:translateY(-1px);box-shadow:0 12px 30px rgba(64,145,108,.5);}
         .det-qty-row{display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:14px;padding:12px 16px;border:1px solid var(--line);}
@@ -1479,6 +1480,7 @@ export default function MenuApp({
                 onClick={() => setSelectedItem(null)}
               >
                 <div className="det-sheet" onClick={(e) => e.stopPropagation()}>
+                  <div className="det-body">
                   <div className="det-img-wrap">
                     <div className="det-handle" />
                     <ItemPhoto
@@ -1509,7 +1511,7 @@ export default function MenuApp({
                       </div>
                     )}
                   </div>
-                  <div className="det-body">
+                  <div className="det-content">
                     <div className="det-row">
                       <div className="det-name">{item.name[lang]}</div>
                       <div className="det-price">IQD {fmt(item.price + (selectedAddon?.price || 0))}</div>
@@ -1547,64 +1549,65 @@ export default function MenuApp({
                         ))}
                       </div>
                     )}
-                    {tableNum && (
-                      <div className="det-actions">
-                        {qty === 0 ? (
+                  </div>
+                  </div>
+                  {tableNum && (
+                    <div className="det-actions">
+                      {qty === 0 ? (
+                        <button
+                          className="det-add"
+                          onClick={() => {
+                            add(item, selectedAddon);
+                            setSelectedItem(null);
+                          }}
+                        >
+                          +{" "}
+                          {lang === "ar"
+                            ? "أضف للطلب"
+                            : lang === "ku"
+                              ? "زیادبکە"
+                              : "Add to Order"}
+                        </button>
+                      ) : (
+                        <div className="det-qty-row">
                           <button
-                            className="det-add"
-                            onClick={() => {
-                              add(item, selectedAddon);
-                              setSelectedItem(null);
+                            className="qb"
+                            style={{ width: 36, height: 36 }}
+                            onClick={() => remove(item)}
+                          >
+                            <MinusIcon />
+                          </button>
+                          <span
+                            style={{
+                              fontSize: 18,
+                              fontWeight: 800,
+                              minWidth: 28,
+                              textAlign: "center",
                             }}
                           >
-                            +{" "}
-                            {lang === "ar"
-                              ? "أضف للطلب"
-                              : lang === "ku"
-                                ? "زیادبکە"
-                                : "Add to Order"}
+                            {qty}
+                          </span>
+                          <button
+                            className="qb solid"
+                            style={{ width: 36, height: 36 }}
+                            onClick={() => add(item)}
+                          >
+                            <PlusIcon />
                           </button>
-                        ) : (
-                          <div className="det-qty-row">
-                            <button
-                              className="qb"
-                              style={{ width: 36, height: 36 }}
-                              onClick={() => remove(item)}
-                            >
-                              <MinusIcon />
-                            </button>
-                            <span
-                              style={{
-                                fontSize: 18,
-                                fontWeight: 800,
-                                minWidth: 28,
-                                textAlign: "center",
-                              }}
-                            >
-                              {qty}
-                            </span>
-                            <button
-                              className="qb solid"
-                              style={{ width: 36, height: 36 }}
-                              onClick={() => add(item)}
-                            >
-                              <PlusIcon />
-                            </button>
-                            <div style={{ flex: 1 }} />
-                            <div
-                              style={{
-                                fontSize: 14,
-                                fontWeight: 700,
-                                color: "#52b788",
-                              }}
-                            >
-                              IQD {fmt(itemPrice(item) * qty)}
-                            </div>
+                          <div style={{ flex: 1 }} />
+                          <div
+                            style={{
+                              fontSize: 14,
+                              fontWeight: 700,
+                              color: "#52b788",
+                            }}
+                          >
+                            IQD {fmt(itemPrice(item) * qty)}
                           </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             );
