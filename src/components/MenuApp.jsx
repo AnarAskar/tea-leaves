@@ -78,6 +78,7 @@ export default function MenuApp({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [note, setNote] = useState("");
   const [query, setQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const [toast, setToast] = useState("");
   const [orderNum] = useState(() => Math.floor(Math.random() * 9000) + 1000);
   const [screen, setScreen] = useState("menu"); // "menu" | "success" | "error"
@@ -495,6 +496,7 @@ export default function MenuApp({
         .det-img.photo-ph{font-size:56px;}
         .icon-btn{background:none;border:none;color:var(--text-dim);cursor:pointer;padding:5px;display:flex;align-items:center;justify-content:center;position:relative;transition:color .2s;}
         .icon-btn:hover{color:#fff;}
+        .icon-btn.active{color:var(--mint);}
         .search-row{display:flex;align-items:center;gap:9px;background:rgba(25,50,36,.8);border:1px solid var(--line);border-radius:14px;padding:11px 14px;margin-bottom:14px;color:var(--text-faint);transition:border-color .2s;}
         .search-row:focus-within{border-color:var(--mint);color:var(--mint);}
         .search-row input{flex:1;background:none;border:none;outline:none;color:#fff;font-size:14px;font-family:var(--f);}
@@ -660,6 +662,10 @@ export default function MenuApp({
         .det-qty-row{display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:14px;padding:12px 16px;border:1px solid var(--line);}
         .act-btn{background:var(--surface-2);border:1px solid var(--line);border-radius:11px;color:var(--text-dim);cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;transition:all .18s var(--ease);padding:0;flex-shrink:0;}
         .act-btn:hover{border-color:var(--mint);color:var(--mint);background:var(--surface-3);transform:translateY(-1px);}
+        .svc-bar{display:flex;gap:8px;margin:0 16px 12px;}
+        .svc-btn{flex:1;display:flex;align-items:center;justify-content:center;height:44px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;color:#e7efe9;cursor:pointer;padding:0;transition:all .15s var(--ease);}
+        .svc-btn:hover{background:var(--surface-3);border-color:var(--mint);color:#fff;}
+        .svc-btn:active{transform:scale(.97);}
         .m-overlay{position:absolute;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:80;display:flex;align-items:flex-end;justify-content:center;}
         .m-sheet{background:linear-gradient(180deg,#1d3a2b,#14271c);border-top-left-radius:var(--r-xl);border-top-right-radius:var(--r-xl);width:100%;padding:0 20px calc(32px + env(safe-area-inset-bottom));max-height:80vh;display:flex;flex-direction:column;border-top:1px solid var(--line);box-shadow:var(--sh-pop);}
         .m-handle{width:38px;height:4px;background:var(--line-strong);border-radius:2px;margin:12px auto 18px;flex-shrink:0;}
@@ -751,76 +757,32 @@ export default function MenuApp({
             <h1 className="hdr-title">{t.appName}</h1>
 
             <div className="hdr-right">
+              <button
+                type="button"
+                className={`icon-btn${searchOpen ? " active" : ""}`}
+                onClick={() => {
+                  setSearchOpen((v) => {
+                    if (v) setQuery("");
+                    return !v;
+                  });
+                }}
+                aria-label={t.search}
+                aria-expanded={searchOpen}
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
+              </button>
               {tableNum && (
                 <>
-                  <button
-                    className="act-btn"
-                    title={t.billTitle}
-                    aria-label={t.billTitle}
-                    onClick={() => {
-                      setModal("bill");
-                      setModalDone(false);
-                    }}
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                      <polyline points="14 2 14 8 20 8" />
-                      <line x1="16" y1="13" x2="8" y2="13" />
-                      <line x1="16" y1="17" x2="8" y2="17" />
-                      <polyline points="10 9 9 9 8 9" />
-                    </svg>
-                  </button>
-                  <button
-                    className="act-btn"
-                    title={t.noteTitle}
-                    aria-label={t.noteTitle}
-                    onClick={() => {
-                      setModal("note");
-                      setModalDone(false);
-                      setNoteText("");
-                    }}
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-                    </svg>
-                  </button>
-                  <button
-                    className="act-btn"
-                    title={t.feedbackTitle}
-                    aria-label={t.feedbackTitle}
-                    onClick={() => {
-                      setModal("feedback");
-                      setModalDone(false);
-                      setFbStars({ staff: 0, service: 0, hygiene: 0 });
-                      setFbContact("");
-                      setFbComments("");
-                    }}
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                    </svg>
-                  </button>
                   <button
                     className="icon-btn"
                     onClick={() => setDrawerOpen(true)}
@@ -865,29 +827,113 @@ export default function MenuApp({
             </div>
           </div>
 
-          <div className="search-row">
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={t.search}
-            />
-            {query && (
-              <button className="clr-btn" onClick={() => setQuery("")}>
+          {tableNum && (
+            <div className="svc-bar">
+              <button
+                type="button"
+                className="svc-btn"
+                title={t.billTitle}
+                aria-label={t.billTitle}
+                onClick={() => {
+                  setModal("bill");
+                  setModalDone(false);
+                }}
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                  <polyline points="10 9 9 9 8 9" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                className="svc-btn"
+                title={t.noteTitle}
+                aria-label={t.noteTitle}
+                onClick={() => {
+                  setModal("note");
+                  setModalDone(false);
+                  setNoteText("");
+                }}
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                className="svc-btn"
+                title={t.feedbackTitle}
+                aria-label={t.feedbackTitle}
+                onClick={() => {
+                  setModal("feedback");
+                  setModalDone(false);
+                  setFbStars({ staff: 0, service: 0, hygiene: 0 });
+                  setFbContact("");
+                  setFbComments("");
+                }}
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+              </button>
+            </div>
+          )}
+
+          {searchOpen && (
+            <div className="search-row">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+              </svg>
+              <input
+                autoFocus
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t.search}
+              />
+              <button
+                className="clr-btn"
+                aria-label="Close search"
+                onClick={() => {
+                  setQuery("");
+                  setSearchOpen(false);
+                }}
+              >
                 ✕
               </button>
-            )}
-          </div>
+            </div>
+          )}
 
           {!query && visibleCategories.length > 0 && (
             <nav className="cats" ref={catBarRef} aria-label="Menu categories">
