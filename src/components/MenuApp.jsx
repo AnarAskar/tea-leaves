@@ -670,13 +670,13 @@ export default function MenuApp({
         /* ITEM DETAIL MODAL */
         @keyframes det-up{from{transform:translateY(100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
         .det-overlay{position:absolute;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:70;display:flex;align-items:flex-end;}
-        .det-sheet{background:linear-gradient(180deg,#1d3a2b,#14271c);border-top-left-radius:var(--r-xl);border-top-right-radius:var(--r-xl);width:100%;max-height:92%;display:flex;flex-direction:column;overflow:hidden;animation:det-up .3s var(--ease);box-shadow:var(--sh-pop);}
+        .det-sheet{position:relative;background:linear-gradient(180deg,#1d3a2b,#14271c);border-top-left-radius:var(--r-xl);border-top-right-radius:var(--r-xl);width:100%;max-height:88%;display:flex;flex-direction:column;overflow:hidden;animation:det-up .3s var(--ease);box-shadow:var(--sh-pop);}
         .det-handle{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:40px;height:4px;background:rgba(255,255,255,.55);border-radius:2px;z-index:3;backdrop-filter:blur(4px);}
         .det-img-wrap{position:relative;width:100%;flex-shrink:0;overflow:hidden;}
-        .det-img{position:relative;z-index:1;width:100%;height:auto;display:block;}
+        .det-img{position:relative;z-index:1;width:100%;height:auto;max-height:56vh;object-fit:cover;display:block;}
         .det-img.photo-ph{height:240px;font-size:64px;display:flex;align-items:center;justify-content:center;}
         .det-img-wrap::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,#14271c,transparent 38%);pointer-events:none;z-index:2;}
-        .det-close{position:absolute;top:12px;right:12px;width:36px;height:36px;background:rgba(0,0,0,.5);border:none;border-radius:50%;color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);z-index:3;}
+        .det-close{position:absolute;top:12px;right:12px;width:36px;height:36px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.18);border-radius:50%;color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:20;}
         .det-tags{position:absolute;bottom:12px;left:12px;display:flex;gap:4px;z-index:3;}
         .det-body{overflow-y:auto;flex:1;min-height:0;}
         .det-content{padding:18px 20px;}
@@ -1480,6 +1480,13 @@ export default function MenuApp({
                 onClick={() => setSelectedItem(null)}
               >
                 <div className="det-sheet" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    className="det-close"
+                    onClick={() => setSelectedItem(null)}
+                    aria-label="Close"
+                  >
+                    ✕
+                  </button>
                   <div className="det-body">
                   <div className="det-img-wrap">
                     <div className="det-handle" />
@@ -1488,12 +1495,6 @@ export default function MenuApp({
                       src={item.photo}
                       alt={item.name[lang]}
                     />
-                    <button
-                      className="det-close"
-                      onClick={() => setSelectedItem(null)}
-                    >
-                      ✕
-                    </button>
                     {item.tags.length > 0 && (
                       <div className="det-tags">
                         {item.tags.includes("hot") && (
