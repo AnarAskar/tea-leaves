@@ -1,4 +1,17 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import {
+  Search,
+  ShoppingBag,
+  Plus,
+  Minus,
+  Receipt,
+  NotebookPen,
+  MessageSquareHeart,
+  X,
+  ChevronDown,
+  List,
+  LayoutGrid,
+} from "lucide-react";
 import { useMenuData } from "../hooks/useMenuData";
 import { SLIDER_IMAGES } from "../constants/sliderImages";
 import { T, LANG_OPTS } from "../translations";
@@ -10,41 +23,14 @@ import {
   sendTelegramFeedback,
 } from "../utils/telegram";
 
-// Rendered as SVG (not text glyphs) so the +/- sit optically centered in the
-// round buttons regardless of the active language font's baseline metrics.
+// Sized at 55% so the +/- fit the variable round-button sizes; rendered as
+// icons (not text glyphs) so they stay optically centered across fonts.
 function PlusIcon() {
-  return (
-    <svg
-      width="55%"
-      height="55%"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      aria-hidden="true"
-    >
-      <line x1="12" y1="5" x2="12" y2="19" />
-      <line x1="5" y1="12" x2="19" y2="12" />
-    </svg>
-  );
+  return <Plus width="55%" height="55%" strokeWidth={2.5} aria-hidden="true" />;
 }
 
 function MinusIcon() {
-  return (
-    <svg
-      width="55%"
-      height="55%"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      aria-hidden="true"
-    >
-      <line x1="5" y1="12" x2="19" y2="12" />
-    </svg>
-  );
+  return <Minus width="55%" height="55%" strokeWidth={2.5} aria-hidden="true" />;
 }
 
 function isCategoryAvailable(cat) {
@@ -548,7 +534,7 @@ export default function MenuApp({
         .search-row:focus-within{border-color:var(--mint);color:var(--mint);}
         .search-row input{flex:1;background:none;border:none;outline:none;color:#fff;font-size:14px;font-family:var(--f);}
         .search-row input::placeholder{color:var(--text-faint);}
-        .clr-btn{background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:13px;padding:0;}
+        .clr-btn{background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:13px;padding:0;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
         .cats{display:flex;gap:4px;padding:6px 12px 2px;overflow-x:auto;scrollbar-width:none;cursor:grab;user-select:none;-webkit-overflow-scrolling:touch;}
         .cats::-webkit-scrollbar{display:none;}
         .cats.drag{cursor:grabbing;}
@@ -584,6 +570,7 @@ export default function MenuApp({
         .t-new{background:rgba(204,93,232,.16);color:#dd8cf0;}
         .qty-r{display:flex;align-items:center;gap:5px;}
         .qb{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--mint);background:transparent;color:var(--mint);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s var(--ease);line-height:1;font-family:var(--f);}
+        .qb svg{width:58%;height:58%;}
         .qb:hover,.qb.solid{background:var(--mint);color:#11261a;border-color:var(--mint);}
         .qb.solid{box-shadow:0 3px 10px rgba(82,183,136,.4);}
         .qnum{font-size:13px;font-weight:800;min-width:16px;text-align:center;color:#fff;}
@@ -717,6 +704,10 @@ export default function MenuApp({
         .m-sheet{background:linear-gradient(180deg,#1d3a2b,#14271c);border-top-left-radius:var(--r-xl);border-top-right-radius:var(--r-xl);width:100%;padding:0 20px calc(32px + env(safe-area-inset-bottom));max-height:80vh;display:flex;flex-direction:column;border-top:1px solid var(--line);box-shadow:var(--sh-pop);}
         .m-handle{width:38px;height:4px;background:var(--line-strong);border-radius:2px;margin:12px auto 18px;flex-shrink:0;}
         .m-title{font-size:18px;font-weight:800;color:#fff;margin-bottom:18px;flex-shrink:0;}
+        .note-sugs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+        .note-sug{background:var(--surface-2);border:1px solid var(--line);border-radius:20px;color:var(--text-dim);font-family:var(--f);font-size:13px;font-weight:600;padding:8px 13px;cursor:pointer;transition:all .15s var(--ease);white-space:nowrap;}
+        .note-sug:hover{border-color:var(--mint);color:var(--mint);background:var(--surface-3);}
+        .note-sug:active{transform:scale(.96);}
         .m-textarea{width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;color:#fff;font-family:var(--f);font-size:14px;padding:12px 14px;outline:none;resize:none;transition:border-color .2s;margin-bottom:14px;}
         .m-textarea:focus{border-color:var(--mint);}
         .m-textarea::placeholder{color:var(--text-faint);}
@@ -731,7 +722,7 @@ export default function MenuApp({
         .m-btn-no{flex:1;background:var(--surface-2);color:var(--text-dim);border:1px solid var(--line);border-radius:14px;padding:14px;font-family:var(--f);font-size:15px;font-weight:600;cursor:pointer;transition:all .15s;}
         .m-btn-no:hover{border-color:var(--mint);color:#fff;}
         .m-done{display:flex;flex-direction:column;align-items:center;padding:12px 0 4px;text-align:center;}
-        .m-done-icon{font-size:52px;margin-bottom:14px;}
+        .m-done-icon{font-size:52px;margin-bottom:14px;display:flex;align-items:center;justify-content:center;line-height:1;}
         .m-done-text{font-size:16px;font-weight:600;color:var(--mint);line-height:1.5;}
         .m-scroll{flex:0 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;margin-bottom:14px;}
         .m-scroll::-webkit-scrollbar{width:3px;}
@@ -768,17 +759,12 @@ export default function MenuApp({
                 title={currentLang?.label}
               >
                 <span className="lang-btn-badge">{currentLang?.badge}</span>
-                <svg
+                <ChevronDown
                   className={`chev${langOpen ? " open" : ""}`}
-                  width="8"
-                  height="8"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                >
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
+                  size={13}
+                  strokeWidth={2.5}
+                  aria-hidden="true"
+                />
               </button>
               {langOpen && (
                 <div className="lang-drop" role="listbox">
@@ -817,17 +803,7 @@ export default function MenuApp({
                 aria-label={t.search}
                 aria-expanded={searchOpen}
               >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="m21 21-4.35-4.35" />
-                </svg>
+                <Search size={20} strokeWidth={2} aria-hidden="true" />
               </button>
               {tableNum && (
                 <>
@@ -836,18 +812,7 @@ export default function MenuApp({
                     onClick={() => setDrawerOpen(true)}
                     aria-label={`${t.yourOrder}${totalQty > 0 ? ` (${totalQty})` : ""}`}
                   >
-                    <svg
-                      width="22"
-                      height="22"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                    >
-                      <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-                      <line x1="3" y1="6" x2="21" y2="6" />
-                      <path d="M16 10a4 4 0 01-8 0" />
-                    </svg>
+                    <ShoppingBag size={22} strokeWidth={1.8} aria-hidden="true" />
                     {totalQty > 0 && (
                       <span
                         style={{
@@ -887,20 +852,7 @@ export default function MenuApp({
                   setModalDone(false);
                 }}
               >
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                  <line x1="16" y1="13" x2="8" y2="13" />
-                  <line x1="16" y1="17" x2="8" y2="17" />
-                  <polyline points="10 9 9 9 8 9" />
-                </svg>
+                <Receipt size={22} strokeWidth={2} aria-hidden="true" />
               </button>
               <button
                 type="button"
@@ -913,16 +865,7 @@ export default function MenuApp({
                   setNoteText("");
                 }}
               >
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-                </svg>
+                <NotebookPen size={22} strokeWidth={2} aria-hidden="true" />
               </button>
               <button
                 type="button"
@@ -937,33 +880,14 @@ export default function MenuApp({
                   setFbComments("");
                 }}
               >
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                </svg>
+                <MessageSquareHeart size={22} strokeWidth={2} aria-hidden="true" />
               </button>
             </div>
           )}
 
           {searchOpen && (
             <div className="search-row">
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
-              </svg>
+              <Search size={15} strokeWidth={2} aria-hidden="true" />
               <input
                 autoFocus
                 value={query}
@@ -978,7 +902,7 @@ export default function MenuApp({
                   setSearchOpen(false);
                 }}
               >
-                ✕
+                <X size={16} strokeWidth={2.2} aria-hidden="true" />
               </button>
             </div>
           )}
@@ -1147,32 +1071,9 @@ export default function MenuApp({
                       title="Toggle view"
                     >
                       {viewMode === "grid" ? (
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.2"
-                        >
-                          <line x1="3" y1="6" x2="21" y2="6" />
-                          <line x1="3" y1="12" x2="21" y2="12" />
-                          <line x1="3" y1="18" x2="21" y2="18" />
-                        </svg>
+                        <List size={16} strokeWidth={2.2} aria-hidden="true" />
                       ) : (
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <rect x="3" y="3" width="7" height="7" />
-                          <rect x="14" y="3" width="7" height="7" />
-                          <rect x="3" y="14" width="7" height="7" />
-                          <rect x="14" y="14" width="7" height="7" />
-                        </svg>
+                        <LayoutGrid size={16} strokeWidth={2} aria-hidden="true" />
                       )}
                     </button>
                     <span>{cat[`label_${lang}`]}</span>
@@ -1211,7 +1112,7 @@ export default function MenuApp({
           <div className="d-head">
             <div className="d-title">🍵 {t.yourOrder}</div>
             <button className="d-close" onClick={() => setDrawerOpen(false)}>
-              ✕
+              <X size={16} strokeWidth={2.2} aria-hidden="true" />
             </button>
           </div>
           <div className="d-list">
@@ -1361,6 +1262,22 @@ export default function MenuApp({
                 ) : (
                   <>
                     <div className="m-title">{t.noteTitle}</div>
+                    <div className="note-sugs">
+                      {t.noteSuggestions.map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          className="note-sug"
+                          onClick={() =>
+                            setNoteText((cur) =>
+                              cur.trim() ? `${cur.trim()}, ${s}` : s,
+                            )
+                          }
+                        >
+                          + {s}
+                        </button>
+                      ))}
+                    </div>
                     <textarea
                       className="m-textarea"
                       rows={4}
@@ -1397,7 +1314,14 @@ export default function MenuApp({
               {modal === "feedback" &&
                 (modalDone ? (
                   <div className="m-done">
-                    <div className="m-done-icon">⭐</div>
+                    <div className="m-done-icon">
+                      <MessageSquareHeart
+                        size={50}
+                        strokeWidth={1.6}
+                        color="#52b788"
+                        aria-hidden="true"
+                      />
+                    </div>
                     <div className="m-done-text">{t.feedbackSent}</div>
                   </div>
                 ) : (
@@ -1496,7 +1420,7 @@ export default function MenuApp({
                     onClick={() => setSelectedItem(null)}
                     aria-label="Close"
                   >
-                    ✕
+                    <X size={18} strokeWidth={2.2} aria-hidden="true" />
                   </button>
                   <div className="det-body">
                   <div className="det-img-wrap">
