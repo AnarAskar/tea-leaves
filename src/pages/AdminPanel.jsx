@@ -17,12 +17,14 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { QRCodeSVG } from "qrcode.react";
+import { Languages } from "lucide-react";
 import { ADMIN_PATH, BASE_URL, NUM_TABLES } from "../constants/config";
 import { supabase } from "../utils/supabaseClient";
 import { genTableToken } from "../utils/tableToken";
 import { useAuth } from "../contexts/AuthContext";
 import { uploadCategoryImage } from "../utils/uploadCategoryImage";
 import { uploadMenuImage } from "../utils/uploadMenuImage";
+import { translateText } from "../utils/translate";
 import { formatSupabaseError } from "../utils/formatSupabaseError";
 import "../styles/admin.css";
 
@@ -316,6 +318,54 @@ export default function AdminPanel() {
   const showSuccess = (msg) => {
     setSuccess(msg);
     setError(null);
+  };
+
+  // Auto-translate: fill one language field from whichever sibling field is
+  // already filled. `keyId` (e.g. "name_ar") tracks which button is spinning.
+  const [translating, setTranslating] = useState("");
+  const runTranslate = async (form, setForm, prefix, target, keyId) => {
+    const order = ["en", "ar", "ku"];
+    const srcLang = order.find(
+      (l) => l !== target && String(form[`${prefix}_${l}`] || "").trim(),
+    );
+    if (!srcLang) {
+      setError("Type text in another language first, then translate.");
+      return;
+    }
+    setError(null);
+    setTranslating(keyId);
+    try {
+      const out = await translateText(
+        String(form[`${prefix}_${srcLang}`]).trim(),
+        srcLang,
+        target,
+      );
+      setForm((prev) => ({ ...prev, [`${prefix}_${target}`]: out }));
+    } catch (err) {
+      setError(err?.message || "Translation failed.");
+    } finally {
+      setTranslating("");
+    }
+  };
+
+  const transBtn = (form, setForm, prefix, target) => {
+    const keyId = `${prefix}_${target}`;
+    return (
+      <button
+        type="button"
+        className="admin-trans-btn"
+        title="Auto-translate from a filled language"
+        aria-label="Auto-translate"
+        disabled={!!translating}
+        onClick={() => runTranslate(form, setForm, prefix, target, keyId)}
+      >
+        {translating === keyId ? (
+          <span className="admin-trans-spin" />
+        ) : (
+          <Languages size={14} />
+        )}
+      </button>
+    );
   };
 
   useEffect(() => {
@@ -908,34 +958,43 @@ export default function AdminPanel() {
                     </Field>
                     <div className="admin-field-row admin-field-row-3">
                       <Field label="Name (English) *">
-                        <input
-                          className="admin-input"
-                          value={itemForm.name_en}
-                          onChange={(e) =>
-                            setItemForm({ ...itemForm, name_en: e.target.value })
-                          }
-                          required
-                        />
+                        <div className="admin-field-trans">
+                          <input
+                            className="admin-input"
+                            value={itemForm.name_en}
+                            onChange={(e) =>
+                              setItemForm({ ...itemForm, name_en: e.target.value })
+                            }
+                            required
+                          />
+                          {transBtn(itemForm, setItemForm, "name", "en")}
+                        </div>
                       </Field>
                       <Field label="Name (Arabic)">
-                        <input
-                          className="admin-input"
-                          dir="rtl"
-                          value={itemForm.name_ar}
-                          onChange={(e) =>
-                            setItemForm({ ...itemForm, name_ar: e.target.value })
-                          }
-                        />
+                        <div className="admin-field-trans">
+                          <input
+                            className="admin-input"
+                            dir="rtl"
+                            value={itemForm.name_ar}
+                            onChange={(e) =>
+                              setItemForm({ ...itemForm, name_ar: e.target.value })
+                            }
+                          />
+                          {transBtn(itemForm, setItemForm, "name", "ar")}
+                        </div>
                       </Field>
                       <Field label="Name (Kurdish)">
-                        <input
-                          className="admin-input"
-                          dir="rtl"
-                          value={itemForm.name_ku}
-                          onChange={(e) =>
-                            setItemForm({ ...itemForm, name_ku: e.target.value })
-                          }
-                        />
+                        <div className="admin-field-trans">
+                          <input
+                            className="admin-input"
+                            dir="rtl"
+                            value={itemForm.name_ku}
+                            onChange={(e) =>
+                              setItemForm({ ...itemForm, name_ku: e.target.value })
+                            }
+                          />
+                          {transBtn(itemForm, setItemForm, "name", "ku")}
+                        </div>
                       </Field>
                     </div>
                   </div>
@@ -944,36 +1003,45 @@ export default function AdminPanel() {
                     <div className="admin-form-section-title">Ingredients</div>
                     <div className="admin-field-row admin-field-row-3">
                       <Field label="English">
-                        <textarea
-                          className="admin-textarea"
-                          value={itemForm.ing_en}
-                          onChange={(e) =>
-                            setItemForm({ ...itemForm, ing_en: e.target.value })
-                          }
-                          rows={2}
-                        />
+                        <div className="admin-field-trans admin-field-trans-ta">
+                          <textarea
+                            className="admin-textarea"
+                            value={itemForm.ing_en}
+                            onChange={(e) =>
+                              setItemForm({ ...itemForm, ing_en: e.target.value })
+                            }
+                            rows={2}
+                          />
+                          {transBtn(itemForm, setItemForm, "ing", "en")}
+                        </div>
                       </Field>
                       <Field label="Arabic">
-                        <textarea
-                          className="admin-textarea"
-                          dir="rtl"
-                          value={itemForm.ing_ar}
-                          onChange={(e) =>
-                            setItemForm({ ...itemForm, ing_ar: e.target.value })
-                          }
-                          rows={2}
-                        />
+                        <div className="admin-field-trans admin-field-trans-ta">
+                          <textarea
+                            className="admin-textarea"
+                            dir="rtl"
+                            value={itemForm.ing_ar}
+                            onChange={(e) =>
+                              setItemForm({ ...itemForm, ing_ar: e.target.value })
+                            }
+                            rows={2}
+                          />
+                          {transBtn(itemForm, setItemForm, "ing", "ar")}
+                        </div>
                       </Field>
                       <Field label="Kurdish">
-                        <textarea
-                          className="admin-textarea"
-                          dir="rtl"
-                          value={itemForm.ing_ku}
-                          onChange={(e) =>
-                            setItemForm({ ...itemForm, ing_ku: e.target.value })
-                          }
-                          rows={2}
-                        />
+                        <div className="admin-field-trans admin-field-trans-ta">
+                          <textarea
+                            className="admin-textarea"
+                            dir="rtl"
+                            value={itemForm.ing_ku}
+                            onChange={(e) =>
+                              setItemForm({ ...itemForm, ing_ku: e.target.value })
+                            }
+                            rows={2}
+                          />
+                          {transBtn(itemForm, setItemForm, "ing", "ku")}
+                        </div>
                       </Field>
                     </div>
                   </div>
@@ -1416,43 +1484,52 @@ export default function AdminPanel() {
                     <div className="admin-form-section-title">Labels</div>
                     <div className="admin-field-row admin-field-row-3">
                       <Field label="English *">
-                        <input
-                          className="admin-input"
-                          value={categoryForm.label_en}
-                          onChange={(e) =>
-                            setCategoryForm({
-                              ...categoryForm,
-                              label_en: e.target.value,
-                            })
-                          }
-                          required
-                        />
+                        <div className="admin-field-trans">
+                          <input
+                            className="admin-input"
+                            value={categoryForm.label_en}
+                            onChange={(e) =>
+                              setCategoryForm({
+                                ...categoryForm,
+                                label_en: e.target.value,
+                              })
+                            }
+                            required
+                          />
+                          {transBtn(categoryForm, setCategoryForm, "label", "en")}
+                        </div>
                       </Field>
                       <Field label="Arabic">
-                        <input
-                          className="admin-input"
-                          dir="rtl"
-                          value={categoryForm.label_ar}
-                          onChange={(e) =>
-                            setCategoryForm({
-                              ...categoryForm,
-                              label_ar: e.target.value,
-                            })
-                          }
-                        />
+                        <div className="admin-field-trans">
+                          <input
+                            className="admin-input"
+                            dir="rtl"
+                            value={categoryForm.label_ar}
+                            onChange={(e) =>
+                              setCategoryForm({
+                                ...categoryForm,
+                                label_ar: e.target.value,
+                              })
+                            }
+                          />
+                          {transBtn(categoryForm, setCategoryForm, "label", "ar")}
+                        </div>
                       </Field>
                       <Field label="Kurdish">
-                        <input
-                          className="admin-input"
-                          dir="rtl"
-                          value={categoryForm.label_ku}
-                          onChange={(e) =>
-                            setCategoryForm({
-                              ...categoryForm,
-                              label_ku: e.target.value,
-                            })
-                          }
-                        />
+                        <div className="admin-field-trans">
+                          <input
+                            className="admin-input"
+                            dir="rtl"
+                            value={categoryForm.label_ku}
+                            onChange={(e) =>
+                              setCategoryForm({
+                                ...categoryForm,
+                                label_ku: e.target.value,
+                              })
+                            }
+                          />
+                          {transBtn(categoryForm, setCategoryForm, "label", "ku")}
+                        </div>
                       </Field>
                     </div>
                   </div>

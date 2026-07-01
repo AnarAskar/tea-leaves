@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import { handleTelegramApi } from "./api/telegram-handler.js";
+import { handleTranslateApi } from "./api/translate-handler.js";
 
 function readJsonBody(req) {
   return new Promise((resolve, reject) => {
@@ -75,6 +76,12 @@ export default defineConfig(({ mode }) => {
           throw Object.assign(new Error("Method not allowed"), { status: 405 });
         }
         return handleTelegramApi(req.body);
+      }),
+      apiDevPlugin("/api/translate", async (req) => {
+        if (req.method !== "POST") {
+          throw Object.assign(new Error("Method not allowed"), { status: 405 });
+        }
+        return handleTranslateApi(req.body);
       }),
     ],
   };

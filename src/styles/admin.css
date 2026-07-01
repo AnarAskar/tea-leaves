@@ -317,6 +317,56 @@
   min-height: 72px;
 }
 
+/* Auto-translate: input + translate button side by side */
+.admin-field-trans {
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+.admin-field-trans .admin-input,
+.admin-field-trans .admin-textarea {
+  flex: 1;
+  min-width: 0;
+}
+.admin-field-trans-ta {
+  align-items: flex-start;
+}
+.admin-trans-btn {
+  flex-shrink: 0;
+  width: 38px;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid rgba(82, 183, 136, 0.25);
+  background: #0f2419;
+  color: #52b788;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.admin-field-trans-ta .admin-trans-btn {
+  align-self: auto;
+  height: 40px;
+}
+.admin-trans-btn:hover:not(:disabled) {
+  border-color: #52b788;
+  background: rgba(82, 183, 136, 0.12);
+  color: #7fd2a0;
+}
+.admin-trans-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.admin-trans-spin {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(82, 183, 136, 0.3);
+  border-top-color: #52b788;
+  border-radius: 50%;
+  animation: admin-spin 0.7s linear infinite;
+}
+
 .admin-select {
   cursor: pointer;
 }
