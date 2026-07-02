@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150">
+  <rect width="150" height="150" fill="#183227"/>
+
+  <!-- smoke -->
+  <g fill="#ffffff" opacity="0.12">
+    <circle cx="70" cy="24" r="7"/>
+    <circle cx="80" cy="18" r="5"/>
+    <circle cx="86" cy="27" r="6"/>
+  </g>
+
+  <!-- hose -->
+  <path d="M82 76 C 108 80, 116 96, 110 118"
+        fill="none" stroke="#3f8f7d" stroke-width="7" stroke-linecap="round"/>
+  <rect x="104" y="116" width="12" height="9" rx="2" fill="#2c6355"/>
+
+  <!-- glass vase -->
+  <path d="M63 82
+           C 60 96, 52 104, 52 116
+           C 52 130, 63 137, 75 137
+           C 87 137, 98 130, 98 116
+           C 98 104, 90 96, 87 82 Z"
+        fill="#7fd0e0"/>
+  <path d="M60 118 C 60 130, 68 135, 75 135 C 82 135, 90 130, 90 118 C 90 126, 60 126, 60 118 Z"
+        fill="#5bb9cc"/>
+  <ellipse cx="69" cy="104" rx="5" ry="9" fill="#a7e0ec" opacity="0.8"/>
+
+  <!-- stem -->
+  <rect x="71" y="44" width="8" height="42" fill="#aeb9c2"/>
+  <rect x="71" y="44" width="4" height="42" fill="#c7d0d7"/>
+  <!-- valve on stem for hose -->
+  <rect x="79" y="70" width="9" height="7" rx="2" fill="#8b97a1"/>
+
+  <!-- tray -->
+  <ellipse cx="75" cy="58" rx="24" ry="6" fill="#c7d0d7"/>
+  <ellipse cx="75" cy="56" rx="24" ry="6" fill="#aeb9c2"/>
+
+  <!-- bowl -->
+  <path d="M66 46 L 69 33 L 81 33 L 84 46 Z" fill="#d9714b"/>
+  <path d="M66 46 L 68 40 L 82 40 L 84 46 Z" fill="#c05f3d"/>
+  <ellipse cx="75" cy="33" rx="7.5" ry="3" fill="#e8c36b"/>
+  <!-- coals -->
+  <rect x="70" y="29" width="4" height="4" rx="1" fill="#e8894f"/>
+  <rect x="76" y="30" width="4" height="4" rx="1" fill="#e06a3a"/>
+</svg>

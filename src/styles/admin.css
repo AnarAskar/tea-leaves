@@ -562,6 +562,13 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* text column next to the thumbnail — must be allowed to shrink */
+.admin-table-item > div {
+  min-width: 0;
 }
 
 .admin-table-thumb {
@@ -588,12 +595,14 @@
 .admin-table-name {
   font-weight: 600;
   color: #fff;
+  overflow-wrap: anywhere;
 }
 
 .admin-table-meta {
   font-size: 12px;
   color: #6ba882;
   margin-top: 2px;
+  overflow-wrap: anywhere;
 }
 
 .admin-badge {
@@ -901,6 +910,46 @@
   opacity: 0.8;
 }
 
+/* ===== Responsive list rows (items by category + categories) ===== */
+@media (max-width: 639px) {
+  .admin-sort-groups {
+    padding: 12px 12px 20px;
+  }
+
+  .admin-sort-row {
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  /* item/name block on its own line, price + actions on the next */
+  .admin-sort-main {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .admin-sort-side {
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
+  }
+
+  /* keep the drag/arrow controls compact so content gets the width */
+  .admin-drag-handle {
+    width: 26px;
+  }
+
+  .admin-table-actions {
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  .admin-btn-sm {
+    padding: 7px 12px;
+  }
+}
+
 /* ===== Tag chips (item form) ===== */
 .admin-tag-chips {
   display: flex;
@@ -990,49 +1039,36 @@
   .qr-print-area {
     display: flex !important;
     flex-wrap: wrap;
-    gap: 6mm;
+    gap: 3mm;
     align-content: flex-start;
   }
   .qr-print-card {
-    width: 58mm;
+    width: 35mm;
     box-sizing: border-box;
-    border: 0.3mm dashed #999;
-    border-radius: 3mm;
-    padding: 4mm 3mm;
+    border: 0.3mm solid #000;
+    padding: 2mm 1.5mm;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.5mm;
+    gap: 1mm;
     page-break-inside: avoid;
     break-inside: avoid;
     color: #000;
     text-align: center;
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: Arial, Helvetica, sans-serif;
   }
   .qr-print-card svg {
-    width: 38mm;
-    height: 38mm;
-  }
-  .qr-print-brand {
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 13pt;
-    font-weight: 700;
-    font-style: italic;
-    letter-spacing: 0.02em;
+    width: 25mm;
+    height: 25mm;
   }
   .qr-print-table {
-    font-size: 13pt;
+    font-size: 10pt;
     font-weight: 800;
   }
-  .qr-print-hint {
-    font-size: 6.5pt;
-    color: #444;
-  }
   .qr-print-wifi {
-    font-size: 7.5pt;
+    font-size: 6.5pt;
     color: #000;
-    line-height: 1.4;
-    margin-top: 1mm;
+    line-height: 1.35;
     word-break: break-word;
   }
 }

@@ -1768,20 +1768,14 @@ export default function AdminPanel() {
         if (!token) return null;
         return (
         <div className="qr-print-card" key={n}>
-          <div className="qr-print-brand">Tea Leaves</div>
-          <QRCodeSVG value={tableUrl(token)} size={150} level="M" marginSize={2} />
-          <div className="qr-print-table">Table {n}</div>
-          <div className="qr-print-hint">Scan for the menu &amp; to order</div>
+          <QRCodeSVG value={tableUrl(token)} size={140} level="M" marginSize={2} />
+          <div className="qr-print-table">T{n}</div>
           {(wifiName || wifiPass) && (
             <div className="qr-print-wifi">
-              {wifiName && (
-                <div>
-                  <strong>WiFi:</strong> {wifiName}
-                </div>
-              )}
+              {wifiName && <div>{wifiName}</div>}
               {wifiPass && (
                 <div>
-                  <strong>Password:</strong> {wifiPass}
+                  <strong>WIFI PASS:</strong> {wifiPass}
                 </div>
               )}
             </div>
