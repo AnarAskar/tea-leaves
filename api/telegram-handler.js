@@ -24,7 +24,15 @@ function enforceRateLimit(tableNum) {
   recentHits.push({ t: now, table: tableNum });
 }
 
-function getTelegramConfig() {
+function getTelegramConfig(type) {
+  if (type === "feedback") {
+    const botToken = process.env.REVIEW_BOT_TOKEN;
+    const chatId = process.env.REVIEW_CHAT_ID;
+    if (!botToken || !chatId) {
+      throw new Error("Missing Telegram review bot configuration");
+    }
+    return { botToken, chatId };
+  }
   const botToken = process.env.BOT_TOKEN || process.env.VITE_BOT_TOKEN;
   const chatId = process.env.CHAT_ID || process.env.VITE_CHAT_ID;
   if (!botToken || !chatId) {
@@ -94,7 +102,7 @@ export async function handleTelegramApi(body) {
   enforceRateLimit(Number(payload.tableNum));
 
   const text = buildTelegramMessage(type, payload);
-  const config = getTelegramConfig();
+  const config = getTelegramConfig(type);
   await sendTelegramMessage(text, config);
   return { ok: true };
 }

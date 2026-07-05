@@ -30,10 +30,12 @@ Copy `.env.example` to `.env.local`. Required for the app to function:
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | `src/utils/supabaseClient.js` |
 | `VITE_NUM_TABLES` | Number of tables shown in order modal (default: 25) |
 | `VITE_BASE_URL` | Optional — base URL for QR code generation |
-| `BOT_TOKEN` | Server-side only — Telegram bot token |
-| `CHAT_ID` | Server-side only — Telegram chat ID for order notifications |
+| `BOT_TOKEN` | Server-side only — Telegram bot token for orders/bills/notes |
+| `CHAT_ID` | Server-side only — Telegram chat ID for orders/bills/notes |
+| `REVIEW_BOT_TOKEN` | Server-side only — Telegram bot token for customer feedback |
+| `REVIEW_CHAT_ID` | Server-side only — Telegram chat ID for customer feedback |
 
-`BOT_TOKEN` and `CHAT_ID` are server-only (no `VITE_` prefix). In dev, Vite middleware reads them directly; in production they are Vercel/Cloudflare environment secrets.
+Server-only variables (no `VITE_` prefix): `BOT_TOKEN`, `CHAT_ID`, `REVIEW_BOT_TOKEN`, `REVIEW_CHAT_ID`. In dev, Vite middleware reads them directly; in production they are Vercel/Cloudflare environment secrets. Feedback is routed to the review bot if configured, otherwise uses the main bot.
 
 ## Architecture
 
