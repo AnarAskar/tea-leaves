@@ -128,7 +128,9 @@ export default function MenuApp({
     error: menuError,
   } = useMenuData();
 
-  const visibleCategories = categories.filter(isCategoryAvailable);
+  const visibleCategories = categories.filter(
+    (cat) => isCategoryAvailable(cat) && (itemsByCategory[cat.id]?.length > 0)
+  );
 
   const toastRef = useRef(null);
   const catBarRef = useRef(null);
