@@ -1,7 +1,10 @@
 import { supabase } from "./supabaseClient";
 
 export const MENU_IMAGES_BUCKET = "menu-images";
-const MAX_BYTES = 2 * 1024 * 1024;
+const MAX_INPUT_BYTES = 15 * 1024 * 1024; // raw file, before compression
+const MAX_UPLOAD_BYTES = 2 * 1024 * 1024; // safety net after compression
+const MAX_DIMENSION = 1000; // px, longest side — plenty for a menu thumbnail
+const WEBP_QUALITY = 0.8;
 const ALLOWED_TYPES = new Set([
   "image/jpeg",
   "image/jpg",
@@ -46,6 +49,32 @@ function formatUploadError(error) {
   return msg;
 }
 
+// Downscale + re-encode as WebP so a full-res phone photo isn't served at
+// full size to every visitor. Skips GIFs to keep animation intact, and falls
+// back to the original file if the browser can't do canvas re-encoding.
+async function compressImage(file, contentType) {
+  if (contentType === "image/gif") return null;
+  try {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, MAX_DIMENSION / Math.max(bitmap.width, bitmap.height));
+    const width = Math.round(bitmap.width * scale);
+    const height = Math.round(bitmap.height * scale);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    canvas.getContext("2d").drawImage(bitmap, 0, 0, width, height);
+    bitmap.close?.();
+
+    const blob = await new Promise((resolve) =>
+      canvas.toBlob(resolve, "image/webp", WEBP_QUALITY),
+    );
+    return blob ? { blob, contentType: "image/webp", ext: "webp" } : null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Upload an image to Supabase Storage (menu-images bucket).
  * @param {File} file
@@ -62,20 +91,28 @@ export async function uploadMenuImage(file, folderPath) {
   const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
   const contentType = resolveContentType(file, ext);
 
-  if (file.size > MAX_BYTES) {
-    throw new Error("Image must be 2 MB or smaller.");
+  if (file.size > MAX_INPUT_BYTES) {
+    throw new Error("Image must be 15 MB or smaller.");
+  }
+
+  const compressed = await compressImage(file, contentType);
+  const body = compressed ? compressed.blob : toUploadBody(file, contentType);
+  const finalContentType = compressed ? compressed.contentType : contentType;
+  const finalExt = compressed ? compressed.ext : ext;
+
+  if (body.size > MAX_UPLOAD_BYTES) {
+    throw new Error("Image is too large even after compression — try a smaller photo.");
   }
 
   const folder = folderPath.replace(/\/+$/, "");
-  const path = `${folder}/${Date.now()}.${ext}`;
-  const body = toUploadBody(file, contentType);
+  const path = `${folder}/${Date.now()}.${finalExt}`;
 
   const { error } = await supabase.storage
     .from(MENU_IMAGES_BUCKET)
     .upload(path, body, {
-      contentType,
+      contentType: finalContentType,
       upsert: true,
-      cacheControl: "3600",
+      cacheControl: "31536000",
     });
 
   if (error) {

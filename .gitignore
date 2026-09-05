@@ -33,3 +33,12 @@ dist-ssr
 # Deploy tooling local state
 .vercel
 .wrangler
+
+# Local-only scratch SQL (one-off Supabase Editor pastes)
+/_migration_bundle.sql
+/_restore_table_tokens.sql
+
+# Local-only AI agent skills (not shared via the repo)
+.agents/
+.claude/
+skills-lock.json

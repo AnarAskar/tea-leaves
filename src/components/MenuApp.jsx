@@ -176,7 +176,7 @@ export default function MenuApp({
   const totalQty = Object.values(cart).reduce((s, q) => s + q, 0);
   const itemPrice = (item) => item.price + (cartAddons[item.id]?.price || 0);
   const totalIQD = Object.entries(cart).reduce((s, [id, q]) => {
-    const item = allItems.find((i) => i.id === id);
+    const item = allItems.find((i) => String(i.id) === id);
     return s + (item ? itemPrice(item) * q : 0);
   }, 0);
 
