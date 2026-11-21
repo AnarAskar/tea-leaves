@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
+import legacy from "@vitejs/plugin-legacy";
 import { handleTelegramApi } from "./api/telegram-handler.js";
 import { handleTranslateApi } from "./api/translate-handler.js";
 
@@ -69,8 +70,23 @@ export default defineConfig(({ mode }) => {
   Object.assign(process.env, loadEnv(mode, process.cwd(), ""));
 
   return {
+    // Dev server only (ignored by `vite build`): listen on all interfaces so
+    // the Windows browser can reach it when running inside WSL2.
+    server: { host: true },
+    // Terser only minifies the legacy bundle. Stop it from turning methods
+    // back into arrow functions, which Safari 9 can't parse.
+    build: { terserOptions: { compress: { arrows: false } } },
     plugins: [
       react(),
+      // Extra ES5 bundle + polyfills for old browsers (e.g. the café's iPad 2,
+      // stuck on iOS 9 / Safari 9). Modern browsers never download it.
+      legacy({
+        targets: ["defaults", "ios >= 9", "safari >= 9"],
+        // iOS 12 passes the module feature check and loads the modern entry.
+        // Its dependencies still need runtime polyfills on that Safari version.
+        modernPolyfills: true,
+        additionalLegacyPolyfills: ["whatwg-fetch"],
+      }),
       apiDevPlugin("/api/telegram", async (req) => {
         if (req.method !== "POST") {
           throw Object.assign(new Error("Method not allowed"), { status: 405 });

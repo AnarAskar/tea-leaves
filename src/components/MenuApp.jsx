@@ -256,16 +256,26 @@ export default function MenuApp({
     const container = scrollRef.current;
     if (el && container) {
       ignoreScrollRef.current = true;
-      container.scrollTo({ top: el.offsetTop - 170, behavior: "smooth" });
+      const top = el.offsetTop - 170;
+      // Old Safari (iPad 2) has no element.scrollTo — jump instead of throwing.
+      if (typeof container.scrollTo === "function") {
+        container.scrollTo({ top, behavior: "smooth" });
+      } else {
+        container.scrollTop = top;
+      }
       setTimeout(() => {
         ignoreScrollRef.current = false;
       }, 800);
     }
-    catBarRef.current?.querySelector(`[data-cat="${catId}"]`)?.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-      inline: "center",
-    });
+    // scrollIntoView options are ignored by old Safari, which would scroll the
+    // whole page instead; only centre the category pill where it's supported.
+    if ("scrollBehavior" in document.documentElement.style) {
+      catBarRef.current?.querySelector(`[data-cat="${catId}"]`)?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+    }
   };
 
   // Scroll spy
@@ -285,8 +295,11 @@ export default function MenuApp({
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    el.addEventListener("scroll", handleScroll, { passive: true });
-    return () => el.removeEventListener("scroll", handleScroll);
+    // Same options on add & remove: old Safari reads the object as
+    // useCapture=true, so a bare remove would never detach the listener.
+    const opts = { passive: true };
+    el.addEventListener("scroll", handleScroll, opts);
+    return () => el.removeEventListener("scroll", handleScroll, opts);
   }, [handleScroll]);
 
   // Drag category bar
@@ -488,7 +501,7 @@ export default function MenuApp({
           --sh-card:0 2px 10px rgba(0,0,0,.22);--sh-pop:0 18px 50px rgba(0,0,0,.55);--glow:0 8px 26px rgba(64,145,108,.42);
           --ease:cubic-bezier(.22,1,.36,1);
         }
-        body{background:var(--bg);font-family:var(--f);min-height:100dvh;-webkit-font-smoothing:antialiased;}
+        body{background:var(--bg);font-family:var(--f);min-height:100vh;min-height:100dvh;-webkit-font-smoothing:antialiased;}
         /* Declare a native dark theme so force-dark browsers (Samsung Internet)
            detect we already handle dark mode and don't re-tint the page. */
         @media (prefers-color-scheme:dark){
@@ -502,7 +515,7 @@ export default function MenuApp({
         @media (prefers-reduced-motion:reduce){
           *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important;}
         }
-        .app{width:100%;max-width:430px;min-height:100dvh;height:100dvh;background:linear-gradient(180deg,#1b3a2d 0%,#16301f 55%,#112619 100%);color:var(--text);direction:${isRTL ? "rtl" : "ltr"};display:flex;flex-direction:column;position:relative;overflow:hidden;margin:0 auto;}
+        .app{width:100%;max-width:430px;min-height:100vh;min-height:100dvh;height:100vh;height:100dvh;background:linear-gradient(180deg,#1b3a2d 0%,#16301f 55%,#112619 100%);color:var(--text);direction:${isRTL ? "rtl" : "ltr"};display:flex;flex-direction:column;position:relative;overflow:hidden;margin:0 auto;}
         .hdr{background:linear-gradient(180deg,rgba(20,39,28,.94),rgba(20,39,28,.74));backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:14px 16px 0;flex-shrink:0;border-bottom:1px solid var(--line);z-index:10;}
         .hdr-top{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:8px;margin-bottom:13px;}
         .hdr-title{font-size:19px;font-weight:800;letter-spacing:.01em;color:#fff;text-align:center;justify-self:center;white-space:nowrap;}
@@ -551,7 +564,7 @@ export default function MenuApp({
         .scroll-body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
         .scroll-body::-webkit-scrollbar{width:3px;}
         .scroll-body::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:2px;}
-        .menu-body{padding:16px 12px calc(140px + env(safe-area-inset-bottom));}
+        .menu-body{padding:16px 12px 140px;padding:16px 12px calc(140px + env(safe-area-inset-bottom));}
         .sec-head{display:flex;align-items:center;gap:10px;padding:6px 2px 12px;font-size:16px;font-weight:800;color:#fff;border-bottom:1px solid var(--line);margin-bottom:14px;margin-top:18px;letter-spacing:.01em;}
         .sec-head:first-child{margin-top:0;}
         .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px;}
@@ -578,15 +591,15 @@ export default function MenuApp({
         .qnum{font-size:13px;font-weight:800;min-width:16px;text-align:center;color:#fff;}
         .no-order-badge{width:26px;height:26px;border-radius:50%;background:#243f30;border:1.5px solid #2d5a42;display:flex;align-items:center;justify-content:center;font-size:12px;opacity:0.6;}
         .img-badge{position:absolute;top:9px;${isRTL ? "left" : "right"}:9px;background:var(--mint-deep);color:#fff;font-size:11px;font-weight:800;width:23px;height:23px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.4);}
-        .search-results{padding:14px 12px calc(140px + env(safe-area-inset-bottom));}
+        .search-results{padding:14px 12px 140px;padding:14px 12px calc(140px + env(safe-area-inset-bottom));}
         .sec-lbl{font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:14px;padding:0 2px;}
-        .btm-bar{position:absolute;bottom:0;left:0;right:0;padding:12px 12px calc(24px + env(safe-area-inset-bottom));background:linear-gradient(to top,#112619 58%,rgba(17,38,25,.82) 82%,transparent);pointer-events:none;z-index:20;}
+        .btm-bar{position:absolute;bottom:0;left:0;right:0;padding:12px 12px 24px;padding:12px 12px calc(24px + env(safe-area-inset-bottom));background:linear-gradient(to top,#112619 58%,rgba(17,38,25,.82) 82%,transparent);pointer-events:none;z-index:20;}
         .vob{width:100%;background:linear-gradient(135deg,#40916c,#52b788);color:#fff;border:none;border-radius:16px;padding:15px 18px;font-family:var(--f);font-size:15px;font-weight:700;cursor:pointer;display:flex;justify-content:space-between;align-items:center;pointer-events:all;box-shadow:var(--glow);transition:transform .18s var(--ease),box-shadow .2s;}
         .vob:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(64,145,108,.55);}
         .vob:active{transform:translateY(0);}
         .vob-l{display:flex;align-items:center;gap:11px;}
         .vob-n{background:rgba(255,255,255,.22);width:26px;height:26px;border-radius:9px;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;}
-        .overlay{position:absolute;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);z-index:30;opacity:0;pointer-events:none;transition:opacity .3s;}
+        .overlay{position:absolute;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.62);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);z-index:30;opacity:0;pointer-events:none;transition:opacity .3s;}
         .overlay.open{opacity:1;pointer-events:all;}
         .drawer{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,#1d3a2b,#152e1e);border-top-left-radius:var(--r-xl);border-top-right-radius:var(--r-xl);z-index:40;max-height:88%;display:flex;flex-direction:column;transition:transform .4s var(--ease);transform:translateY(100%);direction:${isRTL ? "rtl" : "ltr"};box-shadow:var(--sh-pop);border-top:1px solid var(--line);}
         .drawer.open{transform:translateY(0);}
@@ -611,7 +624,7 @@ export default function MenuApp({
         .note-ta{width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;color:#fff;font-family:var(--f);font-size:13px;padding:10px 12px;outline:none;resize:none;transition:border-color .2s;}
         .note-ta:focus{border-color:var(--mint);}
         .note-ta::placeholder{color:var(--text-faint);}
-        .d-foot{padding:14px 18px calc(24px + env(safe-area-inset-bottom));border-top:1px solid var(--line);flex-shrink:0;}
+        .d-foot{padding:14px 18px 24px;padding:14px 18px calc(24px + env(safe-area-inset-bottom));border-top:1px solid var(--line);flex-shrink:0;}
         .s-row{display:flex;justify-content:space-between;font-size:13px;color:var(--text-dim);margin-bottom:5px;}
         .t-row{display:flex;justify-content:space-between;font-size:16px;font-weight:800;margin:8px 0 14px;padding-top:12px;border-top:1px solid var(--line);}
         .t-row span:last-child{color:var(--gold);}
@@ -623,7 +636,7 @@ export default function MenuApp({
         .empty-c p{font-size:14px;line-height:1.7;white-space:pre-line;}
         .toast{position:absolute;bottom:114px;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(25,50,36,.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--mint);color:var(--mint);padding:9px 20px;border-radius:30px;font-size:13px;font-weight:700;z-index:50;opacity:0;transition:all .25s var(--ease);pointer-events:none;white-space:nowrap;box-shadow:var(--sh-card);}
         .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-        .fullscreen{position:absolute;inset:0;background:linear-gradient(180deg,#1b3a2d,#112619);z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 32px;transform:translateY(100%);transition:transform .4s var(--ease);direction:${isRTL ? "rtl" : "ltr"};}
+        .fullscreen{position:absolute;top:0;right:0;bottom:0;left:0;background:linear-gradient(180deg,#1b3a2d,#112619);z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 32px;transform:translateY(100%);transition:transform .4s var(--ease);direction:${isRTL ? "rtl" : "ltr"};}
         .fullscreen.show{transform:translateY(0);}
         .s-icon{font-size:70px;margin-bottom:18px;}
         .s-title{font-size:27px;font-weight:800;color:var(--mint);margin-bottom:10px;}
@@ -642,7 +655,7 @@ export default function MenuApp({
 
         /* SLIDER */
         .slider-wrap{position:relative;width:100%;height:200px;overflow:hidden;border-radius:var(--r-lg);margin-bottom:22px;user-select:none;-webkit-user-select:none;direction:ltr;box-shadow:var(--sh-card);}
-        .slider-wrap::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(17,38,25,.5),transparent 45%);pointer-events:none;z-index:1;}
+        .slider-wrap::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;background:linear-gradient(to top,rgba(17,38,25,.5),transparent 45%);pointer-events:none;z-index:1;}
         .slider-track{display:flex;height:100%;}
         .slide-item{height:100%;flex-shrink:0;}
         .slide-img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;-webkit-user-drag:none;user-drag:none;}
@@ -668,13 +681,13 @@ export default function MenuApp({
 
         /* ITEM DETAIL MODAL */
         @keyframes det-up{from{transform:translateY(100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
-        .det-overlay{position:absolute;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:70;display:flex;align-items:flex-end;}
+        .det-overlay{position:absolute;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.78);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:70;display:flex;align-items:flex-end;}
         .det-sheet{position:relative;background:linear-gradient(180deg,#1d3a2b,#14271c);border-top-left-radius:var(--r-xl);border-top-right-radius:var(--r-xl);width:100%;max-height:88%;display:flex;flex-direction:column;overflow:hidden;animation:det-up .3s var(--ease);box-shadow:var(--sh-pop);}
         .det-handle{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:40px;height:4px;background:rgba(255,255,255,.55);border-radius:2px;z-index:3;backdrop-filter:blur(4px);}
         .det-img-wrap{position:relative;width:100%;flex-shrink:0;overflow:hidden;}
         .det-img{position:relative;z-index:1;width:100%;height:auto;max-height:56vh;object-fit:cover;display:block;}
         .det-img.photo-ph{height:240px;font-size:64px;display:flex;align-items:center;justify-content:center;}
-        .det-img-wrap::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,#14271c,transparent 38%);pointer-events:none;z-index:2;}
+        .det-img-wrap::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;background:linear-gradient(to top,#14271c,transparent 38%);pointer-events:none;z-index:2;}
         .det-close{position:absolute;top:12px;right:12px;width:36px;height:36px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.18);border-radius:50%;color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:20;}
         .det-tags{position:absolute;bottom:12px;left:12px;display:flex;gap:4px;z-index:3;}
         .det-body{overflow-y:auto;flex:1;min-height:0;}
@@ -692,7 +705,7 @@ export default function MenuApp({
         .addon-name{flex:1;font-size:14px;color:var(--text);font-weight:500;}
         .addon-price{font-size:13px;color:var(--gold);font-weight:800;white-space:nowrap;}
         .d-addon-lbl{font-size:12px;color:var(--text-dim);font-weight:400;}
-        .det-actions{flex-shrink:0;padding:12px 20px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(20,39,28,0),#14271c 22%);border-top:1px solid var(--line);}
+        .det-actions{flex-shrink:0;padding:12px 20px 14px;padding:12px 20px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(20,39,28,0),#14271c 22%);border-top:1px solid var(--line);}
         .det-add{width:100%;background:linear-gradient(135deg,#40916c,#52b788);color:#fff;border:none;border-radius:14px;padding:16px;font-family:var(--f);font-size:16px;font-weight:700;cursor:pointer;transition:transform .15s var(--ease),box-shadow .2s;box-shadow:var(--glow);}
         .det-add:hover{transform:translateY(-1px);box-shadow:0 12px 30px rgba(64,145,108,.5);}
         .det-qty-row{display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:14px;padding:12px 16px;border:1px solid var(--line);}
@@ -702,8 +715,8 @@ export default function MenuApp({
         .svc-btn{flex:1;display:flex;align-items:center;justify-content:center;height:44px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;color:#e7efe9;cursor:pointer;padding:0;transition:all .15s var(--ease);}
         .svc-btn:hover{background:var(--surface-3);border-color:var(--mint);color:#fff;}
         .svc-btn:active{transform:scale(.97);}
-        .m-overlay{position:absolute;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:80;display:flex;align-items:flex-end;justify-content:center;}
-        .m-sheet{background:linear-gradient(180deg,#1d3a2b,#14271c);border-top-left-radius:var(--r-xl);border-top-right-radius:var(--r-xl);width:100%;padding:0 20px calc(32px + env(safe-area-inset-bottom));max-height:80vh;display:flex;flex-direction:column;border-top:1px solid var(--line);box-shadow:var(--sh-pop);}
+        .m-overlay{position:absolute;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.7);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:80;display:flex;align-items:flex-end;justify-content:center;}
+        .m-sheet{background:linear-gradient(180deg,#1d3a2b,#14271c);border-top-left-radius:var(--r-xl);border-top-right-radius:var(--r-xl);width:100%;padding:0 20px 32px;padding:0 20px calc(32px + env(safe-area-inset-bottom));max-height:80vh;display:flex;flex-direction:column;border-top:1px solid var(--line);box-shadow:var(--sh-pop);}
         .m-handle{width:38px;height:4px;background:var(--line-strong);border-radius:2px;margin:12px auto 18px;flex-shrink:0;}
         .m-title{font-size:18px;font-weight:800;color:#fff;margin-bottom:18px;flex-shrink:0;}
         .note-sugs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
@@ -740,6 +753,33 @@ export default function MenuApp({
         .star-btn:active{transform:scale(1.15);}
         .star-btn:focus{outline:none;}
         .fb-field-label{font-size:12px;font-weight:700;color:var(--mint);margin-bottom:6px;margin-top:14px;}
+        .m-btn-row{display:flex;gap:10px;margin-top:8px;}
+
+        /* OLD BROWSERS (e.g. café iPad 2 on iOS 9 / Safari 9): no flexbox gap and
+           no CSS grid. Every current browser supports both, so they skip these. */
+        @supports not (gap:1px){
+          .lang-btn>*+*,.cats>*+*,.g-foot>*+*,.det-tags>*+*{-webkit-margin-start:4px;}
+          .qty-r>*+*{-webkit-margin-start:5px;}
+          .hdr-right>*+*,.slider-dots>*+*,.fb-stars>*+*{-webkit-margin-start:6px;}
+          .d-r>*+*,.place-btn>*+*,.svc-bar>*+*,.m-send-btn>*+*,.m-btn-yes>*+*{-webkit-margin-start:8px;}
+          .search-row>*+*{-webkit-margin-start:9px;}
+          .lang-opt>*+*,.d-item>*+*,.addon-opt>*+*,.sec-head>*+*,.m-btn-row>*+*{-webkit-margin-start:10px;}
+          .vob-l>*+*,.d-l>*+*{-webkit-margin-start:11px;}
+          .det-row>*+*,.det-qty-row>*+*{-webkit-margin-start:12px;}
+          .l-body>*+*{margin-top:5px;}
+          .cat-item>*+*{margin-top:7px;}
+          .list-view>*+*{margin-top:11px;}
+          .g-tags>*{-webkit-margin-end:4px;margin-bottom:4px;}
+          .note-sugs>*{-webkit-margin-end:8px;margin-bottom:8px;}
+        }
+        @supports not (display:grid){
+          .grid{display:flex;flex-wrap:wrap;justify-content:space-between;}
+          .grid>*{width:calc(50% - 6px);margin-bottom:12px;}
+          .hdr-top{display:flex;align-items:center;}
+          .hdr-top>.lang-wrap,.hdr-top>.hdr-right{flex:1 1 0%;min-width:0;}
+          .hdr-top>.hdr-right{justify-content:flex-end;}
+          .hdr-title{margin:0 8px;}
+        }
         /* skeleton CSS lives in index.html so it works before React mounts */
       `}</style>
 
@@ -1224,7 +1264,7 @@ export default function MenuApp({
                 ) : (
                   <>
                     <div className="m-title">{t.billTitle}</div>
-                    <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+                    <div className="m-btn-row">
                       <button
                         className="m-btn-no"
                         onClick={() => setModal(null)}
