@@ -82,6 +82,9 @@ export default defineConfig(({ mode }) => {
       // stuck on iOS 9 / Safari 9). Modern browsers never download it.
       legacy({
         targets: ["defaults", "ios >= 9", "safari >= 9"],
+        // iOS 12 passes the module feature check and loads the modern entry.
+        // Its dependencies still need runtime polyfills on that Safari version.
+        modernPolyfills: true,
         additionalLegacyPolyfills: ["whatwg-fetch"],
       }),
       apiDevPlugin("/api/telegram", async (req) => {
